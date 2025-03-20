@@ -11,15 +11,15 @@ Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
 It can perform the following tasks:
 
-Set watch's time
-Set Home Time (Home City)
-Set Alarms
-Set Reminders
-Set watch's settings.
-Get watch's name
-Get watch's battery level
-Get Watch's temperature
-Get/Set watch's Timer
+- Set watch's time
+- Set Home Time (Home City)
+- Set Alarms
+- Set Reminders
+- Set watch's settings.
+- Get watch's name
+- Get watch's battery level
+- Get Watch's temperature
+- Get/Set watch's Timer
 
 Dependencies
 ============
