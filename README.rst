@@ -29,7 +29,7 @@ To understand how to use the library, please refer to the **`src/examples`** fol
 Virtual Environment Setup
 =========================
 
-To run the server in a virtual environment:
+It is recommended that you create a virtual environment to run the tests:
 
 1. Create a virtual environment:
 
@@ -40,7 +40,7 @@ To run the server in a virtual environment:
 
    # Activate it (Mac/Linux)
    source venv/bin/activate
-
+   
    # Install dependencies
    pip3 install -e .
 
@@ -50,7 +50,7 @@ To run the server in a virtual environment:
 
    python3 src/examples/api_tests.py [--multi-watch]
 
-The optional **`--multi-watch`** forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
+The optional **`--multi-watch`** parameter forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
 the library will try to connect to the last connected watch only. If you have multiple watches, you should use this parameter.
 
 
@@ -58,6 +58,7 @@ Installing the library for your project:
 ========================================
 
 .. code-block:: sh
+
    pip3 install gshock-api
 
 
