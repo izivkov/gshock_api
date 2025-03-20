@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gshock_api"  # Change to your project name
+version = "2.0.2"
+description = "Pythgon API for GShock Watches using BLE"
+readme = "README.rst"
+authors = [{ name = "Ivo Zivkov", email = "izivkov@gmail.com" }]
+license = { file = "LICENSE" }
+dependencies = ["requests"]  # Add any required dependencies
