@@ -61,6 +61,7 @@ Installing the library for your project:
 
    pip3 install gshock-api
 
+See [this project](https://github.com/izivkov/GShockTimeServer) using this library to run a time server for G-Shock watches
 
 Troubleshooting:
 ================
