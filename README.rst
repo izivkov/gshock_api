@@ -9,6 +9,17 @@ G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100,
 G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, 
 Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
+It can perform the following tasks:
+
+Set watch's time
+Set Home Time (Home City)
+Set Alarms
+Set Reminders
+Set watch's settings.
+Get watch's name
+Get watch's battery level
+Get Watch's temperature
+Get/Set watch's Timer
 
 Dependencies
 ============
