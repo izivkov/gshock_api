@@ -2,6 +2,7 @@ import asyncio
 import sys
 
 import json
+import time
 import pytz
 from datetime import datetime, timezone
 
@@ -48,7 +49,7 @@ async def run_api_tests():
     watch_name = await api.get_watch_name()
     logger.info("got watch name: {}".format(watch_name))
 
-    await api.set_time()
+    await api.set_time(time.time()+10*60)
 
     alarms = await api.get_alarms()
     logger.info("alarms: {}".format(alarms))
