@@ -74,7 +74,7 @@ Installing the library for your project:
 
 See `this project <https://github.com/izivkov/GShockTimeServer>`_ using this library to run a time server for G-Shock watches.
 
-See also `this blog <https://digitalsober.wordpress.com/2025/05/05/g-shock-watch-integration-with-sxmo/>` for using the library in the `SXMO <https://sxmo.org/>` mobile environment.
+See also `this blog <https://digitalsober.wordpress.com/2025/05/05/g-shock-watch-integration-with-sxmo/>`_ for using the library in the `SXMO <https://sxmo.org/>`_ mobile environment.
 
 Troubleshooting:
 ================
