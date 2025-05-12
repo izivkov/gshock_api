@@ -14,7 +14,7 @@ from gshock_api.logger import logger
 
 
 async def main(argv):
-    await run_api_tests()
+    await run_api_tests_dw_h5600()
 
 def prompt():
     logger.info(
@@ -28,6 +28,26 @@ def prompt():
     )
     logger.info("")
 
+async def run_api_tests_dw_h5600():
+    prompt()
+
+    device = await scanner.scan()
+    logger.info("Found: {}".format(device))
+
+    connection = Connection(device)
+    await connection.connect()
+    api = GshockAPI(connection)
+
+    # watch_name = await api.get_watch_name()
+    # logger.info("got watch name: {}".format(watch_name))
+
+    workingBuffer = "fffffffffffefacdcfcdcacfcacfc9abcfc6cecccdc8f7ffbc9e939a919b9e8dedff1d7f711d7f55ab9a8c8bdfcc1d7f531d7f71ffffe2ff1d7f711d7f55c6c5cecadf1d7f6cdfcecfc5cecadfbeb21d7f531d7f71"
+    await api.send_message(workingBuffer)
+
+    input("Hit any key to disconnect")
+
+    await connection.disconnect()
+    logger.info("--- END OF TESTS ---")
 
 async def run_api_tests():
     prompt()

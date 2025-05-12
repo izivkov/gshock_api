@@ -54,6 +54,7 @@ class Connection:
             0x0C
         ] = CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID
         handles_map[0x0E] = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
+        handles_map[0x0D] = CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID
         handles_map[0x11] = CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID
         handles_map[0x14] = CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
         handles_map[0xFF] = CasioConstants.SERIAL_NUMBER_STRING
