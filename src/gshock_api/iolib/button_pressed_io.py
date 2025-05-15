@@ -8,7 +8,6 @@ from gshock_api.casio_constants import CasioConstants
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
-
 class WatchButton(IntEnum):
     UPPER_LEFT = 1
     LOWER_LEFT = 2

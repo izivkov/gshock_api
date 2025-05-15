@@ -1,23 +1,20 @@
-import asyncio
 import logging
 import json
 import time
 
-# from data_watcher import data_watcher
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.iolib.button_pressed_io import WatchButton
+from gshock_api.iolib.app_notification_io import AppNotificationIO
+from gshock_api.app_notification import EmailSmsNotification, CalendarNotification
+
 from gshock_api import message_dispatcher
 from gshock_api.utils import (
-    to_ascii_string,
     to_hex_string,
-    to_int_array,
     to_compact_string,
-    clean_str,
 )
 from gshock_api.alarms import alarms_inst
 from gshock_api.event import Event
 from gshock_api.watch_info import watch_info
-
 
 class GshockAPI:
     """
@@ -454,7 +451,8 @@ class GshockAPI:
         result = await message_dispatcher.AppInfoIO.request(self.connection)
         return await result
 
-    async def send_message (self, hex_str):
-        print("send_message: ", hex_str)
-        await self.connection.write(0xD, hex_str)
+    async def send_message (self, notification):
+        encoded_buffer = AppNotificationIO.get_encoded_buffer(notification)
+        print(f"Sending message: {notification.to_dict()}")
+        await self.connection.write(0xD, encoded_buffer)
 
