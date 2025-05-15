@@ -11,15 +11,28 @@ class Connection:
         self.handles_map = self.init_handles_map()
         self.device = device
         self.client = BleakClient(device)
+        self.characteristics_map = {}
 
     def notification_handler(
         self, characteristic: BleakGATTCharacteristic, data: bytearray
     ):
         message_dispatcher.MessageDispatcher.on_received(data)
 
+    async def enumerate_characteristics(self):
+        """
+        Prints all services and characteristics of the connected BLE device.
+        """
+        services = await self.client.get_services()
+        for service in services:
+            print(f"Service: {service.uuid}")
+            for char in service.characteristics:
+                print(f"  Characteristic: {char.uuid} (properties: {char.properties})")
+                self.characteristics_map[char.uuid] = char.uuid  # Store in map
+
     async def connect(self):
         try:
             await self.client.connect()
+            await self.enumerate_characteristics()
             await self.client.start_notify(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
                 self.notification_handler,
@@ -34,8 +47,19 @@ class Connection:
 
     async def write(self, handle, data):
         try:
+            uuid = self.handles_map.get(handle)
+            if (uuid not in self.characteristics_map):
+                logger.error(
+                    "write failed: handle {} not in characteristics map".format(handle)
+                )
+                if (handle == 13):
+                    logger.error(
+                        "Your watch does not suppot notifications..."
+                    )
+                return
+            
             await self.client.write_gatt_char(
-                self.handles_map[handle], to_casio_cmd(data)
+                uuid, to_casio_cmd(data)
             )
         except Exception as e:
             logger.debug("write failed with exception: {}".format(e))
@@ -62,5 +86,4 @@ class Connection:
         return handles_map
 
     async def sendMessage(self, message):
-        # await callWriter(self, message)
         await message_dispatcher.MessageDispatcher.send_to_watch(message)
