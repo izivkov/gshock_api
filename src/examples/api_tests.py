@@ -11,10 +11,10 @@ from gshock_api.gshock_api import GshockAPI
 from gshock_api.event import Event, create_event_date, RepeatPeriod
 from gshock_api.scanner import scanner
 from gshock_api.logger import logger
-from gshock_api.app_notification import EmailSmsNotification, CalendarNotification
+from gshock_api.app_notification import AppNotification, NotificationType
 
 async def main(argv):
-    await run_api_tests_dw_h5600()
+    await run_api_tests_app_notifications()
 
 def prompt():
     logger.info(
@@ -28,7 +28,7 @@ def prompt():
     )
     logger.info("")
 
-async def run_api_tests_dw_h5600():
+async def run_api_tests_app_notifications():
     prompt()
 
     device = await scanner.scan()
@@ -41,22 +41,47 @@ async def run_api_tests_dw_h5600():
     # watch_name = await api.get_watch_name()
     # logger.info("got watch name: {}".format(watch_name))
 
-    calendar_notification = CalendarNotification(
-        date_time="20231001T121000",
-        source_app="Calendar",
-        title=  "This is a very long Meeting with Team",
-        start_time="9:20",
-        end_time="10:15 AM "
+    calendar_notification = AppNotification(
+        type = NotificationType.CALENDAR,
+        timestamp="20231001T121000",
+        app = "Calendar",
+        title = "This is a very long Meeting with Team",
+        text =" 9:20 - 10:15 AM"
     )
 
-    email_notification = EmailSmsNotification(
-        date_time="20231001T120000",
-        source_app="EmailApp",
-        sender="Ivo",
-        message="Hello, this is a test message."
+    calendar_notification_all_day = AppNotification(
+        type = NotificationType.CALENDAR,
+        timestamp="20250516T233000",
+        app = "Calendar",
+        title = "Full day event 3",
+        text = "Tomorrow",
     )
 
-    await api.send_message(calendar_notification)
+    email_notification = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20231001T120000",
+        app="EmailApp",
+        title="Ivo",
+        text="Hello, this is a test message."
+    )
+
+    email_notification2 = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20250516T211520",
+        app="Gmail",
+        title="me",
+        text="\u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n"
+    )
+
+    email_notificationArabic = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20250516T211520",
+        app="Gmail",
+        title="me",
+        text="الساعة\n"
+    )
+
+    await api.send_app_notification(email_notificationArabic)
 
     input("Hit any key to disconnect")
 

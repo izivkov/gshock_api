@@ -18,21 +18,20 @@ class Connection:
     ):
         message_dispatcher.MessageDispatcher.on_received(data)
 
-    async def enumerate_characteristics(self):
+    async def init_characteristics_map(self):
         """
         Prints all services and characteristics of the connected BLE device.
         """
         services = await self.client.get_services()
+        print(f"got services...")
         for service in services:
-            print(f"Service: {service.uuid}")
             for char in service.characteristics:
-                print(f"  Characteristic: {char.uuid} (properties: {char.properties})")
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
 
     async def connect(self):
         try:
             await self.client.connect()
-            await self.enumerate_characteristics()
+            await self.init_characteristics_map()
             await self.client.start_notify(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
                 self.notification_handler,
@@ -44,6 +43,12 @@ class Connection:
 
     async def disconnect(self):
         await self.client.disconnect()
+
+    def is_service_supported(self, handle):
+        uuid = self.handles_map.get(handle)
+        supported = (uuid not in self.characteristics_map)
+        print(f"write, service with handle {handle} is supported: {supported}")
+        return supported
 
     async def write(self, handle, data):
         try:

@@ -1,5 +1,4 @@
-from datetime import datetime
-from gshock_api.app_notification import EmailSmsNotification, CalendarNotification
+from gshock_api.app_notification import AppNotification, NotificationType
 
 class AppNotificationIO:
     def xor_decode_buffer(buffer: str, key: int = 255) -> bytes:
@@ -31,134 +30,87 @@ class AppNotificationIO:
         encoded_bytes = bytes(b ^ key for b in decoded_bytes)
         return encoded_bytes.hex()
 
-    def create_buffer_from_email_sms(email_sms: EmailSmsNotification) -> bytes:
+    def read_length_prefixed_string(buf: bytes, offset: int) -> tuple[str, int]:
+        if offset + 2 > len(buf):
+            raise ValueError("Not enough data to read length prefix")
+
+        length = buf[offset]
+        if buf[offset + 1] != 0x00:
+            raise ValueError("Expected null second byte in length prefix")
+
+        start = offset + 2
+        end = start + length
+        if end > len(buf):
+            raise ValueError("String length exceeds buffer")
+
+        string = buf[start:end].decode("utf-8")
+        return string, end
+
+    def decode_notification_packet(buf: bytes) -> AppNotification:
         """
-        Creates an SMS buffer from an EmailSmsNotification object.
-
-        Args:
-            email_sms (EmailSmsNotification): The EmailSmsNotification object.
-
-        Returns:
-            bytes: The reconstructed SMS buffer as bytes.
+        Decodes a G-Shock calendar notification buffer into an AppNotification object.
         """
-        # Step 1: Header
-        header = bytes.fromhex("00000000000106")
+        offset = 0
 
-        # Step 2: Date-Time
-        date_time = email_sms.date_time.encode("utf-8")
+        if len(buf) < 6:
+            raise ValueError("Buffer too short")
 
-        # Step 3: Source App
-        source_app = email_sms.source_app
-        source_length = len(source_app)
-        source_bytes = source_length.to_bytes(1, "big") + b"\x00" + source_app.encode("utf-8")
+        # Read 6-byte header (skip or store if needed)
+        offset = 6
 
-        # Step 4: Sender Phone Number
-        sender = email_sms.sender
-        sender_length = len(sender)
-        sender_bytes = sender_length.to_bytes(1, "big") + b"\x00" + sender.encode("utf-8")
+        # Read 1-byte type
+        notif_type = buf[offset]
+        notif_type_enum = NotificationType(notif_type)
+        offset += 1
 
-        # Step 5: Message
-        message = email_sms.message
-        message_length = len(message)
-        message_bytes = message_length.to_bytes(1, "big") + b"\x00" + message.encode("utf-8")
+        # Read 15-byte ASCII timestamp
+        timestamp_raw = buf[offset:offset + 15].decode("ascii")
+        offset += 15
 
-        # Combine all parts
-        buffer = header + date_time + source_bytes + sender_bytes + b"\x00\x00" + message_bytes
+        # Read app name (length-prefixed UTF-8 string)
+        app, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
 
-        return buffer
+        # Read title (length-prefixed UTF-8 string)
+        title, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
 
-    def create_buffer_from_calendar(calendar: CalendarNotification) -> bytes:
+        # Read empty string (length-prefixed UTF-8 string, skip)
+        _, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+
+        # Read text (length-prefixed UTF-8 string)
+        text, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+
+        # Construct and return AppNotification object
+        notification = AppNotification(
+            type = notif_type_enum,
+            timestamp=timestamp_raw,
+            app=app,
+            title=title,
+            text=text
+        )
+        return notification
+        
+    
+    def write_length_prefixed_string(text: str) -> bytes:
+        encoded = text.encode("utf-8")
+        if len(encoded) > 255:
+            raise ValueError("Encoded string too long")
+        return bytes([len(encoded), 0x00]) + encoded
+
+    def encode_notification_packet(data: AppNotification) -> bytes:
         """
-        Creates a decoded buffer from a CalendarNotification object.
-
-        Args:
-            calendar (CalendarNotification): The CalendarNotification object.
-
-        Returns:
-            bytes: The decoded buffer as bytes.
+        Encodes a dictionary representing a G-Shock notification into a binary buffer.
         """
-        # Step 1: Fixed header
-        header = bytes.fromhex("00000000000105")
 
-        # Step 2: Date-time
-        date_time_bytes = calendar.date_time.encode("utf-8")
-
-        # Step 3: Source
-        source = calendar.source_app
-        source_length = len(source)
-        source_bytes = source_length.to_bytes(1, "big") + b"\x00" + source.encode("utf-8")
-
-        # Step 4: Title
-        title = calendar.title
-        title_separator = b"\x1d\x00\xe2\x80\x8e\xe2\x80\xaa"  # Separator before the title
-        title_bytes = title_separator + title.encode("utf-8")
-
-        # Step 5: Start time and end time
-        start_time = calendar.start_time
-        end_time = calendar.end_time
-        time_separator = b"\xe2\x80\xac\xe2\x80\x8e\x00\x00\x1e\x00\xe2\x80\x8e\xe2\x80\xaa"  # Separator before times
-        start_time_bytes = start_time.encode("utf-8")
-        end_time_separator = b"\xe2\x80\x93"  # Separator between start and end times
-        end_time_bytes = end_time.encode("utf-8")
-
-        # Add the missing sequence after "280aa31303a3430"
-        additional_sequence = b"\x20\xe2\x80\x93\x20" + end_time_bytes + b"\xe2\x80\xac\xe2\x80\x8e"
-
-        # Combine start and end times
-        time_bytes = time_separator + start_time_bytes + additional_sequence
-
-        # Step 6: Combine all parts
-        decoded_buffer = header + date_time_bytes + source_bytes + title_bytes + time_bytes
-
-        return decoded_buffer
-
-    @staticmethod
-    def get_encoded_buffer(notification) -> str:
-        """
-        Encodes a buffer based on the notification type (calendar or email/SMS).
-
-        Args:
-            notification: The notification object (either EmailSmsNotification or CalendarNotification).
-
-        Returns:
-            str: The XOR-encoded buffer as a hex string.
-
-        Raises:
-            ValueError: If the notification type is not supported.
-        """
-        if isinstance(notification, EmailSmsNotification):
-            # Handle email/SMS notification
-            buffer = AppNotificationIO.create_buffer_from_email_sms(notification)
-        elif isinstance(notification, CalendarNotification):
-            # Handle calendar notification
-            buffer = AppNotificationIO.create_buffer_from_calendar(notification)
-        else:
-            # Raise an error for unsupported types
-            raise ValueError(f"Unsupported notification type: {type(notification)}")
-
-        # Encode the buffer using XOR
-        return AppNotificationIO.xor_encode_buffer(buffer)
-
-
-# Example usage
-if __name__ == "__main__":
-    calendar_notification = CalendarNotification(
-        date_time="20231001T120000",
-        source_app="CalendarApp",
-        title="Meeting with Team",
-        start_time="10:15 ",
-        end_time="11:40 PM"
-    )
-
-    email_notification = EmailSmsNotification(
-        date_time="20231001T120000",
-        source_app="EmailApp",
-        sender="Ivo",
-        message="Hello, this is a test message."
-    )
-
-    encoded = AppNotificationIO.get_encoded_buffer(calendar_notification)
-    print(f"Encoded Calendar Notification: {encoded}")
-
-    encoded = AppNotificationIO.get_encoded_buffer(email_notification)
-    print(f"Encoded Email Notification: {encoded}")
+        if not isinstance(data, AppNotification):
+            raise TypeError("data must be an AppNotification instance")
+    
+        header = "010000000001"
+        result = bytearray()
+        result += bytes.fromhex(header)
+        result.append(data.type.value)
+        result += data.timestamp.encode("ascii")
+        result += AppNotificationIO.write_length_prefixed_string(data.app)
+        result += AppNotificationIO.write_length_prefixed_string(data.title)
+        result += AppNotificationIO.write_length_prefixed_string("")  # Empty string for the separator
+        result += AppNotificationIO.write_length_prefixed_string(data.text)
+        return bytes(result)

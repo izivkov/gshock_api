@@ -5,7 +5,6 @@ import time
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.app_notification_io import AppNotificationIO
-from gshock_api.app_notification import EmailSmsNotification, CalendarNotification
 
 from gshock_api import message_dispatcher
 from gshock_api.utils import (
@@ -160,7 +159,7 @@ class GshockAPI:
         for item in array_of_dst_watch_state[: watch_info.dstCount]:
             await self.read_and_write(item["function"], item["state"])
 
-    async def send_message (self, hex_str):
+    async def send_app_notification (self, hex_str):
         await self.connection.write(0xD, hex_str)
 
     async def read_write_dst_for_world_cities(self):
@@ -451,8 +450,8 @@ class GshockAPI:
         result = await message_dispatcher.AppInfoIO.request(self.connection)
         return await result
 
-    async def send_message (self, notification):
-        encoded_buffer = AppNotificationIO.get_encoded_buffer(notification)
-        print(f"Sending message: {notification.to_dict()}")
-        await self.connection.write(0xD, encoded_buffer)
+    async def send_app_notification (self, notification):
+        encoded_buffer = AppNotificationIO.encode_notification_packet(notification)
+        encrypted_buffer = AppNotificationIO.xor_encode_buffer(encoded_buffer)
+        await self.connection.write(0xD, encrypted_buffer)
 
