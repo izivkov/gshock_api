@@ -12,7 +12,7 @@ class AppNotification:
         self.type = type
         self.timestamp = timestamp
         self.app = app
-        self.title = title[:17] # Truncate title to 17 characters, otherwise cannot send
+        self.title = title
         self.text = text
 
     def to_dict(self) -> dict:

@@ -81,7 +81,7 @@ async def run_api_tests_app_notifications():
         text="الساعة\n"
     )
 
-    await api.send_app_notification(email_notificationArabic)
+    await api.send_app_notification(calendar_notification)
 
     input("Hit any key to disconnect")
 
