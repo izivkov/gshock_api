@@ -1,7 +1,8 @@
 gshock_api
 ================
 
-# Announcement
+Announcement
+============
 
 The library now supports sending application-level notifications to watches that support it, namely:
 
