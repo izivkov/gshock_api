@@ -14,7 +14,7 @@ The library now supports sending application-level notifications to watches that
 * GBD-100BAR
 * GBX-100
 
-The new API is `send_app_notification <https://github.com/izivkov/gshock_api/blob/main/src/gshock_api/gshock_api.py#453-456>`_ function. 
+The new API is **send_app_notification** function. 
 See the `examples/api_test.py <https://github.com/izivkov/gshock_api/blob/main/src/examples/api_tests.py#L453-L456>`_ file for usage examples.
 
 Only the **DW-H5600** watch has been tested. If you have any of the watches supporting notifications, please let me know your findings.
