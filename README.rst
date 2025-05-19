@@ -14,7 +14,7 @@ The library now supports sending application-level notifications to watches that
 * GBD-100BAR
 * GBX-100
 
-The new API is the `send_app_notification` function. See how to use it in the `api_test.py` script.
+The new API is the **send_app_notification** function. See how to use it in the **api_test.py** script.
 
 Only the **DW-H5600** watch has been tested. If you have any of the watches supporting notifications, please let me know your findings.
 
