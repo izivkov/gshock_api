@@ -14,7 +14,7 @@ from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
 
 async def main(argv):
-    await run_api_tests_app_notifications()
+    await run_api_tests()
 
 def prompt():
     logger.info(
@@ -27,66 +27,6 @@ def prompt():
         "========================================================================"
     )
     logger.info("")
-
-async def run_api_tests_app_notifications():
-    prompt()
-
-    device = await scanner.scan()
-    logger.info("Found: {}".format(device))
-
-    connection = Connection(device)
-    await connection.connect()
-    api = GshockAPI(connection)
-
-    # watch_name = await api.get_watch_name()
-    # logger.info("got watch name: {}".format(watch_name))
-
-    calendar_notification = AppNotification(
-        type = NotificationType.CALENDAR,
-        timestamp="20231001T121000",
-        app = "Calendar",
-        title = "This is a very long Meeting with Team",
-        text =" 9:20 - 10:15 AM"
-    )
-
-    calendar_notification_all_day = AppNotification(
-        type = NotificationType.CALENDAR,
-        timestamp="20250516T233000",
-        app = "Calendar",
-        title = "Full day event 3",
-        text = "Tomorrow",
-    )
-
-    email_notification = AppNotification(
-        type = NotificationType.EMAIL_SMS,
-        timestamp="20231001T120000",
-        app="EmailApp",
-        title="Ivo",
-        text="Hello, this is a test message."
-    )
-
-    email_notification2 = AppNotification(
-        type = NotificationType.EMAIL_SMS,
-        timestamp="20250516T211520",
-        app="Gmail",
-        title="me",
-        text="\u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n"
-    )
-
-    email_notificationArabic = AppNotification(
-        type = NotificationType.EMAIL_SMS,
-        timestamp="20250516T211520",
-        app="Gmail",
-        title="me",
-        text="الساعة\n"
-    )
-
-    await api.send_app_notification(calendar_notification)
-
-    input("Hit any key to disconnect")
-
-    await connection.disconnect()
-    logger.info("--- END OF TESTS ---")
 
 async def run_api_tests():
     prompt()
@@ -143,6 +83,9 @@ async def run_api_tests():
     settings_local = await api.get_basic_settings()
     logger.info("After update: settings: {}".format(settings_local))
 
+    await app_notifications(api)
+    logger.info("After app_notifications")
+
     # Create a single event
     tz = pytz.timezone("America/Toronto")
     dt = datetime.now(timezone.utc)    
@@ -180,6 +123,50 @@ async def run_api_tests():
     await connection.disconnect()
     logger.info("--- END OF TESTS ---")
 
+
+async def app_notifications(api):
+
+    calendar_notification = AppNotification(
+        type = NotificationType.CALENDAR,
+        timestamp="20231001T121000",
+        app = "Calendar",
+        title = "This is a very long Meeting with Team",
+        text =" 9:20 - 10:15 AM"
+    )
+
+    calendar_notification_all_day = AppNotification(
+        type = NotificationType.CALENDAR,
+        timestamp="20250516T233000",
+        app = "Calendar",
+        title = "Full day event 3",
+        text = "Tomorrow",
+    )
+
+    email_notification = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20231001T120000",
+        app="EmailApp",
+        title="Ivo",
+        text="Hello, this is a test message."
+    )
+
+    email_notification2 = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20250516T211520",
+        app="Gmail",
+        title="me",
+        text="\u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n"
+    )
+
+    email_notificationArabic = AppNotification(
+        type = NotificationType.EMAIL_SMS,
+        timestamp="20250516T211520",
+        app="Gmail",
+        title="me",
+        text="الساعة\n"
+    )
+
+    await api.send_app_notification(calendar_notification)
 
 def convert_time_string_to_epoch(time_string):
     try:

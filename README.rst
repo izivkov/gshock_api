@@ -1,6 +1,23 @@
 gshock_api
 ================
 
+# Announcement
+
+The library now supports sending application-level notifications to watches that support it, namely:
+
+* DW-H5600
+* GBD-H2000
+* GBD-200
+* GBD-100
+* GBD-800
+* GBD-100BAR
+* GBX-100
+
+The new API is the \:code:`send_app_notification` function. See how to use it in the \:code:`api_test.py` script.
+
+Only the **DW-H5600** watch has been tested. If you have any of the watches supporting notifications, please let me know your findings.
+
+
 Overview
 ========
 This is a **Python API library** for G-Shock watches that support Bluetooth Low Energy (BLE) communication.
