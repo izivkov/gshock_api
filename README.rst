@@ -39,6 +39,7 @@ It can perform the following tasks:
 - Get watch's battery level
 - Get Watch's temperature
 - Get/Set watch's Timer
+- Send notifications to watch (supported models)
 
 Dependencies
 ============

@@ -14,7 +14,7 @@ from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
 
 async def main(argv):
-    await run_api_tests()
+    await run_api_tests_notifications()
 
 def prompt():
     logger.info(
@@ -123,6 +123,23 @@ async def run_api_tests():
     await connection.disconnect()
     logger.info("--- END OF TESTS ---")
 
+async def run_api_tests_notifications():
+    prompt()
+
+    device = await scanner.scan()
+    logger.info("Found: {}".format(device))
+
+    connection = Connection(device)
+    await connection.connect()
+
+    api = GshockAPI(connection)
+
+    await app_notifications(api)
+
+    input("Hit any key to disconnect")
+
+    await connection.disconnect()
+    logger.info("--- END OF TESTS ---")
 
 async def app_notifications(api):
 
@@ -142,14 +159,6 @@ async def app_notifications(api):
         text = "Tomorrow",
     )
 
-    email_notification = AppNotification(
-        type = NotificationType.EMAIL_SMS,
-        timestamp="20231001T120000",
-        app="EmailApp",
-        title="Ivo",
-        text="Hello, this is a test message."
-    )
-
     email_notification2 = AppNotification(
         type = NotificationType.EMAIL_SMS,
         timestamp="20250516T211520",
@@ -166,7 +175,16 @@ async def app_notifications(api):
         text="الساعة\n"
     )
 
-    await api.send_app_notification(calendar_notification)
+    email_notification = AppNotification(
+        type = NotificationType.EMAIL,
+        timestamp="20231001T120000",
+        app="EmailApp",
+        title="Ivo",
+        text="This is the message up to 193 characters, combined up to 206 characters",
+        text2 = """And this is a short message up to 40 chars"""
+    )
+
+    await api.send_app_notification(email_notification)
 
 def convert_time_string_to_epoch(time_string):
     try:

@@ -111,6 +111,6 @@ class AppNotificationIO:
         result += data.timestamp.encode("ascii")
         result += AppNotificationIO.write_length_prefixed_string(data.app)
         result += AppNotificationIO.write_length_prefixed_string(data.title)
-        result += AppNotificationIO.write_length_prefixed_string("")  # Empty string for the separator
+        result += AppNotificationIO.write_length_prefixed_string(data.text2)  # Empty string for the separator
         result += AppNotificationIO.write_length_prefixed_string(data.text)
         return bytes(result)
