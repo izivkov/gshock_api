@@ -104,13 +104,13 @@ class AppNotificationIO:
         if not isinstance(data, AppNotification):
             raise TypeError("data must be an AppNotification instance")
     
-        header = "010000000001"
+        header = "000000000001"
         result = bytearray()
         result += bytes.fromhex(header)
         result.append(data.type.value)
         result += data.timestamp.encode("ascii")
         result += AppNotificationIO.write_length_prefixed_string(data.app)
         result += AppNotificationIO.write_length_prefixed_string(data.title)
-        result += AppNotificationIO.write_length_prefixed_string(data.text2)  # Empty string for the separator
+        result += AppNotificationIO.write_length_prefixed_string(data.short_text)  # Empty string for the separator
         result += AppNotificationIO.write_length_prefixed_string(data.text)
         return bytes(result)

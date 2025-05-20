@@ -15,6 +15,8 @@ def format_hex_string(hexstr):
     """Format a hex string into space-separated bytes."""
     return ' '.join(hexstr[i:i+2] for i in range(0, len(hexstr), 2))
 
+print(f"{AppNotificationIO.xor_decode_buffer(bufferCalendar2)}")
+
 # Example usage
 input_hex_2 = AppNotificationIO.xor_decode_buffer(bufferGmailJapanese).hex()
 buf = bytes.fromhex(input_hex_2)
