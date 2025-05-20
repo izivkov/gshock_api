@@ -91,6 +91,27 @@ class AppNotificationIO:
         
     
     def write_length_prefixed_string(text: str) -> bytes:
+        """
+        Encodes a string as a length-prefixed UTF-8 byte sequence for G-Shock BLE notifications.
+
+        Structure:
+        ----------
+        [Length: 1 byte][0x00][UTF-8 bytes of string]
+
+        - Length: Number of bytes in the UTF-8 encoded string (max 255).
+        - 0x00: Separator byte (always 0x00).
+        - UTF-8 bytes: The actual string data.
+
+        Args:
+            text (str): The string to encode.
+
+        Returns:
+            bytes: The encoded length-prefixed UTF-8 byte sequence.
+
+        Raises:
+            ValueError: If the encoded string is longer than 255 bytes.
+        """
+        
         encoded = text.encode("utf-8")
         if len(encoded) > 255:
             raise ValueError("Encoded string too long")
@@ -98,7 +119,40 @@ class AppNotificationIO:
 
     def encode_notification_packet(data: AppNotification) -> bytes:
         """
-        Encodes a dictionary representing a G-Shock notification into a binary buffer.
+        Encodes an AppNotification object into a binary buffer for G-Shock BLE notifications.
+
+        Message Structure:
+        ------------------
+        The encoded message has the following structure (all fields are concatenated in order):
+
+        [Header: 6 bytes] +
+        [Type: 1 byte] +
+        [Timestamp: 15 bytes, ASCII] +
+        [App Name: length-prefixed UTF-8 string] +
+        [Title: length-prefixed UTF-8 string] +
+        [Short Text: length-prefixed UTF-8 string] +
+        [Text: length-prefixed UTF-8 string]
+
+        - Header: Fixed 6-byte value (hex "000000000001").
+        - Type: 1 byte, value from NotificationType enum.
+        - Timestamp: 15 ASCII characters.
+        - App Name, Title, Short Text, Text: Each is encoded as [length (1 byte)][0x00][UTF-8 bytes].
+          - The length is the number of bytes in the UTF-8 encoded string (max 255).
+          - The second byte is always 0x00 as a separator.
+
+        Args:
+            data (AppNotification): The notification to encode.
+
+        Returns:
+            bytes: The encoded binary buffer.
+
+        Raises:
+            TypeError: If data is not an AppNotification instance.
+            ValueError: If any string field is too long to encode.
+
+        Example:
+            >>> notif = AppNotification(type=NotificationType.CALENDAR, timestamp="20250516T233000", app="Calendar", title="Meeting", text="Discuss project")
+            >>> buf = AppNotificationIO.encode_notification_packet(notif)
         """
 
         if not isinstance(data, AppNotification):
