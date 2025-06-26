@@ -14,7 +14,7 @@ from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
 
 async def main(argv):
-    await run_api_tests_notifications()
+    await run_api_tests()
 
 def prompt():
     logger.info(

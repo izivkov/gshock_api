@@ -1,0 +1,15 @@
+from gshock_api.iolib.app_notification_io import AppNotificationIO
+
+buffer = "05a9ebffffffef0ff7df0ff7df0ff7df0ff7df0ff74992"
+buffer1 = "058ddaffffffdafaf9ecef0ff723f7d9fdfefefee3c0ffffffff01e5ffff84ffffffff00f3fffc52"
+buffer2 = "05ad3afdffff01010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701"
+buffer3 = "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff74caf"
+buffer4 = "05fff0ffffffe6faf4eed7adedffffffffffff50fc756a"
+
+# XOR-decode the buffer with key 255
+decoded = AppNotificationIO.xor_decode_buffer(buffer, key=255)
+print(decoded.hex())
+
+# fa 56 14 00 00 00 10 f0 08 20 f0 08 20 f0 08 20 f0 08 20 f0 08 b6 6d
+
+

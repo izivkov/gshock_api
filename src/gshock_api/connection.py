@@ -23,7 +23,6 @@ class Connection:
         Prints all services and characteristics of the connected BLE device.
         """
         services = await self.client.get_services()
-        print(f"got services...")
         for service in services:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
