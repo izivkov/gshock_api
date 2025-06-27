@@ -6,15 +6,15 @@ from gshock_api import message_dispatcher
 from gshock_api.utils import to_casio_cmd
 from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
-from gshock_api.device import Device
+from bleak.backends.device import BLEDevice
+from gshock_api.scanner import scanner
 
 class Connection:
-    def __init__(self, device: Device):
+    def __init__(self, address = None):
         self.handles_map = self.init_handles_map()
-        self.device = device
-        self.client = BleakClient(device.address)
+        self.address = address
+        self.client: BleakClient = None
         self.characteristics_map = {}
-
 
     def notification_handler(
         self, characteristic: BleakGATTCharacteristic, data: bytearray
@@ -30,20 +30,27 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
 
-    async def connect(self):
+    async def connect(self) -> bool:
         try:
+            # Scan for device if address not provided
+            device = await scanner.scan(device_address=self.address if self.address else None)
+            self.address = device.address  # Always update with actual device found
+            logger.info(f"Found device: {device.name} ({self.address})")
+
+            self.client = BleakClient(self.address)
             await self.client.connect()
+
             await self.init_characteristics_map()
+
             await self.client.start_notify(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
                 self.notification_handler,
             )
-            
-            watch_info.set_name_and_model(self.device.name)
+
             return True
-        
+
         except Exception as e:
-            logger.debug(f"Cannot connect: {e}")
+            logger.warning(f"[GShock Connect] Connection failed: {e}")
             return False
 
     async def disconnect(self):

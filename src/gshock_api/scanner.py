@@ -4,12 +4,12 @@ from bleak import BleakScanner
 from gshock_api.configurator import conf
 from gshock_api.watch_info import watch_info
 from gshock_api.logger import logger
-from gshock_api.device import Device 
+from bleak.backends.device import BLEDevice
 
 class Scanner:
     CASIO_SERVICE_UUID = "00001804-0000-1000-8000-00805f9b34fb"
 
-    async def scan(self, device_address=None) -> Device:
+    async def scan(self, device_address=None) -> BLEDevice:
         scanner = BleakScanner()
         logger.info("Scanning for devices...")
 
@@ -23,8 +23,7 @@ class Scanner:
                 if device is None:
                     continue
                 
-                # This is now set after connection in Connection class
-                # watch_info.set_name_and_model(device.name)
+                watch_info.set_name_and_model(device.name)
 
                 conf.put("device.address", device.address)
                 conf.put("device.name", device.name)
@@ -36,6 +35,6 @@ class Scanner:
             )
             watch_info.set_name_and_model(device.name)
 
-        return Device(device.name, device.address)
+        return device
 
 scanner = Scanner()
