@@ -12,6 +12,8 @@ from gshock_api.event import Event, create_event_date, RepeatPeriod
 from gshock_api.scanner import scanner
 from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
+from gshock_api.configurator import conf
+from gshock_api.device import Device
 
 async def main(argv):
     await run_api_tests()
@@ -32,10 +34,17 @@ def prompt():
 async def run_api_tests():
     prompt()
 
-    device = await scanner.scan()
-    logger.info("Found: {}".format(device))
+    address = conf.get("device.address")
+    name = conf.get("device.name")
+    device = None
 
-    connection = Connection(device)
+    if not address or not name:
+        device = await scanner.scan()
+        logger.info("Found: {}".format(device))
+        address = device.address
+        name = device.name
+
+    connection = Connection(device or Device(name, address))
     await connection.connect()
 
     api = GshockAPI(connection)

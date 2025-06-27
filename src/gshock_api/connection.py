@@ -5,13 +5,16 @@ from gshock_api.casio_constants import CasioConstants
 from gshock_api import message_dispatcher
 from gshock_api.utils import to_casio_cmd
 from gshock_api.logger import logger
+from gshock_api.watch_info import watch_info
+from gshock_api.device import Device
 
 class Connection:
-    def __init__(self, device):
+    def __init__(self, device: Device):
         self.handles_map = self.init_handles_map()
         self.device = device
-        self.client = BleakClient(device)
+        self.client = BleakClient(device.address)
         self.characteristics_map = {}
+
 
     def notification_handler(
         self, characteristic: BleakGATTCharacteristic, data: bytearray
@@ -35,7 +38,10 @@ class Connection:
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
                 self.notification_handler,
             )
+            
+            watch_info.set_name_and_model(self.device.name)
             return True
+        
         except Exception as e:
             logger.debug(f"Cannot connect: {e}")
             return False

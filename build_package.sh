@@ -13,7 +13,7 @@ source venv/bin/activate
 pip install --upgrade pip setuptools wheel
 
 # Install twine for uploading the package
-pip install twine
+pip install build twine
 
 # Clean previous builds
 rm -rf build dist *.egg-info

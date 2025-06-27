@@ -46,12 +46,14 @@ Dependencies
 
 This project requires the following Python packages:
 .. code-block:: sh
+
    pytz
    bleak
 
 
 So you can install them using the following command:
 .. code-block:: sh
+    
    pip3 install -r requirements.txt
 
 
@@ -64,23 +66,26 @@ It is recommended that you create a virtual environment to run the tests:
 
 1. Create a virtual environment:
 
-.. code-block:: sh
+   .. code-block:: sh
 
-   # Create a virtual environment
-   python3 -m venv venv
+      # Create a virtual environment
+      python3 -m venv venv
 
-   # Activate it (Mac/Linux)
-   source venv/bin/activate
-   
-   # Install dependencies
-   pip3 install -e .
+      # Activate it (Mac/Linux)
+      source venv/bin/activate
+
+      # Install dependencies
+      pip3 install -e .
 
 2. Run the tests:
 
-.. code-block:: sh
+   .. code-block:: sh
 
-   python3 src/examples/api_tests.py [--multi-watch]
+      python3 src/examples/api_tests.py [--multi-watch]
 
+The optional **`--multi-watch`** parameter forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
+the library will try to connect to the last connected watch only. If you have multiple watches, you should use this parameter.
+      
 The optional **`--multi-watch`** parameter forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
 the library will try to connect to the last connected watch only. If you have multiple watches, you should use this parameter.
 

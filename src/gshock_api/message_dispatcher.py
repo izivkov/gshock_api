@@ -75,7 +75,6 @@ class MessageDispatcher:
             logger.info(f"Found key: {MessageDispatcher.data_received_messages[key]}")
             MessageDispatcher.data_received_messages[key](data)
 
-
 # Usage example
 if __name__ == "__main__":
     # Simulated messages
