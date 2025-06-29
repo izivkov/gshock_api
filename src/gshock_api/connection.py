@@ -62,6 +62,31 @@ class Connection:
         print(f"write, service with handle {handle} is supported: {supported}")
         return supported
 
+    async def safe_ble_write(self, client, uuid, data, timeout=5.0):
+        """
+        Safely writes to a BLE characteristic with a timeout.
+        
+        Args:
+            client: The BleakClient or compatible BLE client.
+            uuid: The characteristic UUID to write to.
+            data: Bytes-like object to send (use your to_casio_cmd or similar).
+            timeout: Maximum time to wait for the write (in seconds).
+        
+        Returns:
+            True if the write succeeds, False if it times out or fails.
+        """
+        try:
+            await asyncio.wait_for(
+                client.write_gatt_char(uuid, data),
+                timeout=timeout
+            )
+            return True
+        except asyncio.TimeoutError:
+            print(f"⏰ BLE write to {uuid} timed out after {timeout} seconds.")
+        except Exception as e:
+            print(f"⚠️ BLE write to {uuid} failed: {e}")
+        return False
+
     async def write(self, handle, data):
         try:
             uuid = self.handles_map.get(handle)
@@ -75,11 +100,20 @@ class Connection:
                     )
                 return
             
-            await self.client.write_gatt_char(
-                uuid, to_casio_cmd(data)
-            )
+            data_bytes = to_casio_cmd(data)
+            success = await self.safe_ble_write(self.client, uuid, data_bytes, timeout=3.0)
+
+            if not success:
+                # handle retry or error logging
+                await self.client.disconnect()
+
+            # await self.client.write_gatt_char(
+            #     uuid, to_casio_cmd(data)
+            # )
+
         except Exception as e:
-            logger.debug("write failed with exception: {}".format(e))
+            logger.info("write failed with exception: {}".format(e))
+            await self.client.disconnect()
 
     async def request(self, request):
         logger.info("write: {}".format(request))

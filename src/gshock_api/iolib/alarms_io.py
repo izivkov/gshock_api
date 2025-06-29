@@ -9,14 +9,12 @@ from gshock_api.casio_constants import CasioConstants
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
-
 class AlarmsIO:
     result: CancelableResult = None
     connection = None
 
     @staticmethod
     async def request(connection):
-        await connection.request("GET_ALARMS")
         AlarmsIO.connection = connection
 
         alarms_inst.clear()
