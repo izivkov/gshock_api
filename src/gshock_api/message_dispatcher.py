@@ -72,7 +72,6 @@ class MessageDispatcher:
         if key not in MessageDispatcher.data_received_messages:
             logger.info(f"Unknown key: {key}")
         else:
-            logger.info(f"Found key: {MessageDispatcher.data_received_messages[key]}")
             MessageDispatcher.data_received_messages[key](data)
 
 # Usage example

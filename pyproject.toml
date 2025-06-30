@@ -1,6 +1,7 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+# requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.0"]
 
 [project]
 name = "gshock_api"  # Change to your project name

@@ -13,15 +13,13 @@ class WorldCitiesIO:
 
     @staticmethod
     async def request(connection, cityNumber: int):
-        logger.info(f"DstWatchStateIO request")
         WorldCitiesIO.connection = connection
         key = "1f0{}".format(cityNumber)
 
         await connection.request(key)
 
-        loop = asyncio.get_running_loop()
-        WorldCitiesIO.result = loop.create_future()
-        return WorldCitiesIO.result
+        WorldCitiesIO.result = CancelableResult()
+        return WorldCitiesIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(connection):
@@ -29,5 +27,4 @@ class WorldCitiesIO:
 
     @staticmethod
     def on_received(data):
-        logger.info(f"WorldCitiesIO onReceived")
         WorldCitiesIO.result.set_result(data)

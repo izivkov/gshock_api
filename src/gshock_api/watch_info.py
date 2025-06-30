@@ -202,8 +202,6 @@ class WatchInfo:
         if len(parts) > 1:
             self.shortName = parts[1]
 
-        logger.info(f"============> self.shortName: ${self.shortName}")
-
         # *** Order matters. Start with the longest shortName first. ***
         if self.shortName.startswith("MSG"):
             self.model = WATCH_MODEL.MSG

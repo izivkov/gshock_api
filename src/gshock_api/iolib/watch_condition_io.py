@@ -19,13 +19,11 @@ class WatchConditionIO:
 
     @staticmethod
     async def request(connection):
-        logger.info(f"WatchConditionIO request")
         WatchConditionIO.connection = connection
         await connection.request("28")
 
-        loop = asyncio.get_running_loop()
-        WatchConditionIO.result = loop.create_future()
-        return WatchConditionIO.result
+        WatchConditionIO.result = CancelableResult()
+        return WatchConditionIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(connection):
@@ -33,16 +31,11 @@ class WatchConditionIO:
 
     @staticmethod
     def on_received(data):
-        logger.info(f"WatchConditionIO onReceived")
-
         def decode_value(data: str) -> WatchConditionIO.WatchConditionValue:
             int_arr = list(map(int, data))
             bytes_data = bytes(int_arr[1:])
 
             if len(bytes_data) >= 2:
-                # Battery level between 15 and 20 for B2100 and between 12 and 19 for B5600. Scale accordingly to %
-                logger.info(f"battery level row value: {int(bytes_data[0])}")
-
                 battery_level_lower_limit = watch_info.batteryLevelLowerLimit
                 battery_level_upper_limit = watch_info.batteryLevelUpperLimit
 

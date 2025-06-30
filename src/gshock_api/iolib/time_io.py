@@ -32,7 +32,6 @@ class TimeIO:
     @staticmethod
     async def send_to_watch_set(message):
         date_time_ms = int(json.loads(message).get("value"))
-        logger.info("date_time_ms: {}".format(date_time_ms))
         date_time = datetime.datetime.fromtimestamp(date_time_ms / 1000.0)
         time_data = TimeEncoder.prepare_current_time(date_time)
         time_command = to_hex_string(

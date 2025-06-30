@@ -25,9 +25,8 @@ class AlarmsIO:
     async def _get_alarms(connection):
         await connection.sendMessage("""{ "action": "GET_ALARMS"}""")
 
-        loop = asyncio.get_running_loop()
-        AlarmsIO.result = loop.create_future()
-        return AlarmsIO.result
+        AlarmsIO.result = CancelableResult()
+        return await AlarmsIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(message=""):

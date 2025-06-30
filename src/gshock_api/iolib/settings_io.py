@@ -16,25 +16,20 @@ class SettingsIO:
 
     @staticmethod
     async def request(connection):
-        logger.info(f"TimerIO request")
         SettingsIO.connection = connection
         await connection.request("13")
 
-        loop = asyncio.get_running_loop()
-        SettingsIO.result = loop.create_future()
-        return SettingsIO.result
+        SettingsIO.result = CancelableResult()
+        return SettingsIO.result.get_result()
 
     @staticmethod
     def send_to_watch(message):
-        logger.info(f"SettingsIO sendToWatch: {message}")
         SettingsIO.connection.write(
             0x000C, bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_BASIC"]])
         )
 
     @staticmethod
     async def send_to_watch_set(message):
-        logger.info(f"SettingsIO sendToWatchSet: {message}")
-
         def encode(settings):
             mask_24_hours = 0b00000001
             MASK_BUTTON_TONE_OFF = 0b00000010

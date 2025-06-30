@@ -15,9 +15,8 @@ class WatchNameIO:
         WatchNameIO.connection = connection
         await connection.request("23")
 
-        loop = asyncio.get_running_loop()
-        WatchNameIO.result = loop.create_future()
-        return WatchNameIO.result
+        WatchNameIO.result = CancelableResult()
+        return WatchNameIO.result.get_result()
 
     @staticmethod
     def on_received(data):

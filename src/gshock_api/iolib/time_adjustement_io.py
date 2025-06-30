@@ -20,27 +20,23 @@ class TimeAdjustmentIO:
 
     @staticmethod
     async def request(connection):
-        logger.info(f"TimerIO request")
         TimeAdjustmentIO.connection = connection
         await connection.request("11")
 
-        loop = asyncio.get_running_loop()
-        TimeAdjustmentIO.result = loop.create_future()
-        return TimeAdjustmentIO.result
+        TimeAdjustmentIO.result = CancelableResult()
+        return TimeAdjustmentIO.result.get_result()
+
 
     @staticmethod
     def send_to_watch(message):
-        logger.info(f"TimeAdjustmentIO sendToWatch: {message}")
         TimeAdjustmentIO.connection.write(
             0x000C, bytearray([CHARACTERISTICS["TIME_ADJUSTMENT"]])
         )
 
     @staticmethod
     async def send_to_watch_set(message):
-        logger.info(f"TimeAdjustmentIO sendToWatchSet: {message}")
 
         if TimeAdjustmentIO.original_value == None:
-            logging.error("Error: Must call get before set")
             return ErrorIO.request("Error: Must call get before set")
 
         time_adjustment = json.loads(message).get("timeAdjustment") == "True"
@@ -61,7 +57,6 @@ class TimeAdjustmentIO:
 
     @staticmethod
     def on_received(message):
-        logger.info(f"TimeAdjustmentIO onReceived: {message}")
         TimeAdjustmentIO.original_value = to_hex_string(
             message
         )  # save original message

@@ -16,13 +16,12 @@ class TimerIO:
 
     @staticmethod
     async def request(connection):
-        logger.info(f"TimerIO request")
         TimerIO.connection = connection
         await connection.request("18")
 
-        loop = asyncio.get_running_loop()
-        TimerIO.result = loop.create_future()
-        return TimerIO.result
+        TimerIO.result = CancelableResult()
+        return TimerIO.result.get_result()
+
 
     @staticmethod
     async def send_to_watch(connection):
@@ -30,8 +29,6 @@ class TimerIO:
 
     @staticmethod
     async def send_to_watch_set(data):
-        logger.info(f"TimerIO sendToWatchSet: {data}")
-
         def encode(seconds_str):
             in_seconds = int(seconds_str)
             hours = in_seconds // 3600
@@ -53,8 +50,6 @@ class TimerIO:
 
     @staticmethod
     def on_received(data):
-        logger.info(f"TimerIO onReceived")
-
         def decode_value(data: str) -> str:
             timer_int_array = data
 

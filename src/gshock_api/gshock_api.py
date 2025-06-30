@@ -231,7 +231,7 @@ class GshockAPI:
 
     async def _get_alarms(self):
         result = await message_dispatcher.AlarmsIO.request(self.connection)
-        return await result
+        return result
 
     async def set_alarms(self, alarms):
         """Sets alarms to the watch. Up to 5 alarms are supported on the watch.

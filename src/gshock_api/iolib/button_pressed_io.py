@@ -26,9 +26,8 @@ class ButtonPressedIO:
         ButtonPressedIO.connection = connection
         await connection.request("10")
 
-        loop = asyncio.get_running_loop()
-        ButtonPressedIO.result = loop.create_future()
-        return ButtonPressedIO.result
+        ButtonPressedIO.result = CancelableResult()
+        return ButtonPressedIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(connection):
@@ -36,14 +35,10 @@ class ButtonPressedIO:
 
     @staticmethod
     async def send_to_watch_set(data):
-        logger.info(f"TimerIO sendToWatchSet: {data}")
-
         await ButtonPressedIO.connection.write(0x000E, data)
 
     @staticmethod
     def on_received(data):
-        logger.info(f"ButtonPressedIO onReceived")
-
         def button_pressed_callback(data):
             """
             RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
@@ -57,7 +52,6 @@ class ButtonPressedIO:
             if len(data) >= 19:
                 ble_int_arr = to_int_array(to_hex_string(data))
                 button_indicator = ble_int_arr[8]
-                logger.info(f"Buttom code pressed: ${button_indicator}")
                 ret = (
                     WatchButton.LOWER_LEFT
                     if (button_indicator == 0 or button_indicator == 1)

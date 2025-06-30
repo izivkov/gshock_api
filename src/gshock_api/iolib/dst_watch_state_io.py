@@ -20,14 +20,13 @@ class DstWatchStateIO:
 
     @staticmethod
     async def request(connection, state: DtsState):
-        logger.info(f"DstWatchStateIO request")
         DstWatchStateIO.connection = connection
         key = f"1d0{state.value}"
         await connection.request(key)
 
-        loop = asyncio.get_running_loop()
-        DstWatchStateIO.result = loop.create_future()
-        return DstWatchStateIO.result
+        DstWatchStateIO.result = CancelableResult()
+        return DstWatchStateIO.result.get_result()
+
 
     @staticmethod
     async def send_to_watch(connection):
@@ -35,5 +34,4 @@ class DstWatchStateIO:
 
     @staticmethod
     def on_received(data):
-        logger.info(f"DstWatchStateIO onReceived")
         DstWatchStateIO.result.set_result(data)

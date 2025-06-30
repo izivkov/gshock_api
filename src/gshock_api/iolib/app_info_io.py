@@ -15,13 +15,11 @@ class AppInfoIO:
 
     @staticmethod
     async def request(connection):
-        logger.info(f"AppInfoIO request")
         AppInfoIO.connection = connection
         await connection.request("22")
 
-        loop = asyncio.get_running_loop()
-        AppInfoIO.result = loop.create_future()
-        return AppInfoIO.result
+        AppInfoIO.result = CancelableResult()
+        return AppInfoIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(connection):
@@ -29,8 +27,6 @@ class AppInfoIO:
 
     @staticmethod
     def on_received(data):
-        logger.info(f"AppInfoIO onReceived")
-
         def set_app_info(data: str):
             # App info:
             # This is needed to re-enable button D (Lower-right) after the watch has been reset or BLE has been cleared.

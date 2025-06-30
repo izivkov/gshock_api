@@ -11,7 +11,6 @@ class Scanner:
 
     async def scan(self, device_address=None) -> BLEDevice:
         scanner = BleakScanner()
-        logger.info("Scanning for devices...")
 
         if device_address is None:
             while True:
@@ -19,7 +18,6 @@ class Scanner:
                     lambda d, ad: d.name and d.name.lower().startswith("casio"),
                     timeout=5 * 60.0,
                 )
-                logger.info(f"device: {device}")
                 if device is None:
                     continue
                 

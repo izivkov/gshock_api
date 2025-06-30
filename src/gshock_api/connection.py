@@ -8,6 +8,7 @@ from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from bleak.backends.device import BLEDevice
 from gshock_api.scanner import scanner
+from gshock_api.exceptions import GShockConnectionError
 
 class Connection:
     def __init__(self, address = None):
@@ -25,7 +26,7 @@ class Connection:
         """
         Prints all services and characteristics of the connected BLE device.
         """
-        services = await self.client.get_services()
+        services = self.client.services
         for service in services:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
@@ -35,7 +36,6 @@ class Connection:
             # Scan for device if address not provided
             device = await scanner.scan(device_address=self.address if self.address else None)
             self.address = device.address  # Always update with actual device found
-            logger.info(f"Found device: {device.name} ({self.address})")
 
             self.client = BleakClient(self.address)
             await self.client.connect()
@@ -50,7 +50,7 @@ class Connection:
             return True
 
         except Exception as e:
-            logger.warning(f"[GShock Connect] Connection failed: {e}")
+            logger.info(f"[GShock Connect] Connection failed: {e}")
             return False
 
     async def disconnect(self):
@@ -59,64 +59,31 @@ class Connection:
     def is_service_supported(self, handle):
         uuid = self.handles_map.get(handle)
         supported = (uuid not in self.characteristics_map)
-        print(f"write, service with handle {handle} is supported: {supported}")
         return supported
-
-    async def safe_ble_write(self, client, uuid, data, timeout=5.0):
-        """
-        Safely writes to a BLE characteristic with a timeout.
-        
-        Args:
-            client: The BleakClient or compatible BLE client.
-            uuid: The characteristic UUID to write to.
-            data: Bytes-like object to send (use your to_casio_cmd or similar).
-            timeout: Maximum time to wait for the write (in seconds).
-        
-        Returns:
-            True if the write succeeds, False if it times out or fails.
-        """
-        try:
-            await asyncio.wait_for(
-                client.write_gatt_char(uuid, data),
-                timeout=timeout
-            )
-            return True
-        except asyncio.TimeoutError:
-            print(f"⏰ BLE write to {uuid} timed out after {timeout} seconds.")
-        except Exception as e:
-            print(f"⚠️ BLE write to {uuid} failed: {e}")
-        return False
 
     async def write(self, handle, data):
         try:
             uuid = self.handles_map.get(handle)
+
             if (uuid not in self.characteristics_map):
-                logger.error(
+                logger.info(
                     "write failed: handle {} not in characteristics map".format(handle)
                 )
                 if (handle == 13):
-                    logger.error(
+                    logger.info(
                         "Your watch does not suppot notifications..."
                     )
                 return
-            
-            data_bytes = to_casio_cmd(data)
-            success = await self.safe_ble_write(self.client, uuid, data_bytes, timeout=3.0)
 
-            if not success:
-                # handle retry or error logging
-                await self.client.disconnect()
-
-            # await self.client.write_gatt_char(
-            #     uuid, to_casio_cmd(data)
-            # )
+            await self.client.write_gatt_char(
+                uuid, to_casio_cmd(data)
+            )
 
         except Exception as e:
             logger.info("write failed with exception: {}".format(e))
-            await self.client.disconnect()
+            raise GShockConnectionError(f"Unable to connect to G-Shock device: {e}") from e
 
     async def request(self, request):
-        logger.info("write: {}".format(request))
         await self.write(0xC, request)
 
     def init_handles_map(self):
