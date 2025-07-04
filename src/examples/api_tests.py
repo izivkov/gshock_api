@@ -14,6 +14,7 @@ from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
 from gshock_api.configurator import conf
 from gshock_api.exceptions import GShockConnectionError
+from args import args
 
 async def main(argv):
     await run_api_tests(argv)
@@ -35,8 +36,11 @@ async def run_api_tests(argv):
     prompt()
 
     try:
-        address = conf.get("device.address")
-        
+        if args.get().multi_watch:
+            address = None
+        else:
+            address = conf.get("device.address")        
+
         connection = Connection(address)
         await connection.connect()
 

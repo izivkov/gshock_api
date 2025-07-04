@@ -42,10 +42,10 @@ async def run_time_server():
         try:
             address = None
 
-            logger.info(f"Before Connecting to watch at {address}...")
+            logger.info(f"Waiting for connection...")
             connection = Connection(address)
             await connection.connect()
-            logger.info(f"Connected to watch at {address}...")
+            logger.info(f"Connected...")
 
             api = GshockAPI(connection)
             pressed_button = await api.get_pressed_button()
@@ -61,16 +61,13 @@ async def run_time_server():
 
             # Apply fine adjustment to the time
             fine_adjustment_secs = args.get().fine_adjustment_secs
-            logger.info(f"Fine adjustment: {fine_adjustment_secs} seconds")  
-
             await api.set_time(int(time.time()) + fine_adjustment_secs)
-            
             logger.info(f"Time set at {datetime.now()} on {watch_info.name}")
 
             # Only update the display of we have pressed LOWER-LEFT button,
             # Otherwise the watch will dicoinnect before we get all the information for the display.
             # if pressed_button == WatchButton.LOWER_LEFT:
-            # await show_display(api)
+            #     await show_display(api)
 
             if watch_info.alwaysConnected == False:
                 await connection.disconnect()
