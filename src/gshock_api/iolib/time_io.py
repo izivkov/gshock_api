@@ -37,7 +37,6 @@ class TimeIO:
         )
         await TimeIO.connection.write(0xE, to_compact_string(time_command))
 
-
 class TimeEncoder:
     def prepare_current_time(date: datetime.datetime):
         arr = bytearray(10)

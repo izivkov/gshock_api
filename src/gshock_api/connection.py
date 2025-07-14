@@ -1,4 +1,5 @@
-import asyncio
+import asyncio, time
+from tracemalloc import start
 from bleak import BleakClient
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from gshock_api.casio_constants import CasioConstants
@@ -71,17 +72,16 @@ class Connection:
                 )
                 if (handle == 13):
                     logger.info(
-                        "Your watch does not suppot notifications..."
+                        "Your watch does not support notifications..."
                     )
                 return
 
             await self.client.write_gatt_char(
-                uuid, to_casio_cmd(data)
+                uuid, to_casio_cmd(data),
             )
 
         except Exception as e:
-            logger.info("write failed with exception: {}".format(e))
-            raise GShockConnectionError(f"Unable to connect to G-Shock device: {e}") from e
+            raise GShockConnectionError(f"Unable to write to G-Shock device: {e}") from e
 
     async def request(self, request):
         await self.write(0xC, request)
