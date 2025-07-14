@@ -7,6 +7,7 @@ from gshock_api.logger import logger
 
 from gshock_api.utils import to_compact_string, to_hex_string
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.exceptions import GShockIgnorableException
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -35,7 +36,13 @@ class TimeIO:
         time_command = to_hex_string(
             bytearray([CHARACTERISTICS["CASIO_CURRENT_TIME"]]) + time_data
         )
-        await TimeIO.connection.write(0xE, to_compact_string(time_command))
+        try:
+            await TimeIO.connection.write(0xE, to_compact_string(time_command))
+        except (GShockIgnorableException) as e:
+            # Ignore this exception if the LOWER-RIGHT button is pressed.
+            # In this case, the connection will be closed before the call completes with a response, and we get an EOFError.
+            # The call actually works, though.
+            logger.info(f"Ignoring {e}")
 
 class TimeEncoder:
     def prepare_current_time(date: datetime.datetime):

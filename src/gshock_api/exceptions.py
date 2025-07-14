@@ -5,5 +5,9 @@ class GShockError(Exception):
     pass
 
 class GShockConnectionError(GShockError):
-    """Raised when BLE connection to G-Shock device fails."""
+    """Raised when BLE connection to G-Shock device fails."""    
+    pass
+
+class GShockIgnorableException(GShockConnectionError):
+    """Raised when BLE connection to G-Shock device fails."""    
     pass

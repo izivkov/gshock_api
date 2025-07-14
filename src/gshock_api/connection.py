@@ -1,6 +1,7 @@
 import asyncio, time
 from tracemalloc import start
 from bleak import BleakClient
+from bleak.exc import BleakDBusError
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from gshock_api.casio_constants import CasioConstants
 from gshock_api import message_dispatcher
@@ -9,7 +10,7 @@ from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from bleak.backends.device import BLEDevice
 from gshock_api.scanner import scanner
-from gshock_api.exceptions import GShockConnectionError
+from gshock_api.exceptions import GShockIgnorableException, GShockConnectionError
 
 class Connection:
     def __init__(self, address = None):
@@ -77,11 +78,15 @@ class Connection:
                 return
 
             await self.client.write_gatt_char(
-                uuid, to_casio_cmd(data),
+                uuid, to_casio_cmd(data)
             )
 
         except Exception as e:
-            raise GShockConnectionError(f"Unable to write to G-Shock device: {e}") from e
+            e.args = (type(e).__name__,)
+            if isinstance(e, (BleakDBusError, EOFError)):
+                raise GShockIgnorableException(e)
+            else:
+                raise GShockConnectionError(f"Unable to send time to watch: {e}") 
 
     async def request(self, request):
         await self.write(0xC, request)
