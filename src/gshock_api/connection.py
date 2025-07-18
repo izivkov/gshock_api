@@ -46,7 +46,7 @@ class Connection:
             if self.client.is_connected:
                 logger.info(f"Connected to {self.address}")
             else:
-                logger.error(f"Failed to connect to {self.address}")
+                logger.info(f"Failed to connect to {self.address}")
                 return False
 
             await self.init_characteristics_map()
