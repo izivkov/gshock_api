@@ -39,8 +39,15 @@ class Connection:
             device = await scanner.scan(device_address=self.address if self.address else None)
             self.address = device.address  # Always update with actual device found
 
+            logger.info(f"Connecting to address {self.address}")
+
             self.client = BleakClient(self.address)
             await self.client.connect()
+            if self.client.is_connected:
+                logger.info(f"Connected to {self.address}")
+            else:
+                logger.error(f"Failed to connect to {self.address}")
+                return False
 
             await self.init_characteristics_map()
 
@@ -54,7 +61,7 @@ class Connection:
         except Exception as e:
             logger.info(f"[GShock Connect] Connection failed: {e}")
             return False
-
+        
     async def disconnect(self):
         await self.client.disconnect()
 
