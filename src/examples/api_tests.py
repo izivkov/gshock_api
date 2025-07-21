@@ -33,16 +33,14 @@ def prompt():
     logger.info("")
 
 async def run_api_tests(argv):
+    excluded_watches = conf.get("excluded_watches")
     prompt()
 
     try:
-        if args.get().multi_watch:
-            address = None
-        else:
-            address = conf.get("device.address")        
-
-        connection = Connection(address)
-        await connection.connect()
+        logger.info(f"Waiting for connection...")
+        connection = Connection()
+        await connection.connect(excluded_watches)
+        logger.info(f"Connected...")
 
         api = GshockAPI(connection)
 

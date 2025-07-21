@@ -33,19 +33,22 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
 
-    async def connect(self) -> bool:
+    async def connect(self, excluded_watches: list[str] | None = None) -> bool:
         try:
             # Scan for device if address not provided
-            device = await scanner.scan(device_address=self.address if self.address else None)
-            self.address = device.address  # Always update with actual device found
+            device = await scanner.scan(
+                device_address=self.address if self.address else None,
+                excluded_watches=excluded_watches
+            )
+            if device is None:
+                logger.info("No G-Shock device found or name matches excluded watches.")
+                return False
 
-            logger.info(f"Connecting to address {self.address}")
+            self.address = device.address  # Always update with actual device found
 
             self.client = BleakClient(self.address)
             await self.client.connect()
-            if self.client.is_connected:
-                logger.info(f"Connected to {self.address}")
-            else:
+            if not self.client.is_connected:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
 

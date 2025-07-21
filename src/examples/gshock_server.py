@@ -15,6 +15,7 @@ from args import args
 from gshock_api.exceptions import GShockConnectionError
 import time
 
+
 __author__ = "Ivo Zivkov"
 __copyright__ = "Ivo Zivkov"
 __license__ = "MIT"
@@ -37,15 +38,14 @@ def prompt():
     logger.info("")
 
 async def run_time_server():
+    excluded_watches = conf.get("excluded_watches")
     prompt()
 
     while True:
         try:
-            address = None
-
             logger.info(f"Waiting for connection...")
-            connection = Connection(address)
-            await connection.connect()
+            connection = Connection()
+            await connection.connect(excluded_watches)
             logger.info(f"Connected...")
 
             api = GshockAPI(connection)
@@ -58,7 +58,6 @@ async def run_time_server():
                 continue
 
             watch_name = await api.get_watch_name()
-            logger.info(f"Watch name: {watch_name}")
 
             # Apply fine adjustment to the time
             fine_adjustment_secs = args.get().fine_adjustment_secs
