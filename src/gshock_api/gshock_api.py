@@ -188,7 +188,7 @@ class GshockAPI:
         for item in array_of_world_cities[: watch_info.worldCitiesCount]:
             await self.read_and_write(item["function"], item["city_number"])
 
-    async def set_time(self, current_time=None):
+    async def set_time(self, current_time=None, offset = 0):
         """Sets the current time on the watch from the time on the phone. In addition, it can optionally set the Home Time
         to the current time zone. If timezone changes during travel, the watch will automatically be set to the
         correct time and timezone after running this function.
@@ -202,15 +202,15 @@ class GshockAPI:
         None
         """
 
-        if current_time == None:
-            current_time = time.time()
+        # if current_time == None:
+        #     current_time = time.time()
 
         await self.initialize_for_setting_time()
-        await self._set_time(current_time)
+        await self._set_time(current_time, offset)
         current_time = None
 
-    async def _set_time(self, current_time):
-        await message_dispatcher.TimeIO.request(self.connection, current_time)
+    async def _set_time(self, current_time, offset = 0):
+        await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
 
     async def get_alarms(self):
         """Gets the current alarms from the watch. Up to 5 alarms are supported on the watch.

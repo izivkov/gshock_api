@@ -1,4 +1,4 @@
-import asyncio
+import time
 import datetime
 import json
 import time
@@ -16,22 +16,34 @@ class TimeIO:
     connection = None
 
     @staticmethod
-    async def request(connection, current_time):
+    async def request(connection, current_time, offset):
         TimeIO.connection = connection
-
-        if current_time is None:
-            current_time = time.time()
 
         message = {
             "action": "SET_TIME",
-            "value": "{}".format(round(current_time * 1000)),
+            "value": {
+                "time": None if current_time is None else round(current_time),
+                "offset": offset  # must always be an integer
+            }
         }
         await connection.sendMessage(json.dumps(message))
 
     @staticmethod
     async def send_to_watch_set(message):
-        date_time_ms = int(json.loads(message).get("value"))
-        date_time = datetime.datetime.fromtimestamp(date_time_ms / 1000.0)
+        data = json.loads(message)
+        value = data.get("value", {})
+
+        # Extract time (or use current time), and apply offset (or default to 0)
+        timestamp = value.get("time")
+        offset = value.get("offset", 0)
+
+        # Fall back to current time if timestamp is None
+        if timestamp is None:
+            timestamp = time.time()
+
+        date_time_ms = int(timestamp + offset)
+
+        date_time = datetime.datetime.fromtimestamp(date_time_ms)
         time_data = TimeEncoder.prepare_current_time(date_time)
         time_command = to_hex_string(
             bytearray([CHARACTERISTICS["CASIO_CURRENT_TIME"]]) + time_data

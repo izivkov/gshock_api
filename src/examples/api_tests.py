@@ -12,7 +12,6 @@ from gshock_api.gshock_api import GshockAPI
 from gshock_api.event import Event, create_event_date, RepeatPeriod
 from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
-from gshock_api.configurator import conf
 from gshock_api.exceptions import GShockConnectionError
 from args import args
 
@@ -33,7 +32,7 @@ def prompt():
     logger.info("")
 
 async def run_api_tests(argv):
-    excluded_watches = conf.get("excluded_watches")
+    excluded_watches = excluded_watches = ["DW-H5600", "OCW-S400", "OCW-S400SG", "OCW-T200SB", "ECB-30", "ECB-20", "ECB-10", "ECB-50", "ECB-60", "ECB-70"]
     prompt()
 
     try:
@@ -130,8 +129,7 @@ async def run_api_tests(argv):
 async def run_api_tests_notifications():
     prompt()
 
-    address = conf.get("device.address")
-    connection = Connection(address)
+    connection = Connection()
     await connection.connect()
 
     api = GshockAPI(connection)

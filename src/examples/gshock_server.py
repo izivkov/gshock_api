@@ -8,7 +8,6 @@ from gshock_api.connection import Connection
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.scanner import scanner
-from gshock_api.configurator import conf
 from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from args import args
@@ -38,7 +37,8 @@ def prompt():
     logger.info("")
 
 async def run_time_server():
-    excluded_watches = conf.get("excluded_watches")
+    excluded_watches = ["DW-H5600", "OCW-S400", "OCW-S400SG", "OCW-T200SB", "ECB-30", "ECB-20", "ECB-10", "ECB-50", "ECB-60", "ECB-70"]
+
     prompt()
 
     while True:
@@ -62,7 +62,7 @@ async def run_time_server():
             # Apply fine adjustment to the time
             fine_adjustment_secs = args.get().fine_adjustment_secs
             
-            await api.set_time(int(time.time()) + fine_adjustment_secs)
+            await api.set_time(offset=fine_adjustment_secs)
             logger.info(f"Time set at {datetime.now()} on {watch_info.name}")
 
             if watch_info.alwaysConnected == False:
