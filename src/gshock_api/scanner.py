@@ -1,5 +1,6 @@
 import sys
 
+import time
 from bleak import BleakScanner
 from gshock_api.watch_info import watch_info
 from gshock_api.logger import logger
@@ -23,8 +24,11 @@ class Scanner:
                         and parts[0].lower() == "casio"
                         and (len(parts) > 1 and parts[1] not in excluded_watches)
                     ),
-                    timeout=5 * 60.0,
                 )
+
+                # Trottle scan
+                time.sleep(3)
+                
                 if device is None:
                     continue
 

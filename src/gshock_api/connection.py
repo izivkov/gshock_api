@@ -36,15 +36,16 @@ class Connection:
     async def connect(self, excluded_watches: list[str] | None = None) -> bool:
         try:
             # Scan for device if address not provided
-            device = await scanner.scan(
-                device_address=self.address if self.address else None,
-                excluded_watches=excluded_watches
-            )
-            if device is None:
-                logger.info("No G-Shock device found or name matches excluded watches.")
-                return False
+            if self.address == None:
+                device = await scanner.scan(
+                    device_address=self.address if self.address else None,
+                    excluded_watches=excluded_watches
+                )
+                if device is None:
+                    logger.info("No G-Shock device found or name matches excluded watches.")
+                    return False
 
-            self.address = device.address  # Always update with actual device found
+                self.address = device.address  # Always update with actual device found
 
             self.client = BleakClient(self.address)
             await self.client.connect()
