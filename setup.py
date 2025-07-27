@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='gshock_api',
-    version='2.0.15',
+    version='2.0.20',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     install_requires=[
         'pytz',
-        'bleak',
+        'bleak>=1.0.1',
     ],
     entry_points={
         'console_scripts': [

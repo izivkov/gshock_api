@@ -1,2 +1,2 @@
 pytz
-bleak>=1.0
+bleak>=1.0.1

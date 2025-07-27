@@ -44,7 +44,7 @@ async def run_time_server():
     while True:
         try:
             logger.info(f"Waiting for connection...")
-            connection = Connection(address="E8:3E:76:AC:6A:35")
+            connection = Connection()
             await connection.connect(excluded_watches)
             logger.info(f"Connected...")
 
