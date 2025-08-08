@@ -142,7 +142,9 @@ class GshockAPI:
     async def initialize_for_setting_time(self):
         await self.read_write_dst_watch_states()
         await self.read_write_dst_for_world_cities()
-        await self.read_write_world_cities()
+
+        if watch_info.hasWorldCities:
+            await self.read_write_world_cities()
 
     async def read_and_write(self, function, param):
         ret = await function(param)

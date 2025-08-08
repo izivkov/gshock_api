@@ -16,6 +16,7 @@ class WATCH_MODEL(Enum):
     OCW = 12
     GB = 13
     GM = 14
+    ABL = 15
     UNKNOWN = 20
 
 class WatchInfo:
@@ -100,6 +101,17 @@ class WatchInfo:
                 "hasReminders": True,
                 "shortLightDuration": "1.5s",
                 "longLightDuration": "3s",
+            },
+            {
+                "model": WATCH_MODEL.ABL,
+                "worldCitiesCount": 2,
+                "dstCount": 1,
+                "alarmCount": 5,
+                "hasAutoLight": True,
+                "hasReminders": True,
+                "shortLightDuration": "1.5s",
+                "longLightDuration": "3s",
+                "hasWorldCities": False
             },
             {
                 "model": WATCH_MODEL.GB001,
@@ -201,6 +213,8 @@ class WatchInfo:
         # Special case: exact match for ECB models
         if self.shortName in {"ECB-10", "ECB-20", "ECB-30"}:
             self.model = WATCH_MODEL.ECB
+        elif self.shortName.startswith("ABL"): # ABL-100WE
+            self.model = WATCH_MODEL.ABL
         else:
             # Ordered prefix-to-model mapping (longer prefixes first)
             prefix_map = [
@@ -216,7 +230,7 @@ class WatchInfo:
                 ("GM",  WATCH_MODEL.GM),
                 ("GW",  WATCH_MODEL.GW),
                 ("MRG", WATCH_MODEL.MRG),
-                ("GMW", WATCH_MODEL.GMW),
+                ("ABL", WATCH_MODEL.ABL),
             ]
 
             for prefix, model in prefix_map:
@@ -246,6 +260,7 @@ class WatchInfo:
         self.hasPowerSavingMode    = model_info.get("hasPowerSavingMode", False)
         self.hasDnD                = model_info.get("hasDnD", False)
         self.hasBatteryLevel       = model_info.get("hasBatteryLevel", False)
+        self.hasWorldCities        = model_info.get("hasWorldCities", True)
 
     def set_address(self, address):
         self.address = address
