@@ -107,7 +107,7 @@ class WatchInfo:
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
-                "hasAutoLight": True,
+                "hasAutoLight": False,
                 "hasReminders": False,
                 "shortLightDuration": "1.5s",
                 "longLightDuration": "3s",
