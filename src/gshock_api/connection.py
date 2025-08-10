@@ -33,6 +33,8 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
 
+        logger.info(f"Characteristics map initialized: {self.characteristics_map}")
+
     async def connect(self, excluded_watches: list[str] | None = None) -> bool:
         try:
             # Scan for device if address not provided

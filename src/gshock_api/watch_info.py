@@ -45,6 +45,7 @@ class WatchInfo:
         self.hasPowerSavingMode = True
         self.hasDnD = False
         self.hasBatteryLevel = False
+        self.hasWorldCities = True
 
         # Model capability definitions (deduplicated)
         self.models = [
@@ -87,10 +88,11 @@ class WatchInfo:
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
-                "hasAutoLight": True,
-                "hasReminders": True,
+                "hasAutoLight": False,
+                "hasReminders": False,
                 "shortLightDuration": "1.5s",
                 "longLightDuration": "3s",
+                "hasWorldCities": False
             },
             {
                 "model": WATCH_MODEL.GA,
@@ -215,13 +217,14 @@ class WatchInfo:
             self.model = WATCH_MODEL.ECB
         elif self.shortName.startswith("ABL"): # ABL-100WE
             self.model = WATCH_MODEL.ABL
+        elif self.shortName.startswith("GST"): # GST-B100
+            self.model = WATCH_MODEL.GST
         else:
             # Ordered prefix-to-model mapping (longer prefixes first)
             prefix_map = [
                 ("MSG", WATCH_MODEL.MSG),
                 ("GPR", WATCH_MODEL.GPR),
                 ("GBM", WATCH_MODEL.GA),
-                ("GST", WATCH_MODEL.GST),
                 ("GBD", WATCH_MODEL.GBD),
                 ("GMW", WATCH_MODEL.GMW),
                 ("DW",  WATCH_MODEL.DW),
@@ -276,6 +279,5 @@ class WatchInfo:
         self.name = ""
         self.shortName = ""
         self.model = WATCH_MODEL.UNKNOWN
-
 
 watch_info = WatchInfo()
