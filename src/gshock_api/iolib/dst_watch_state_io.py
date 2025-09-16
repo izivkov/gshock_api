@@ -8,7 +8,6 @@ from gshock_api.casio_constants import CasioConstants
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
-
 class DtsState(IntEnum):
     ZERO = 0
     TWO = 2

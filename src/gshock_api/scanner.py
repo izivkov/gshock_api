@@ -17,11 +17,10 @@ class Scanner:
     async def scan(
         self,
         device_address: str | None = None,
-        excluded_watches: list[str] | None = None,
+        watch_filter = None,
         max_retries: int = 60,  # Optional: to prevent infinite loops
     ) -> BLEDevice | None:
         scanner = BleakScanner()
-        excluded_watches = excluded_watches or []
 
         retries = 0
         device = None
@@ -39,9 +38,8 @@ class Scanner:
                             return False
 
                         is_casio = parts[0].lower() == "casio"
-                        is_excluded = len(parts) > 1 and parts[1] in excluded_watches
-
-                        return is_casio and not is_excluded
+                        passed = is_casio and watch_filter(device.name)
+                        return passed
                     
                     device = await scanner.find_device_by_filter(
                         casio_filter,

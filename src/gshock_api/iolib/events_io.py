@@ -17,7 +17,6 @@ from gshock_api.utils import (
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
-
 class ReminderMasks:
     YEARLY_MASK = 0b00001000
     MONTHLY_MASK = 0b00010000
@@ -32,7 +31,6 @@ class ReminderMasks:
     SATURDAY_MASK = 0b01000000
 
     ENABLED_MASK = 0b00000001
-
 
 class EventsIO:
     result: CancelableResult = None
@@ -184,6 +182,7 @@ class EventsIO:
             title_byte_arr += bytearray([index + 1])
             title_byte_arr += title
             title_byte_arr_to_send = to_compact_string(to_hex_string(title_byte_arr))
+
             await EventsIO.connection.write(0x000E, title_byte_arr_to_send)
 
             reminder_time_byte_arr = bytearray([])
@@ -195,6 +194,7 @@ class EventsIO:
             reminder_time_byte_arr_to_send = to_compact_string(
                 to_hex_string(bytearray(reminder_time_byte_arr))
             )
+
             await EventsIO.connection.write(0x000E, reminder_time_byte_arr_to_send)
 
     @staticmethod

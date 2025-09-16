@@ -33,15 +33,13 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid  # Store in map
 
-        logger.info(f"Characteristics map initialized: {self.characteristics_map}")
-
-    async def connect(self, excluded_watches: list[str] | None = None) -> bool:
+    async def connect(self, watch_filter=None) -> bool:
         try:
             # Scan for device if address not provided
             if self.address == None:
                 device = await scanner.scan(
                     device_address=self.address if self.address else None,
-                    excluded_watches=excluded_watches
+                    watch_filter=watch_filter
                 )
                 if device is None:
                     logger.info("No G-Shock device found or name matches excluded watches.")
@@ -90,8 +88,10 @@ class Connection:
                     )
                 return
 
+            responseType = True if handle == 0x0E else False
+
             await self.client.write_gatt_char(
-                uuid, to_casio_cmd(data)
+                uuid, to_casio_cmd(data), response=responseType
             )
 
         except Exception as e:

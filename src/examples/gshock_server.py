@@ -2,7 +2,6 @@ import asyncio
 import sys
 
 from datetime import datetime
-import time
 
 from gshock_api.connection import Connection
 from gshock_api.gshock_api import GshockAPI
@@ -12,8 +11,7 @@ from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from args import args
 from gshock_api.exceptions import GShockConnectionError
-import time
-
+from watch_filter import watch_filter
 
 __author__ = "Ivo Zivkov"
 __copyright__ = "Ivo Zivkov"
@@ -37,15 +35,13 @@ def prompt():
     logger.info("")
 
 async def run_time_server():
-    excluded_watches = ["DW-H5600", "OCW-S400", "OCW-S400SG", "OCW-T200SB", "ECB-30", "ECB-20", "ECB-10", "ECB-50", "ECB-60", "ECB-70"]
-
     prompt()
 
     while True:
         try:
             logger.info(f"Waiting for connection...")
             connection = Connection()
-            await connection.connect(excluded_watches)
+            await connection.connect(watch_filter.connection_filter)
             logger.info(f"Connected...")
 
             api = GshockAPI(connection)

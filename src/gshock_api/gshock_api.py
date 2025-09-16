@@ -455,3 +455,6 @@ class GshockAPI:
         encrypted_buffer = AppNotificationIO.xor_encode_buffer(encoded_buffer)
         await self.connection.write(0xD, encrypted_buffer)
 
+# Note: replace all logging calls with 'print' or minimal logger.
+# Ensure your async calls and message_dispatcher methods are ported or stubbed for MicroPython.
+
