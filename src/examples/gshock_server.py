@@ -11,7 +11,7 @@ from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from args import args
 from gshock_api.exceptions import GShockConnectionError
-from watch_filter import watch_filter
+from gshock_api.always_connected_watch_filter import always_connected_watch_filter as watch_filter
 
 __author__ = "Ivo Zivkov"
 __copyright__ = "Ivo Zivkov"

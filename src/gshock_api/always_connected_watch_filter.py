@@ -1,7 +1,7 @@
 import time
 from gshock_api.watch_info import watch_info
 
-class WatchFilter:
+class AlwaysConnectedWatchFilter:
     """
     For always-connected watches, limit the connection frequency to once every 6 hours. 
     Otherwise, they may block other watches from connecting.
@@ -37,4 +37,4 @@ class WatchFilter:
     def update_connection_time(self, watch_name):
         self.last_connected_times[watch_name.strip()] = time.time()
 
-watch_filter = WatchFilter()
+always_connected_watch_filter = AlwaysConnectedWatchFilter()

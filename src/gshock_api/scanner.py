@@ -38,7 +38,7 @@ class Scanner:
                             return False
 
                         is_casio = parts[0].lower() == "casio"
-                        passed = is_casio and watch_filter(device.name)
+                        passed = is_casio and (watch_filter is None or watch_filter(device.name))
                         return passed
                     
                     device = await scanner.find_device_by_filter(
