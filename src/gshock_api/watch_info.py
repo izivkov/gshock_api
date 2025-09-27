@@ -271,6 +271,7 @@ class WatchInfo:
             prefix_map = [
                 ("MSG", WATCH_MODEL.MSG),
                 ("GPR", WATCH_MODEL.GPR),
+                ("GM-B2100", WATCH_MODEL.GA),
                 ("GBM", WATCH_MODEL.GA),
                 ("GBD", WATCH_MODEL.GBD),
                 ("GMW", WATCH_MODEL.GMW),
