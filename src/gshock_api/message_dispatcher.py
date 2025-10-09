@@ -1,7 +1,4 @@
-import sys
-import asyncio
 import json
-from typing import Any
 from gshock_api.logger import logger
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.app_info_io import AppInfoIO

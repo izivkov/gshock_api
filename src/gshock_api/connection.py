@@ -1,5 +1,3 @@
-import asyncio, time
-from tracemalloc import start
 from bleak import BleakClient
 from bleak.exc import BleakDBusError
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -7,8 +5,6 @@ from gshock_api.casio_constants import CasioConstants
 from gshock_api import message_dispatcher
 from gshock_api.utils import to_casio_cmd
 from gshock_api.logger import logger
-from gshock_api.watch_info import watch_info
-from bleak.backends.device import BLEDevice
 from gshock_api.scanner import scanner
 from gshock_api.exceptions import GShockIgnorableException, GShockConnectionError
 
@@ -36,7 +32,7 @@ class Connection:
     async def connect(self, watch_filter=None) -> bool:
         try:
             # Scan for device if address not provided
-            if self.address == None:
+            if self.address is None:
                 device = await scanner.scan(
                     device_address=self.address if self.address else None,
                     watch_filter=watch_filter

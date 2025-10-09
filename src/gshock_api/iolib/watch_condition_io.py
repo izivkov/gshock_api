@@ -1,9 +1,6 @@
-import asyncio
-from typing import Any
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.watch_info import watch_info
 from gshock_api.casio_constants import CasioConstants
-from gshock_api.logger import logger
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 

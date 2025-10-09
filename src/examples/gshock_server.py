@@ -6,7 +6,6 @@ from datetime import datetime
 from gshock_api.connection import Connection
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.button_pressed_io import WatchButton
-from gshock_api.scanner import scanner
 from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 from args import args
@@ -39,10 +38,10 @@ async def run_time_server():
 
     while True:
         try:
-            logger.info(f"Waiting for connection...")
+            logger.info("Waiting for connection...")
             connection = Connection()
             await connection.connect(watch_filter.connection_filter)
-            logger.info(f"Connected...")
+            logger.info("Connected...")
 
             api = GshockAPI(connection)
             pressed_button = await api.get_pressed_button()

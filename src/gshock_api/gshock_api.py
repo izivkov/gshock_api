@@ -1,6 +1,5 @@
 import logging
 import json
-import time
 
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.iolib.button_pressed_io import WatchButton
@@ -12,7 +11,6 @@ from gshock_api.utils import (
     to_compact_string,
 )
 from gshock_api.alarms import alarms_inst
-from gshock_api.event import Event
 from gshock_api.watch_info import watch_info
 
 class GshockAPI:

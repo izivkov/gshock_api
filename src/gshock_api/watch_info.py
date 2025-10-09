@@ -1,4 +1,3 @@
-from gshock_api.logger import logger
 
 class WATCH_MODEL:
     GA = 1

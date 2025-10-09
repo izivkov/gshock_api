@@ -1,5 +1,4 @@
 import asyncio
-from multiprocessing.dummy import connection
 import sys
 
 import json
@@ -13,7 +12,7 @@ from gshock_api.event import Event, create_event_date, RepeatPeriod
 from gshock_api.logger import logger
 from gshock_api.app_notification import AppNotification, NotificationType
 from gshock_api.exceptions import GShockConnectionError
-from args import args
+from gshock_api.always_connected_watch_filter import always_connected_watch_filter as watch_filter
 
 async def main(argv):
     await run_api_tests(argv)
@@ -32,14 +31,13 @@ def prompt():
     logger.info("")
 
 async def run_api_tests(argv):
-    excluded_watches = excluded_watches = ["DW-H5600", "OCW-S400", "OCW-S400SG", "OCW-T200SB", "ECB-30", "ECB-20", "ECB-10", "ECB-50", "ECB-60", "ECB-70"]
     prompt()
 
     try:
-        logger.info(f"Waiting for connection...")
+        logger.info("Waiting for connection...")
         connection = Connection()
-        await connection.connect(excluded_watches)
-        logger.info(f"Connected...")
+        await connection.connect(watch_filter.connection_filter)
+        logger.info("Connected...")
 
         api = GshockAPI(connection)
 

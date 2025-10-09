@@ -1,6 +1,4 @@
-import asyncio
 import json
-from typing import Any
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array

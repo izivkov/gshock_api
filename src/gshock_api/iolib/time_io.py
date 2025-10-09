@@ -1,8 +1,6 @@
 import time
 import datetime
 import json
-import time
-from typing import Any
 from gshock_api.logger import logger
 
 from gshock_api.utils import to_compact_string, to_hex_string
