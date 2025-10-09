@@ -3,7 +3,6 @@ import sys
 import asyncio
 from gshock_api.watch_info import watch_info
 from gshock_api.logger import logger
-from bleak.backends.device import BLEDevice
 from bleak import BleakScanner, BLEDevice
 from bleak.exc import BleakError
 from typing import Optional

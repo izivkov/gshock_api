@@ -32,7 +32,7 @@ class TimeAdjustmentIO:
     @staticmethod
     async def send_to_watch_set(message):
 
-        if TimeAdjustmentIO.original_value == None:
+        if TimeAdjustmentIO.original_value is None:
             return ErrorIO.request("Error: Must call get before set")
 
         time_adjustment = json.loads(message).get("timeAdjustment") == "True"
@@ -42,7 +42,7 @@ class TimeAdjustmentIO:
             raw_string = TimeAdjustmentIO.original_value
             "0x11 0F 0F 0F 06 00 00 00 00 00 01 00 80 30 30"
             int_array = to_int_array(raw_string)
-            int_array[12] = 0x80 if time_adjustment == False else 0x00
+            int_array[12] = 0x80 if not time_adjustment else 0x00
             int_array[13] = int(minutes_after_hour)
             return bytes(int_array)
 

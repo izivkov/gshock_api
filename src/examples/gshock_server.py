@@ -52,7 +52,7 @@ async def run_time_server():
             ):
                 continue
 
-            watch_name = await api.get_watch_name()
+            await api.get_watch_name()
 
             # Apply fine adjustment to the time
             fine_adjustment_secs = args.get().fine_adjustment_secs
@@ -60,7 +60,7 @@ async def run_time_server():
             await api.set_time(offset=fine_adjustment_secs)
             logger.info(f"Time set at {datetime.now()} on {watch_info.name}")
 
-            if watch_info.alwaysConnected == False:
+            if not watch_info.alwaysConnected:
                 await connection.disconnect()
 
         except GShockConnectionError as e:

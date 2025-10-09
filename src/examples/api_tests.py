@@ -141,7 +141,7 @@ async def run_api_tests_notifications():
 
 async def app_notifications(api):
 
-    calendar_notification = AppNotification(
+    AppNotification(
         type = NotificationType.CALENDAR,
         timestamp="20231001T121000",
         app = "Calendar",
@@ -149,7 +149,7 @@ async def app_notifications(api):
         text =" 9:20 - 10:15 AM"
     )
 
-    calendar_notification_all_day = AppNotification(
+    AppNotification(
         type = NotificationType.CALENDAR,
         timestamp="20250516T233000",
         app = "Calendar",
@@ -172,7 +172,7 @@ async def app_notifications(api):
         """
     )
 
-    email_notificationArabic = AppNotification(
+    AppNotification(
         type = NotificationType.EMAIL_SMS,
         timestamp="20250516T211520",
         app="Gmail",
@@ -180,7 +180,7 @@ async def app_notifications(api):
         text="الساعة\n"
     )
 
-    email_notification = AppNotification(
+    AppNotification(
         type = NotificationType.EMAIL,
         timestamp="20231001T120000",
         app="EmailApp",

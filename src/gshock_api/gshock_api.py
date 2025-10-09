@@ -159,9 +159,6 @@ class GshockAPI:
         for item in array_of_dst_watch_state[: watch_info.dstCount]:
             await self.read_and_write(item["function"], item["state"])
 
-    async def send_app_notification (self, hex_str):
-        await self.connection.write(0xD, hex_str)
-
     async def read_write_dst_for_world_cities(self):
         array_of_get_dst_for_world_cities = [
             {"function": self.get_dst_for_world_cities, "city_number": 0},
