@@ -1,5 +1,9 @@
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+from enum import IntEnum
 
-class WATCH_MODEL:
+class WatchModel(IntEnum):
+    """Enum for watch models replacing WATCH_MODEL class"""
     GA = 1
     GW = 2
     DW = 3
@@ -18,38 +22,39 @@ class WATCH_MODEL:
     DW_H = 16
     UNKNOWN = 20
 
+@dataclass
 class WatchInfo:
-    def __init__(self):
-        self.name = ""
-        self.shortName = ""
-        self.address = ""
-        self.model = WATCH_MODEL.UNKNOWN
+    """Information and capabilities of a G-Shock watch"""
+    # Basic information
+    name: str = ""
+    shortName: str = ""
+    address: str = ""
+    model: WatchModel = WatchModel.UNKNOWN
+    
+    # Watch capabilities with defaults
+    worldCitiesCount: int = 2
+    dstCount: int = 3
+    alarmCount: int = 5
+    hasAutoLight: bool = False
+    hasReminders: bool = False
+    shortLightDuration: str = ""
+    longLightDuration: str = ""
+    weekLanguageSupported: bool = True
+    worldCities: bool = True
+    temperature: bool = True
+    batteryLevelLowerLimit: int = 15
+    batteryLevelUpperLimit: int = 20
+    alwaysConnected: bool = False
+    findButtonUserDefined: bool = False
+    hasPowerSavingMode: bool = True
+    hasDnD: bool = False
+    hasBatteryLevel: bool = False
+    hasWorldCities: bool = True
 
-        # Default capabilities
-        self.worldCitiesCount = 2
-        self.dstCount = 3
-        self.alarmCount = 5
-        self.hasAutoLight = False
-        self.hasReminders = False
-        self.shortLightDuration = ""
-        self.longLightDuration = ""
-        self.weekLanguageSupported = True
-        self.worldCities = True
-        self.temperature = True
-        self.batteryLevelLowerLimit = 15
-        self.batteryLevelUpperLimit = 20
-
-        self.alwaysConnected = False
-        self.findButtonUserDefined = False
-        self.hasPowerSavingMode = True
-        self.hasDnD = False
-        self.hasBatteryLevel = False
-        self.hasWorldCities = True
-
-        # Model capability definitions (deduplicated)
-        self.models = [
+    # Model capability definitions (deduplicated)
+    models: List[Dict] = field(default_factory=lambda: [
             {
-                "model": WATCH_MODEL.GW,
+                "model": WatchModel.GW,
                 "worldCitiesCount": 6,
                 "dstCount": 3,
                 "alarmCount": 5,
@@ -61,7 +66,7 @@ class WatchInfo:
                 "batteryLevelUpperLimit": 19,
             },
             {
-                "model": WATCH_MODEL.MRG,
+                "model": WatchModel.MRG,
                 "worldCitiesCount": 6,
                 "dstCount": 3,
                 "alarmCount": 5,
@@ -73,7 +78,7 @@ class WatchInfo:
                 "batteryLevelUpperLimit": 19,
             },
             {
-                "model": WATCH_MODEL.GMW,
+                "model": WatchModel.GMW,
                 "worldCitiesCount": 6,
                 "dstCount": 3,
                 "alarmCount": 5,
@@ -83,7 +88,7 @@ class WatchInfo:
                 "longLightDuration": "4s",
             },
             {
-                "model": WATCH_MODEL.GST,
+                "model": WatchModel.GST,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -94,7 +99,7 @@ class WatchInfo:
                 "hasWorldCities": False
             },
             {
-                "model": WATCH_MODEL.GA,
+                "model": WatchModel.GA,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -104,7 +109,7 @@ class WatchInfo:
                 "longLightDuration": "3s",
             },
             {
-                "model": WATCH_MODEL.ABL,
+                "model": WatchModel.ABL,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -115,7 +120,7 @@ class WatchInfo:
                 "hasWorldCities": False
             },
             {
-                "model": WATCH_MODEL.GB001,
+                "model": WatchModel.GB001,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -125,7 +130,7 @@ class WatchInfo:
                 "longLightDuration": "3s",
             },
             {
-                "model": WATCH_MODEL.MSG,
+                "model": WatchModel.MSG,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -135,7 +140,7 @@ class WatchInfo:
                 "longLightDuration": "3s",
             },
             {
-                "model": WATCH_MODEL.GPR,
+                "model": WatchModel.GPR,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -146,7 +151,7 @@ class WatchInfo:
                 "weekLanguageSupported": False,
             },
             {
-                "model": WATCH_MODEL.DW,
+                "model": WatchModel.DW,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -156,7 +161,7 @@ class WatchInfo:
                 "longLightDuration": "3s",
             },
             {
-                "model": WATCH_MODEL.GBD,
+                "model": WatchModel.GBD,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -169,7 +174,7 @@ class WatchInfo:
                 "alwaysConnected": True,
             },
             {
-                "model": WATCH_MODEL.ECB,
+                "model": WatchModel.ECB,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -186,7 +191,7 @@ class WatchInfo:
                 "hasDnD": True
             },
             {
-                "model": WATCH_MODEL.DW_H,
+                "model": WatchModel.DW_H,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -203,7 +208,7 @@ class WatchInfo:
                 "hasDnD": True
             },
             {
-                "model": WATCH_MODEL.UNKNOWN,
+                "model": WatchModel.UNKNOWN,
                 "worldCitiesCount": 2,
                 "dstCount": 1,
                 "alarmCount": 5,
@@ -212,88 +217,70 @@ class WatchInfo:
                 "shortLightDuration": "1.5s",
                 "longLightDuration": "3s",
             },
-        ]
-
-        # Build model→info lookup
+        ])
+    
+    def __post_init__(self) -> None:
+        """Initialize model map after instance creation"""
         self.model_map = {entry["model"]: entry for entry in self.models}
 
-    def set_name_and_model(self, name):
+    def set_name_and_model(self, name: str) -> None:
+        """Set watch name and determine its model based on the name"""
         details = self._resolve_watch_details(name)
         if not details:
             return
         
-        # Persist fields
-        self.name                  = details["name"]
-        self.shortName             = details["shortName"]
-        self.model                 = details["model"]
-        self.hasReminders          = details["hasReminders"]
-        self.hasAutoLight          = details["hasAutoLight"]
-        self.alarmCount            = details["alarmCount"]
-        self.worldCitiesCount      = details["worldCitiesCount"]
-        self.dstCount              = details["dstCount"]
-        self.shortLightDuration    = details["shortLightDuration"]
-        self.longLightDuration     = details["longLightDuration"]
-        self.weekLanguageSupported = details["weekLanguageSupported"]
-        self.worldCities           = details["worldCities"]
-        self.temperature           = details["temperature"]
-        self.batteryLevelLowerLimit= details["batteryLevelLowerLimit"]
-        self.batteryLevelUpperLimit= details["batteryLevelUpperLimit"]
-        self.alwaysConnected       = details["alwaysConnected"]
-        self.findButtonUserDefined = details["findButtonUserDefined"]
-        self.hasPowerSavingMode    = details["hasPowerSavingMode"]
-        self.hasDnD                = details["hasDnD"]
-        self.hasBatteryLevel       = details["hasBatteryLevel"]
-        self.hasWorldCities        = details["hasWorldCities"]
+        for key, value in details.items():
+            setattr(self, key, value)
 
-    def lookup_watch_info(self, name):
-        # Public non-destructive lookup
+    def lookup_watch_info(self, name: str) -> Optional[Dict]:
+        """Look up watch information based on name"""
         return self._resolve_watch_details(name)
 
-    def _resolve_watch_details(self, name):
-        # Internal method for lookup logic
+    def _resolve_watch_details(self, name: str) -> Optional[Dict]:
+        """Internal method to resolve watch details from name"""
         shortName = None
-        model = WATCH_MODEL.UNKNOWN
+        model = WatchModel.UNKNOWN
 
         parts = name.split(" ")
         if len(parts) > 1:
-            shortName = parts[1]  # instead of `parts`
+            shortName = parts[1]
         if not shortName:
-            return None  # Could return a dict of defaults or None
+            return None
 
+        # Model resolution logic
         if shortName in {"ECB-10", "ECB-20", "ECB-30"}:
-            model = WATCH_MODEL.ECB
+            model = WatchModel.ECB
         elif shortName.startswith("ABL"):
-            model = WATCH_MODEL.ABL
+            model = WatchModel.ABL
         elif shortName.startswith("GST"):
-            model = WATCH_MODEL.GST
+            model = WatchModel.GST
         else:
             prefix_map = [
-                ("MSG", WATCH_MODEL.MSG),
-                ("GPR", WATCH_MODEL.GPR),
-                ("GM-B2100", WATCH_MODEL.GA),
-                ("GBM", WATCH_MODEL.GA),
-                ("GBD", WATCH_MODEL.GBD),
-                ("GMW", WATCH_MODEL.GMW),
-                ("DW-H",  WATCH_MODEL.DW_H),
-                ("DW",  WATCH_MODEL.DW),
-                ("GA",  WATCH_MODEL.GA),
-                ("GB",  WATCH_MODEL.GB),
-                ("GM",  WATCH_MODEL.GM),
-                ("GW",  WATCH_MODEL.GW),
-                ("MRG", WATCH_MODEL.MRG),
-                ("ABL", WATCH_MODEL.ABL),
+                ("MSG", WatchModel.MSG),
+                ("GPR", WatchModel.GPR),
+                ("GM-B2100", WatchModel.GA),
+                ("GBD", WatchModel.GBD),
+                ("GMW", WatchModel.GMW),
+                ("DW-H", WatchModel.DW_H),
+                ("DW", WatchModel.DW),
+                ("GA", WatchModel.GA),
+                ("GB", WatchModel.GB),
+                ("GM", WatchModel.GM),
+                ("GW", WatchModel.GW),
+                ("MRG", WatchModel.MRG),
+                ("ABL", WatchModel.ABL),
             ]
             for prefix, m in prefix_map:
                 if shortName.startswith(prefix):
                     model = m
                     break
 
+        # Get model info and compute details
         model_info = self.model_map.get(model, {})
-        computed = {
+        return {
             "name": name,
             "shortName": shortName,
             "model": model,
-            # Use model_info for each property
             "hasReminders": model_info.get("hasReminders", False),
             "hasAutoLight": model_info.get("hasAutoLight", False),
             "alarmCount": model_info.get("alarmCount", 0),
@@ -313,21 +300,24 @@ class WatchInfo:
             "hasBatteryLevel": model_info.get("hasBatteryLevel", False),
             "hasWorldCities": model_info.get("hasWorldCities", True),
         }
-        return computed
 
-    def set_address(self, address):
+    def set_address(self, address: str) -> None:
+        """Set the watch's address"""
         self.address = address
 
-    def get_address(self):
+    def get_address(self) -> str:
+        """Get the watch's address"""
         return self.address
 
-    def get_model(self):
+    def get_model(self) -> WatchModel:
+        """Get the watch's model"""
         return self.model
 
-    def reset(self):
+    def reset(self) -> None:
+        """Reset watch information to defaults"""
         self.address = ""
         self.name = ""
         self.shortName = ""
-        self.model = WATCH_MODEL.UNKNOWN
+        self.model = WatchModel.UNKNOWN
 
 watch_info = WatchInfo()

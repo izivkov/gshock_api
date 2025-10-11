@@ -2,6 +2,7 @@ import json
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.utils import to_int_array
 from gshock_api.logger import logger
+from dataclasses import dataclass
 
 HOURLY_CHIME_MASK = 0b10000000
 ENABLED_MASK = 0b01000000
@@ -10,12 +11,12 @@ ALARM_CONSTANT_VALUE = 0x40
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
 
+@dataclass
 class Alarm:
-    def __init__(self, hour, minute, enabled, has_hourly_chime):
-        self.hour = hour
-        self.minute = minute
-        self.enabled = enabled
-        self.has_hourly_chime = has_hourly_chime
+    hour = hour
+    minute = minute
+    enabled = enabled
+    has_hourly_chime = has_hourly_chime
 
 
 class Alarms:

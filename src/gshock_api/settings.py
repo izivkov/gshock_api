@@ -1,12 +1,15 @@
-class Settings:
-    time_format = ""
-    date_format = ""
-    language = ""
-    auto_light = False
-    light_duration = ""
-    power_saving_mode = False
-    button_tone = True
-    time_adjustment = True
+from dataclasses import dataclass
 
+@dataclass
+class Settings:
+    """Settings for G-Shock watch configuration"""
+    time_format: str = ""
+    date_format: str = ""
+    language: str = ""
+    auto_light: bool = False
+    light_duration: str = ""
+    power_saving_mode: bool = False
+    button_tone: bool = True
+    time_adjustment: bool = True
 
 settings = Settings()

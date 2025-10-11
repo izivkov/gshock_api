@@ -1,12 +1,13 @@
+from dataclasses import dataclass, field
 import json
 import types
 from datetime import datetime
 
+@dataclass
 class EventDate:
-    def __init__(self, year: int, month: str, day: int):
-        self.year = year
-        self.month = month
-        self.day = day
+    year: int
+    month: str
+    day: int
 
     def to_json(self):
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
@@ -22,16 +23,15 @@ class EventDate:
         return f"year: {self.year}, month: {self.month}, day: {self.day}"
 
 
+@dataclass
 class RepeatPeriod:
-    NEVER = "NEVER"
-    DAILY = "DAILY"
-    WEEKLY = "WEEKLY"
-    MONTHLY = "MONTHLY"
-    YEARLY = "YEARLY"
+    period_duration: str
 
-    def __init__(self, period_duration):
-        self.period_duration = period_duration
-
+    NEVER: str = "NEVER"
+    DAILY: str = "DAILY"
+    WEEKLY: str = "WEEKLY"
+    MONTHLY: str = "MONTHLY"
+    YEARLY: str = "YEARLY"
 
 day_of_week = (
     "MONDAY",
@@ -63,18 +63,18 @@ def create_event_date(time_ms, zone):
     return EventDate(start.year, start.month, start.day)
 
 
+@dataclass
 class Event:
-    def __init__(self):
-        self.title = ""
-        self.start_date = None
-        self.end_date = None
-        self.repeat_period = RepeatPeriod.NEVER
-        self.days_of_week = None
-        self.enabled = False
-        self.incompatible = False
-        self.selected = False
+    title: str = ""
+    start_date: Optional[EventDate] = None
+    end_date: Optional[EventDate] = None
+    repeat_period: str = RepeatPeriod.NEVER
+    days_of_week: Optional[List[str]] = None
+    enabled: bool = False
+    incompatible: bool = False
+    selected: bool = False
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"""Title: {self.title}, 
         startDate: {self.start_date.__str__()}, 
         endDate: {self.end_date.__str__()}, 
@@ -84,7 +84,7 @@ class Event:
         incompatible: {self.incompatible}, 
         selected: {self.selected}"""
 
-    def create_event(self, event_jsn: dict):
+    def create_event(self, event_jsn: dict) -> 'Event':
         def get_array_list_from_json_array(json_array: list):
             list = []
 
@@ -140,15 +140,15 @@ class Event:
 
     def to_json(
         self,
-        title,
-        start_date,
-        end_date,
-        repeat_period,
-        days_of_week,
-        enabled,
-        incompatible,
-        selected,
-    ):
+        title: str,
+        start_date: EventDate,
+        end_date: Optional[EventDate],
+        repeat_period: str,
+        days_of_week: List[str],
+        enabled: bool,
+        incompatible: bool,
+        selected: bool,
+    ) -> dict:
         time_obj = types.SimpleNamespace()
         time_obj.repeatPeriod = repeat_period
         time_obj.daysOfWeek = days_of_week
