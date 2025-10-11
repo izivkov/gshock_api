@@ -11,13 +11,12 @@ ALARM_CONSTANT_VALUE = 0x40
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
 
-@dataclass
+@dataclass(frozen=True)
 class Alarm:
-    hour = hour
-    minute = minute
-    enabled = enabled
-    has_hourly_chime = has_hourly_chime
-
+    hour: int
+    minute: int
+    enabled: bool
+    has_hourly_chime: bool
 
 class Alarms:
     alarms = []
