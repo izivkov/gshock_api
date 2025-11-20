@@ -1,4 +1,5 @@
 from enum import IntEnum
+
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 
@@ -24,9 +25,9 @@ class DstWatchStateIO:
 
 
     @staticmethod
-    async def send_to_watch(connection):
+    async def send_to_watch(connection) -> None:
         connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_DST_WATCH_STATE"]]))
 
     @staticmethod
-    def on_received(data):
+    def on_received(data) -> None:
         DstWatchStateIO.result.set_result(data)

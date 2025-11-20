@@ -1,8 +1,8 @@
 import json
-from gshock_api.cancelable_result import CancelableResult
-from gshock_api.logger import logger
-from gshock_api.casio_constants import CasioConstants
 
+from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
+from gshock_api.logger import logger
 from gshock_api.utils import (
     clean_str,
     dec_to_hex,
@@ -39,21 +39,21 @@ class EventsIO:
     async def request(connection, event_number):
         EventsIO.connection = connection
 
-        await connection.request("30{}".format(event_number))  # reminder title
-        await connection.request("31{}".format(event_number))  # reminder time
+        await connection.request(f"30{event_number}")  # reminder title
+        await connection.request(f"31{event_number}")  # reminder time
 
         EventsIO.result = CancelableResult()
         return EventsIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch_set(message):
+    async def send_to_watch_set(message) -> None:
         def reminder_title_from_json(reminder_json):
             title_str = reminder_json.get("title")
             return to_byte_array(title_str, 18)
 
         def reminder_time_from_json(reminder_json):
             def create_time_detail(repeat_period, start_date, end_date, days_of_week):
-                def encode_date(time_detail, start_date, end_date):
+                def encode_date(time_detail, start_date, end_date) -> None:
                     class Month:
                         JANUARY = 1
                         FEBRUARY = 2
@@ -68,7 +68,7 @@ class EventsIO:
                         NOVEMBER = 11
                         DECEMBER = 12
 
-                        def __init__(self):
+                        def __init__(self) -> None:
                             pass
 
                     def string_to_month(month_str):
@@ -131,14 +131,11 @@ class EventsIO:
                     time_detail[6] = day_of_week
                     time_detail[7] = 0
 
-                elif repeat_period == "MONTHLY":
-                    encode_date(time_detail, start_date, end_date)
-
-                elif repeat_period == "YEARLY":
+                elif repeat_period in {"MONTHLY", "YEARLY"}:
                     encode_date(time_detail, start_date, end_date)
                 else:
                     logger.debug(
-                        "Cannot handle Repeat Period: {}".format(repeat_period)
+                        f"Cannot handle Repeat Period: {repeat_period}"
                     )
 
                 return time_detail
@@ -196,7 +193,7 @@ class EventsIO:
             await EventsIO.connection.write(0x000E, reminder_time_byte_arr_to_send)
 
     @staticmethod
-    def on_received(message):
+    def on_received(message) -> None:
         data = to_hex_string(message)
 
         def reminder_time_to_json(reminder_str):
@@ -252,8 +249,7 @@ class EventsIO:
                         ]
                         if month_int < 1 or month_int > 12:
                             return ""
-                        else:
-                            return months[month_int - 1]
+                        return months[month_int - 1]
 
                     date = json.loads("{}")
 
@@ -339,13 +335,13 @@ class EventsIO:
         EventsIO.result.set_result(reminder_json)
 
     @staticmethod
-    def on_received_title(message):
+    def on_received_title(message) -> None:
         EventsIO.title = ReminderDecoder.reminder_title_to_json(message)
 
 
 class ReminderDecoder:
-    def reminder_title_to_json(title_byte: str) -> dict:
-        hex_str = to_hex_string(title_byte)
+    def reminder_title_to_json(self: str) -> dict:
+        hex_str = to_hex_string(self)
         # ascii_str = to_ascii_string(hex_str, 2)
 
         int_arr = to_int_array(hex_str)

@@ -1,9 +1,9 @@
 import json
-from gshock_api.alarms import alarms_inst, alarm_decoder
 
+from gshock_api.alarms import alarm_decoder, alarms_inst
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.utils import to_compact_string, to_hex_string
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.utils import to_compact_string, to_hex_string
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -27,7 +27,7 @@ class AlarmsIO:
         return await AlarmsIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(message=""):
+    async def send_to_watch(message="") -> None:
         alarm_command = to_compact_string(
             to_hex_string(bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]]))
         )
@@ -39,7 +39,7 @@ class AlarmsIO:
         await AlarmsIO.connection.write(0x000C, alarm_command_2)
 
     @staticmethod
-    async def send_to_watch_set(message):
+    async def send_to_watch_set(message) -> None:
         alarms_json_arr = json.loads(message).get("value")
         alarm_casio0 = to_compact_string(
             to_hex_string(alarms_inst.from_json_alarm_first_alarm(alarms_json_arr[0]))
@@ -51,7 +51,7 @@ class AlarmsIO:
         await AlarmsIO.connection.write(0x000E, alarm_casio)
 
     @staticmethod
-    def on_received(data):
+    def on_received(data) -> None:
         decoded = alarm_decoder.to_json(to_hex_string(data))["ALARMS"]
         alarms_inst.add_alarms(decoded)
 

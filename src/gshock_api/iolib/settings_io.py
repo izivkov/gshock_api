@@ -1,9 +1,10 @@
 import json
+
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.settings import settings
-from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.logger import logger
+from gshock_api.settings import settings
+from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -21,13 +22,13 @@ class SettingsIO:
         return SettingsIO.result.get_result()
 
     @staticmethod
-    def send_to_watch(message):
+    def send_to_watch(message) -> None:
         SettingsIO.connection.write(
             0x000C, bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_BASIC"]])
         )
 
     @staticmethod
-    async def send_to_watch_set(message):
+    async def send_to_watch_set(message) -> None:
         def encode(settings):
             mask_24_hours = 0b00000001
             MASK_BUTTON_TONE_OFF = 0b00000010
@@ -66,8 +67,7 @@ class SettingsIO:
             def __getattr__(self, attr):
                 if attr in self:
                     return self[attr]
-                else:
-                    raise AttributeError(f"'DotDict' object has no attribute '{attr}'")
+                raise AttributeError(f"'DotDict' object has no attribute '{attr}'")
 
             __setattr__ = dict.__setitem__
             __delattr__ = dict.__delitem__
@@ -80,7 +80,7 @@ class SettingsIO:
         await SettingsIO.connection.write(0x000E, setting_to_set)
 
     @staticmethod
-    def on_received(message):
+    def on_received(message) -> None:
         logger.info(f"SettingsIO onReceived: {message}")
 
         def create_json_settings(setting_string):

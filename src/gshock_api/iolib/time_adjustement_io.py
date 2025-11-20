@@ -1,10 +1,10 @@
 import json
+
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.logger import logger
-
+from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -24,7 +24,7 @@ class TimeAdjustmentIO:
 
 
     @staticmethod
-    def send_to_watch(message):
+    def send_to_watch(message) -> None:
         TimeAdjustmentIO.connection.write(
             0x000C, bytearray([CHARACTERISTICS["TIME_ADJUSTMENT"]])
         )
@@ -50,9 +50,10 @@ class TimeAdjustmentIO:
 
         write_cmd = to_compact_string(to_hex_string(encoded_time_adj))
         await TimeAdjustmentIO.connection.write(0x000E, write_cmd)
+        return None
 
     @staticmethod
-    def on_received(message):
+    def on_received(message) -> None:
         TimeAdjustmentIO.original_value = to_hex_string(
             message
         )  # save original message
@@ -79,5 +80,5 @@ class TimeAdjustmentIO:
         TimeAdjustmentIO.result.set_result(value)
 
     @staticmethod
-    async def on_received_set(message):
+    async def on_received_set(message) -> None:
         logger.info(f"TimeAdjustmentIO onReceivedSet: {message}")

@@ -1,11 +1,11 @@
-import time
 import datetime
 import json
-from gshock_api.logger import logger
+import time
 
-from gshock_api.utils import to_compact_string, to_hex_string
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.exceptions import GShockIgnorableException
+from gshock_api.logger import logger
+from gshock_api.utils import to_compact_string, to_hex_string
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -14,7 +14,7 @@ class TimeIO:
     connection = None
 
     @staticmethod
-    async def request(connection, current_time, offset):
+    async def request(connection, current_time, offset) -> None:
         TimeIO.connection = connection
 
         message = {
@@ -27,7 +27,7 @@ class TimeIO:
         await connection.sendMessage(json.dumps(message))
 
     @staticmethod
-    async def send_to_watch_set(message):
+    async def send_to_watch_set(message) -> None:
         data = json.loads(message)
         value = data.get("value", {})
 
@@ -55,17 +55,17 @@ class TimeIO:
             logger.info(f"Ignoring {e}")
 
 class TimeEncoder:
-    def prepare_current_time(date: datetime.datetime):
+    def prepare_current_time(self: datetime.datetime):
         arr = bytearray(10)
-        year = date.year
+        year = self.year
         arr[0] = year >> 0 & 0xFF
         arr[1] = year >> 8 & 0xFF
-        arr[2] = date.month
-        arr[3] = date.day
-        arr[4] = date.hour
-        arr[5] = date.minute
-        arr[6] = date.second
-        arr[7] = date.weekday()
+        arr[2] = self.month
+        arr[3] = self.day
+        arr[4] = self.hour
+        arr[5] = self.minute
+        arr[6] = self.second
+        arr[7] = self.weekday()
         arr[8] = 0
         arr[9] = 1
         return arr

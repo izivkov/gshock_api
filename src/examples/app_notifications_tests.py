@@ -13,7 +13,7 @@ bufferAllDayEvent = "fdfffffffffefacdcfcdcacfcacec9abcdcccccfcfcff7ffbc9e939a919
 
 def format_hex_string(hexstr):
     """Format a hex string into space-separated bytes."""
-    return ' '.join(hexstr[i:i+2] for i in range(0, len(hexstr), 2))
+    return " ".join(hexstr[i:i+2] for i in range(0, len(hexstr), 2))
 
 print(f"{AppNotificationIO.xor_decode_buffer(bufferCalendar2)}")
 

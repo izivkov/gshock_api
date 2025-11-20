@@ -1,18 +1,21 @@
 import asyncio
-import sys
-
+from datetime import UTC, datetime
 import json
+import sys
 import time
-import pytz
-from datetime import datetime, timezone
 
-from gshock_api.connection import Connection
-from gshock_api.gshock_api import GshockAPI
-from gshock_api.event import Event, create_event_date, RepeatPeriod
-from gshock_api.logger import logger
+import pytz
+
+from gshock_api.always_connected_watch_filter import (
+    always_connected_watch_filter as watch_filter,
+)
 from gshock_api.app_notification import AppNotification, NotificationType
+from gshock_api.connection import Connection
+from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
-from gshock_api.always_connected_watch_filter import always_connected_watch_filter as watch_filter
+from gshock_api.gshock_api import GshockAPI
+from gshock_api.logger import logger
+
 
 async def main(argv):
     await run_api_tests(argv)
@@ -42,18 +45,18 @@ async def run_api_tests(argv):
         api = GshockAPI(connection)
 
         app_info = await api.get_app_info()
-        logger.info("app info: {}".format(app_info))
+        logger.info(f"app info: {app_info}")
 
         pressed_button = await api.get_pressed_button()
-        logger.info("pressed button: {}".format(pressed_button))
+        logger.info(f"pressed button: {pressed_button}")
 
         watch_name = await api.get_watch_name()
-        logger.info("got watch name: {}".format(watch_name))
+        logger.info(f"got watch name: {watch_name}")
 
         await api.set_time(time.time()+10*60)
 
         alarms = await api.get_alarms()
-        logger.info("alarms: {}".format(alarms))
+        logger.info(f"alarms: {alarms}")
 
         alarms[3]["enabled"] = True
         alarms[3]["hour"] = 7
@@ -62,11 +65,11 @@ async def run_api_tests(argv):
         await api.set_alarms(alarms)
 
         seconds = await api.get_timer()
-        logger.info("timer: {} seconds".format(seconds))
+        logger.info(f"timer: {seconds} seconds")
 
         await api.set_timer(seconds + 10)
         time_adjstment = await api.get_time_adjustment()
-        logger.info("time_adjstment: {}".format(time_adjstment))
+        logger.info(f"time_adjstment: {time_adjstment}")
 
         await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
 
@@ -74,7 +77,7 @@ async def run_api_tests(argv):
         logger.info(f"condition: {condition}")
 
         settings_local = await api.get_basic_settings()
-        logger.info("settings: {}".format(settings_local))
+        logger.info(f"settings: {settings_local}")
 
         settings_local["button_tone"] = True
         settings_local["language"] = "Russian"
@@ -86,7 +89,7 @@ async def run_api_tests(argv):
 
         # Create a single event
         tz = pytz.timezone("America/Toronto")
-        dt = datetime.now(timezone.utc)    
+        dt = datetime.now(UTC)    
         utc_timestamp = dt.timestamp()
         event_date = create_event_date(utc_timestamp, tz)
         event_date_str = json.dumps(event_date.__dict__)
@@ -106,11 +109,11 @@ async def run_api_tests(argv):
             + """}}"""
         )
         Event().create_event(json.loads(event_json_str))
-        logger.info("Created event: {}".format(event_json_str))
+        logger.info(f"Created event: {event_json_str}")
 
         reminders = await api.get_reminders()
         for reminder in reminders:
-            logger.info("reminder: {}".format(reminder.__str__()))
+            logger.info(f"reminder: {reminder.__str__()}")
 
         reminders[3]["title"] = "Test Event"
 

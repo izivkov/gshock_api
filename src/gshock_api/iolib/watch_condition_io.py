@@ -1,6 +1,6 @@
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.watch_info import watch_info
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.watch_info import watch_info
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -10,7 +10,7 @@ class WatchConditionIO:
     connection = None
 
     class WatchConditionValue:
-        def __init__(self, battery_level_percent: int, temperature: int):
+        def __init__(self, battery_level_percent: int, temperature: int) -> None:
             self.battery_level_percent = battery_level_percent
             self.temperature = temperature
 
@@ -23,11 +23,11 @@ class WatchConditionIO:
         return WatchConditionIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(connection):
+    async def send_to_watch(connection) -> None:
         connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_WATCH_CONDITION"]]))
 
     @staticmethod
-    def on_received(data):
+    def on_received(data) -> None:
         def decode_value(data: str) -> WatchConditionIO.WatchConditionValue:
             int_arr = list(map(int, data))
             bytes_data = bytes(int_arr[1:])

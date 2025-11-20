@@ -1,58 +1,68 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 from enum import IntEnum
+
+# --- Type Aliases for Clarity ---
+from typing import Final, TypeAlias, Any
+
+# Type for a single model's capability dictionary.
+# Keys are strings, values are the union of all primitive types and the WatchModel enum found in the model dictionary.
+ModelCapability: TypeAlias = dict[str, Any | int | str | bool]  # type: ignore  # noqa: F821, UP040
+ModelMap: TypeAlias = dict[Any, ModelCapability]  # type: ignore  # noqa: F821, UP040
 
 class WatchModel(IntEnum):
     """Enum for watch models replacing WATCH_MODEL class"""
-    GA = 1
-    GW = 2
-    DW = 3
-    GMW = 4
-    GPR = 5
-    GST = 6
-    MSG = 7
-    GB001 = 8
-    GBD = 9
-    ECB = 10
-    MRG = 11
-    OCW = 12
-    GB = 13
-    GM = 14
-    ABL = 15
-    DW_H = 16
-    UNKNOWN = 20
+    # Using explicit types for better compatibility, though IntEnum handles this
+    GA: Final[int] = 1  
+    GW: Final[int] = 2
+    DW: Final[int] = 3
+    GMW: Final[int] = 4
+    GPR: Final[int] = 5
+    GST: Final[int] = 6
+    MSG: Final[int] = 7
+    GB001: Final[int] = 8
+    GBD: Final[int] = 9
+    ECB: Final[int] = 10
+    MRG: Final[int] = 11
+    OCW: Final[int] = 12
+    GB: Final[int] = 13
+    GM: Final[int] = 14
+    ABL: Final[int] = 15
+    DW_H: Final[int] = 16
+    UNKNOWN: Final[int] = 20
 
 @dataclass
 class WatchInfo:
     """Information and capabilities of a G-Shock watch"""
+    
     # Basic information
     name: str = ""
-    shortName: str = ""
+    shortName: str = ""  # noqa: N815
     address: str = ""
     model: WatchModel = WatchModel.UNKNOWN
     
     # Watch capabilities with defaults
-    worldCitiesCount: int = 2
-    dstCount: int = 3
-    alarmCount: int = 5
-    hasAutoLight: bool = False
-    hasReminders: bool = False
-    shortLightDuration: str = ""
-    longLightDuration: str = ""
-    weekLanguageSupported: bool = True
-    worldCities: bool = True
-    temperature: bool = True
-    batteryLevelLowerLimit: int = 15
-    batteryLevelUpperLimit: int = 20
-    alwaysConnected: bool = False
-    findButtonUserDefined: bool = False
-    hasPowerSavingMode: bool = True
-    hasDnD: bool = False
-    hasBatteryLevel: bool = False
-    hasWorldCities: bool = True
+    worldCitiesCount: int = 2  # noqa: N815
+    dstCount: int = 3  # noqa: N815
+    alarmCount: int = 5  # noqa: N815
+    hasAutoLight: bool = False  # noqa: N815
+    hasReminders: bool = False  # noqa: N815
+    shortLightDuration: str = ""  # noqa: N815
+    longLightDuration: str = ""  # noqa: N815
+    weekLanguageSupported: bool = True  # noqa: N815
+    worldCities: bool = True  # noqa: N815
+    temperature: bool = True  
+    batteryLevelLowerLimit: int = 15  # noqa: N815
+    batteryLevelUpperLimit: int = 20  # noqa: N815
+    alwaysConnected: bool = False  # noqa: N815
+    findButtonUserDefined: bool = False  # noqa: N815
+    hasPowerSavingMode: bool = True  # noqa: N815
+    hasDnD: bool = False  # noqa: N815
+    hasBatteryLevel: bool = False  # noqa: N815
+    hasWorldCities: bool = True  # noqa: N815
 
-    # Model capability definitions (deduplicated)
-    models: List[Dict] = field(default_factory=lambda: [
+    # Model capability definitions (Instance variable, requires field)
+    # Using ModelCapability type alias for clarity and type safety
+    models: list[ModelCapability] = field(default_factory=lambda: [
             {
                 "model": WatchModel.GW,
                 "worldCitiesCount": 6,
@@ -219,35 +229,43 @@ class WatchInfo:
             },
         ])
     
+    # Instance variable to store the lookup map
+    # Initialized in __post_init__
+    model_map: ModelMap = field(init=False)
+
     def __post_init__(self) -> None:
         """Initialize model map after instance creation"""
-        self.model_map = {entry["model"]: entry for entry in self.models}
+        # Type enforcement on dictionary construction
+        self.model_map = {
+            entry["model"]: entry for entry in self.models
+        } # type: ignore[misc] # Suppressing due to complex dict key type
 
     def set_name_and_model(self, name: str) -> None:
         """Set watch name and determine its model based on the name"""
-        details = self._resolve_watch_details(name)
+        details: ModelCapability | None = self._resolve_watch_details(name)
         if not details:
             return
         
+        # Dynamically set attributes on the instance
         for key, value in details.items():
             setattr(self, key, value)
 
-    def lookup_watch_info(self, name: str) -> Optional[Dict]:
+    def lookup_watch_info(self, name: str) -> ModelCapability | None:
         """Look up watch information based on name"""
         return self._resolve_watch_details(name)
 
-    def _resolve_watch_details(self, name: str) -> Optional[Dict]:
+    def _resolve_watch_details(self, name: str) -> ModelCapability | None:
         """Internal method to resolve watch details from name"""
-        shortName = None
-        model = WatchModel.UNKNOWN
+        shortName: str | None = None  # noqa: N806
+        model: WatchModel = WatchModel.UNKNOWN
 
-        parts = name.split(" ")
+        parts: list[str] = name.split(" ")
         if len(parts) > 1:
-            shortName = parts[1]
+            shortName = parts[1]  # noqa: N806
         if not shortName:
             return None
 
-        # Model resolution logic
+        # --- Model resolution logic ---
         if shortName in {"ECB-10", "ECB-20", "ECB-30"}:
             model = WatchModel.ECB
         elif shortName.startswith("ABL"):
@@ -255,7 +273,8 @@ class WatchInfo:
         elif shortName.startswith("GST"):
             model = WatchModel.GST
         else:
-            prefix_map = [
+            # Type list of tuples for prefix mapping
+            prefix_map: list[tuple[str, WatchModel]] = [
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),
@@ -276,7 +295,9 @@ class WatchInfo:
                     break
 
         # Get model info and compute details
-        model_info = self.model_map.get(model, {})
+        model_info: ModelCapability = self.model_map.get(model, {})
+        
+        # Return the dictionary of attributes to be set on the instance
         return {
             "name": name,
             "shortName": shortName,
@@ -320,4 +341,4 @@ class WatchInfo:
         self.shortName = ""
         self.model = WatchModel.UNKNOWN
 
-watch_info = WatchInfo()
+watch_info: WatchInfo = WatchInfo()

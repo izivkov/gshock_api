@@ -1,8 +1,8 @@
 import json
-from gshock_api.cancelable_result import CancelableResult
 
-from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.utils import to_compact_string, to_hex_string
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -21,11 +21,11 @@ class TimerIO:
 
 
     @staticmethod
-    async def send_to_watch(connection):
+    async def send_to_watch(connection) -> None:
         connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_TIMER"]]))
 
     @staticmethod
-    async def send_to_watch_set(data):
+    async def send_to_watch_set(data) -> None:
         def encode(seconds_str):
             in_seconds = int(seconds_str)
             hours = in_seconds // 3600
@@ -46,7 +46,7 @@ class TimerIO:
         await TimerIO.connection.write(0x000E, seconds_as_compact_str)
 
     @staticmethod
-    def on_received(data):
+    def on_received(data) -> None:
         def decode_value(data: str) -> str:
             timer_int_array = data
 
@@ -54,8 +54,7 @@ class TimerIO:
             minutes = timer_int_array[2]
             seconds = timer_int_array[3]
 
-            in_seconds = hours * 3600 + minutes * 60 + seconds
-            return in_seconds
+            return hours * 3600 + minutes * 60 + seconds
 
         decoded = decode_value(data)
         seconds = int(decoded)

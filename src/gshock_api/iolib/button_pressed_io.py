@@ -1,7 +1,8 @@
 from enum import IntEnum
+
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.utils import to_hex_string, to_int_array
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.utils import to_hex_string, to_int_array
 
 CHARACTERISTICS = CasioConstants.CHARACTERISTICS
 
@@ -27,15 +28,15 @@ class ButtonPressedIO:
         return ButtonPressedIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(connection):
+    async def send_to_watch(connection) -> None:
         connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_BLE_FEATURES"]]))
 
     @staticmethod
-    async def send_to_watch_set(data):
+    async def send_to_watch_set(data) -> None:
         await ButtonPressedIO.connection.write(0x000E, data)
 
     @staticmethod
-    def on_received(data):
+    def on_received(data) -> None:
         def button_pressed_callback(data):
             """
             RIGHT BUTTON: 0x10 17 62 07 38 85 CD 7F ->04<- 03 0F FF FF FF FF 24 00 00 00
@@ -51,7 +52,7 @@ class ButtonPressedIO:
                 button_indicator = ble_int_arr[8]
                 ret = (
                     WatchButton.LOWER_LEFT
-                    if (button_indicator == 0 or button_indicator == 1)
+                    if (button_indicator in {0, 1})
                     else WatchButton.LOWER_RIGHT
                     if button_indicator == 4
                     else WatchButton.NO_BUTTON

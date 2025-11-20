@@ -1,16 +1,18 @@
 import asyncio
+from datetime import datetime
 import sys
 
-from datetime import datetime
+from args import args
 
+from gshock_api.always_connected_watch_filter import (
+    always_connected_watch_filter as watch_filter,
+)
 from gshock_api.connection import Connection
+from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
-from args import args
-from gshock_api.exceptions import GShockConnectionError
-from gshock_api.always_connected_watch_filter import always_connected_watch_filter as watch_filter
 
 __author__ = "Ivo Zivkov"
 __copyright__ = "Ivo Zivkov"
