@@ -1,32 +1,31 @@
 import json
+
 from gshock_api.cancelable_result import CancelableResult
-
-from gshock_api.utils import to_compact_string, to_hex_string
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.utils import to_compact_string, to_hex_string
 
-CHARACTERISTICS = CasioConstants.CHARACTERISTICS
+CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
 
 class TimerIO:
-    result: CancelableResult = None
-    connection = None
+    result: CancelableResult | None = None
+    connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection):
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         TimerIO.connection = connection
         await connection.request("18")
-
         TimerIO.result = CancelableResult()
-        return TimerIO.result.get_result()
-
-
-    @staticmethod
-    async def send_to_watch(connection):
-        connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_TIMER"]]))
+        return await TimerIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch_set(data):
-        def encode(seconds_str):
+    async def send_to_watch(connection: ConnectionProtocol) -> None:
+        await connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_TIMER"]]))
+
+    @staticmethod
+    async def send_to_watch_set(data: str) -> None:
+        def encode(seconds_str: str) -> bytearray:
             in_seconds = int(seconds_str)
             hours = in_seconds // 3600
             minutes_and_seconds = in_seconds % 3600
@@ -41,22 +40,21 @@ class TimerIO:
             return arr
 
         data_obj = json.loads(data)
-        seconds_as_byte_arr = encode(data_obj.get("value"))
+        seconds_as_byte_arr = encode(data_obj.get("value", "0"))
         seconds_as_compact_str = to_compact_string(to_hex_string(seconds_as_byte_arr))
+        if TimerIO.connection is None:
+            raise RuntimeError("TimerIO.connection is not set")
         await TimerIO.connection.write(0x000E, seconds_as_compact_str)
 
     @staticmethod
-    def on_received(data):
-        def decode_value(data: str) -> str:
-            timer_int_array = data
-
-            hours = timer_int_array[1]
-            minutes = timer_int_array[2]
-            seconds = timer_int_array[3]
-
-            in_seconds = hours * 3600 + minutes * 60 + seconds
-            return in_seconds
+    def on_received(data: list[int]) -> None:
+        def decode_value(data_list: list[int]) -> int:
+            hours = data_list[1]
+            minutes = data_list[2]
+            seconds = data_list[3]
+            return hours * 3600 + minutes * 60 + seconds
 
         decoded = decode_value(data)
-        seconds = int(decoded)
-        TimerIO.result.set_result(seconds)
+        if TimerIO.result is None:
+            raise RuntimeError("TimerIO.result is not set")
+        TimerIO.result.set_result(decoded)

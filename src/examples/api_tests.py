@@ -1,24 +1,28 @@
 import asyncio
-import sys
-
+from collections.abc import Sequence
+from datetime import datetime
 import json
+import sys
 import time
+from typing import Optional
+
 import pytz
-from datetime import datetime, timezone
 
-from gshock_api.connection import Connection
-from gshock_api.gshock_api import GshockAPI
-from gshock_api.event import Event, create_event_date, RepeatPeriod
-from gshock_api.logger import logger
+from gshock_api.always_connected_watch_filter import (
+    always_connected_watch_filter as watch_filter,
+)
 from gshock_api.app_notification import AppNotification, NotificationType
+from gshock_api.connection import Connection
+from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
-from gshock_api.always_connected_watch_filter import always_connected_watch_filter as watch_filter
+from gshock_api.gshock_api import GshockAPI
+from gshock_api.logger import logger
 
-async def main(argv):
+
+async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
-    # await run_api_tests_notifications()
 
-def prompt():
+def prompt() -> None:
     logger.info(
         "========================================================================"
     )
@@ -30,7 +34,8 @@ def prompt():
     )
     logger.info("")
 
-async def run_api_tests(argv):
+
+async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
     prompt()
 
     try:
@@ -42,18 +47,18 @@ async def run_api_tests(argv):
         api = GshockAPI(connection)
 
         app_info = await api.get_app_info()
-        logger.info("app info: {}".format(app_info))
+        logger.info(f"app info: {app_info}")
 
         pressed_button = await api.get_pressed_button()
-        logger.info("pressed button: {}".format(pressed_button))
+        logger.info(f"pressed button: {pressed_button}")
 
         watch_name = await api.get_watch_name()
-        logger.info("got watch name: {}".format(watch_name))
+        logger.info(f"got watch name: {watch_name}")
 
-        await api.set_time(time.time()+10*60)
+        await api.set_time(time.time() + 10 * 60)
 
         alarms = await api.get_alarms()
-        logger.info("alarms: {}".format(alarms))
+        logger.info(f"alarms: {alarms}")
 
         alarms[3]["enabled"] = True
         alarms[3]["hour"] = 7
@@ -62,11 +67,11 @@ async def run_api_tests(argv):
         await api.set_alarms(alarms)
 
         seconds = await api.get_timer()
-        logger.info("timer: {} seconds".format(seconds))
+        logger.info(f"timer: {seconds} seconds")
 
         await api.set_timer(seconds + 10)
         time_adjstment = await api.get_time_adjustment()
-        logger.info("time_adjstment: {}".format(time_adjstment))
+        logger.info(f"time_adjstment: {time_adjstment}")
 
         await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
 
@@ -74,7 +79,7 @@ async def run_api_tests(argv):
         logger.info(f"condition: {condition}")
 
         settings_local = await api.get_basic_settings()
-        logger.info("settings: {}".format(settings_local))
+        logger.info(f"settings: {settings_local}")
 
         settings_local["button_tone"] = True
         settings_local["language"] = "Russian"
@@ -86,7 +91,7 @@ async def run_api_tests(argv):
 
         # Create a single event
         tz = pytz.timezone("America/Toronto")
-        dt = datetime.now(timezone.utc)    
+        dt = datetime.now()
         utc_timestamp = dt.timestamp()
         event_date = create_event_date(utc_timestamp, tz)
         event_date_str = json.dumps(event_date.__dict__)
@@ -106,25 +111,26 @@ async def run_api_tests(argv):
             + """}}"""
         )
         Event().create_event(json.loads(event_json_str))
-        logger.info("Created event: {}".format(event_json_str))
+        logger.info(f"Created event: {event_json_str}")
 
         reminders = await api.get_reminders()
         for reminder in reminders:
-            logger.info("reminder: {}".format(reminder.__str__()))
+            logger.info(f"reminder: {reminder}")
 
         reminders[3]["title"] = "Test Event"
 
         await api.set_reminders(reminders)
 
     except GShockConnectionError as e:
-        logger.info(f"Connection problem: {e}") 
+        logger.info(f"Connection problem: {e}")
 
     input("Hit any key to disconnect")
 
     await connection.disconnect()
     logger.info("--- END OF TESTS ---")
 
-async def run_api_tests_notifications():
+
+async def run_api_tests_notifications() -> None:
     prompt()
 
     connection = Connection()
@@ -139,66 +145,69 @@ async def run_api_tests_notifications():
     await connection.disconnect()
     logger.info("--- END OF TESTS ---")
 
-async def app_notifications(api):
 
+async def app_notifications(api: GshockAPI) -> None:
     AppNotification(
-        type = NotificationType.CALENDAR,
+        type=NotificationType.CALENDAR,
         timestamp="20231001T121000",
-        app = "Calendar",
-        title = "This is a very long Meeting with Team",
-        text =" 9:20 - 10:15 AM"
+        app="Calendar",
+        title="This is a very long Meeting with Team",
+        text=" 9:20 - 10:15 AM",
     )
 
     AppNotification(
-        type = NotificationType.CALENDAR,
+        type=NotificationType.CALENDAR,
         timestamp="20250516T233000",
-        app = "Calendar",
-        title = "Full day event 3",
-        text = "Tomorrow",
+        app="Calendar",
+        title="Full day event 3",
+        text="Tomorrow",
     )
 
     email_notification2 = AppNotification(
-        type = NotificationType.EMAIL_SMS,
+        type=NotificationType.EMAIL_SMS,
         timestamp="20250516T211520",
         app="Gmail",
         title="me",
-        text="""\u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        \u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        \u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        """,
-        short_text = """\u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        \u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        \u5f7c\u5973\u306f\u30d4\u30a2\n\u5f7c\u5973\u306f\u30d4\u30a2\u30ce\u3092\u5f3e\u3044\u305f\u308a\u3001\u7d75\u3092\u63cf\u304f\u306e\u304c\u597d\u304d\u3067\u3059\u3002\u30ea\u30a2\u5145\u3067\u3059\n
-        """
+        text="""[translate:彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+]""",
+        short_text="""[translate:彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+彼女はピア
+彼女はピアノを弾いたり、絵を描くのが好きです。リア充です
+]""",
     )
 
     AppNotification(
-        type = NotificationType.EMAIL_SMS,
+        type=NotificationType.EMAIL_SMS,
         timestamp="20250516T211520",
         app="Gmail",
         title="me",
-        text="الساعة\n"
+        text="[translate:الساعة\n]",
     )
 
     AppNotification(
-        type = NotificationType.EMAIL,
+        type=NotificationType.EMAIL,
         timestamp="20231001T120000",
         app="EmailApp",
         title="Ivo",
-        short_text = """And this is a short message up to 40 chars""",
+        short_text="""And this is a short message up to 40 chars""",
         text="This is the message up to 193 characters, combined up to 206 characters",
     )
 
     await api.send_app_notification(email_notification2)
 
-def convert_time_string_to_epoch(time_string):
+
+def convert_time_string_to_epoch(time_string: str) -> Optional[float]:
     try:
-        # Create a datetime object with today's date and the provided time
         time_object = datetime.strptime(time_string, "%H:%M:%S")
-
-        # Get the timestamp in seconds since the epoch
         timestamp = time_object.timestamp()
-
         return timestamp
     except ValueError:
         logger.info("Invalid time format. Please use the format HH:MM:SS.")

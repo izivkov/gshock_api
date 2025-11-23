@@ -1,14 +1,24 @@
-import json
-from gshock_api.casio_constants import CasioConstants
-from gshock_api.utils import to_int_array
-from gshock_api.logger import logger
 from dataclasses import dataclass
+import json
+from typing import TypedDict
 
-HOURLY_CHIME_MASK = 0b10000000
-ENABLED_MASK = 0b01000000
-ALARM_CONSTANT_VALUE = 0x40
+from gshock_api.casio_constants import CasioConstants
+from gshock_api.logger import logger
+from gshock_api.utils import to_int_array
 
-CHARACTERISTICS = CasioConstants.CHARACTERISTICS
+HOURLY_CHIME_MASK: int = 0b10000000
+ENABLED_MASK: int = 0b01000000
+ALARM_CONSTANT_VALUE: int = 0x40
+
+
+CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
+
+class AlarmDict(TypedDict):
+    enabled: bool
+    hasHourlyChime: bool
+    hour: int
+    minute: int
 
 
 @dataclass(frozen=True)
@@ -18,26 +28,28 @@ class Alarm:
     enabled: bool
     has_hourly_chime: bool
 
-class Alarms:
-    alarms = []
 
-    def clear(self):
+class Alarms:
+    def __init__(self) -> None:
+        self.alarms: list[AlarmDict] = []
+
+    def clear(self) -> None:
         self.alarms.clear()
 
-    def add_alarms(self, alarm_json_str_arr):
+    def add_alarms(self, alarm_json_str_arr: list[str]) -> None:
         for alarm_json_str in alarm_json_str_arr:
-            alarm = json.loads(alarm_json_str)
+            alarm: AlarmDict = json.loads(alarm_json_str)
             self.alarms.append(alarm)
 
-    def from_json_alarm_first_alarm(self, alarm):
+    def from_json_alarm_first_alarm(self, alarm: AlarmDict) -> bytearray:
         return self.create_first_alarm(alarm)
 
-    def create_first_alarm(self, alarm):
-        flag = 0
+    def create_first_alarm(self, alarm: AlarmDict) -> bytearray:
+        flag: int = 0
         if alarm.get("enabled"):
-            flag = flag | ENABLED_MASK
+            flag |= ENABLED_MASK
         if alarm.get("hasHourlyChime"):
-            flag = flag | HOURLY_CHIME_MASK
+            flag |= HOURLY_CHIME_MASK
 
         return bytearray(
             [
@@ -49,21 +61,21 @@ class Alarms:
             ]
         )
 
-    def from_json_alarm_secondary_alarms(self, alarms_json):
+    def from_json_alarm_secondary_alarms(self, alarms_json: list[AlarmDict]) -> bytearray:
         if len(alarms_json) < 2:
-            return []
+            return bytearray()
         alarms = self.alarms[1:]
         return self.create_secondary_alarm(alarms)
 
-    def create_secondary_alarm(self, alarms):
-        all_alarms = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
+    def create_secondary_alarm(self, alarms: list[AlarmDict]) -> bytearray:
+        all_alarms: bytearray = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
 
         for alarm in alarms:
-            flag = 0
+            flag: int = 0
             if alarm.get("enabled"):
-                flag = flag | ENABLED_MASK
+                flag |= ENABLED_MASK
             if alarm.get("hasHourlyChime"):
-                flag = flag | HOURLY_CHIME_MASK
+                flag |= HOURLY_CHIME_MASK
 
             all_alarms += bytearray(
                 [flag, ALARM_CONSTANT_VALUE, alarm.get("hour"), alarm.get("minute")]
@@ -76,10 +88,10 @@ alarms_inst = Alarms()
 
 
 class AlarmDecoder:
-    def to_json(self, command: str):
-        json_response = {}
-        int_array = to_int_array(command)
-        alarms = []
+    def to_json(self, command: str) -> dict[str, list[str]]:
+        json_response: dict[str, list[str]] = {}
+        int_array: list[int] = to_int_array(command)
+        alarms: list[str] = []
 
         if int_array[0] == CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]:
             int_array.pop(0)
@@ -88,43 +100,39 @@ class AlarmDecoder:
         elif int_array[0] == CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]:
             int_array.pop(0)
 
-            # replacement to above 2 lines
-            alarms = []
-            # split int_array into 4 subarrays
-            subarr1 = int_array[: len(int_array) // 4]
-            subarr2 = int_array[len(int_array) // 4 : len(int_array) // 2]
-            subarr3 = int_array[len(int_array) // 2 : len(int_array) * 3 // 4]
-            subarr4 = int_array[len(int_array) * 3 // 4 :]
+            quarter_len: int = len(int_array) // 4
+            subarr1 = int_array[:quarter_len]
+            subarr2 = int_array[quarter_len : 2 * quarter_len]
+            subarr3 = int_array[2 * quarter_len : 3 * quarter_len]
+            subarr4 = int_array[3 * quarter_len :]
 
-            # create json alarms for each subarray
             alarms.append(self.create_json_alarm(subarr1))
             alarms.append(self.create_json_alarm(subarr2))
             alarms.append(self.create_json_alarm(subarr3))
             alarms.append(self.create_json_alarm(subarr4))
-            # end replacement
 
             json_response["ALARMS"] = alarms
         else:
-            logger.warn("Unhandled Command {}".format(command))
+            logger.warning(f"Unhandled Command {command}")
 
         return json_response
 
-    def create_json_alarm(self, int_array):
+    def create_json_alarm(self, int_array: list[int]) -> str:
         alarm = Alarm(
-            int_array[2],
-            int_array[3],
-            int_array[0] & ENABLED_MASK != 0,
-            int_array[0] & HOURLY_CHIME_MASK != 0,
+            hour=int_array[2],
+            minute=int_array[3],
+            enabled=bool(int_array[0] & ENABLED_MASK),
+            has_hourly_chime=bool(int_array[0] & HOURLY_CHIME_MASK),
         )
         return self.to_json_new_alarm(alarm)
 
-    def to_json_new_alarm(self, alarm):
+    def to_json_new_alarm(self, alarm: Alarm) -> str:
         return json.dumps(
             {
-                "enabled": bool(alarm.enabled),
-                "hasHourlyChime": bool(alarm.has_hourly_chime),
-                "hour": int(alarm.hour),
-                "minute": int(alarm.minute),
+                "enabled": alarm.enabled,
+                "hasHourlyChime": alarm.has_hourly_chime,
+                "hour": alarm.hour,
+                "minute": alarm.minute,
             }
         )
 

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Settings:
     """Settings for G-Shock watch configuration"""
+    # Instance attributes with default values and type hints
     time_format: str = ""
     date_format: str = ""
     language: str = ""
@@ -12,4 +14,5 @@ class Settings:
     button_tone: bool = True
     time_adjustment: bool = True
 
-settings = Settings()
+# Instantiate the settings object using the typed dataclass
+settings: Settings = Settings()
