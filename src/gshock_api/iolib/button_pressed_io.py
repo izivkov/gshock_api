@@ -19,14 +19,14 @@ class WatchButton(IntEnum):
 
 
 class ButtonPressedIO:
-    result: CancelableResult | None = None
+    result: CancelableResult[WatchButton] | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> CancelableResult[WatchButton]:
         ButtonPressedIO.connection = connection
         await connection.request("10")
-        ButtonPressedIO.result = CancelableResult()
+        ButtonPressedIO.result = CancelableResult[WatchButton]()
         return await ButtonPressedIO.result.get_result()
 
     @staticmethod

@@ -14,15 +14,15 @@ class DtsState(IntEnum):
 
 
 class DstWatchStateIO:
-    result: CancelableResult | None = None
+    result: CancelableResult[bytes] | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, state: DtsState) -> CancelableResult:
+    async def request(connection: ConnectionProtocol, state: DtsState) -> CancelableResult[bytes]:
         DstWatchStateIO.connection = connection
         key = f"1d0{state.value}"
         await connection.request(key)
-        DstWatchStateIO.result = CancelableResult()
+        DstWatchStateIO.result = CancelableResult[bytes]()
         return await DstWatchStateIO.result.get_result()
 
     @staticmethod

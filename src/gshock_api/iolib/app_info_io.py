@@ -21,10 +21,10 @@ class AppInfoIO:
     connection: ConnectionProtocol = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
         AppInfoIO.connection = connection
         await connection.request("22")
-        AppInfoIO.result = CancelableResult()
+        AppInfoIO.result = CancelableResult[str]()
         return await AppInfoIO.result.get_result()
 
     @staticmethod

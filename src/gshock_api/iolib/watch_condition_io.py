@@ -18,10 +18,10 @@ class WatchConditionIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, int]]:
         WatchConditionIO.connection = connection
         await connection.request("28")
-        WatchConditionIO.result = CancelableResult()
+        WatchConditionIO.result = CancelableResult[dict[str, int]]()
         return await WatchConditionIO.result.get_result()
 
     @staticmethod
