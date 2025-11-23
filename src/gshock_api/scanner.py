@@ -45,6 +45,7 @@ class Scanner:
         
         # Use the class constant
         found: BLEDevice | None = None
+        scanner = BleakScanner()
 
         if not device_address:
             for _ in range(max_retries):
@@ -67,7 +68,7 @@ class Scanner:
                         return is_casio_service and passes_custom_filter
                     
                     # Call find_device_by_filter with the typed filter function
-                    found = await BleakScanner().find_device_by_filter(uuid_filter, timeout=10)
+                    found = await scanner.find_device_by_filter(uuid_filter, timeout=10)
                     
                     if found:
                         logger.info(f"✅ Found: {found.name} ({found.address})")

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 
 # --- Type Aliases for Clarity ---
-from typing import Final, TypeAlias, Any
+from typing import Any, Final, TypeAlias
 
 # Type for a single model's capability dictionary.
 # Keys are strings, values are the union of all primitive types and the WatchModel enum found in the model dictionary.

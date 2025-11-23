@@ -18,7 +18,7 @@ from gshock_api.utils import (
 from gshock_api.watch_info import watch_info
 
 # Type variable for unknown request/message objects (e.g., Alarm, Event)
-T = TypeVar('T') 
+T = TypeVar("T") 
 
 # Define constants for write handles based on previous context (Connection class)
 # 0xE is the CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (used for writing response back)
@@ -107,7 +107,7 @@ class GshockAPI:
         short_str: bytes = to_compact_string(hex_data)
         
         # Replaced 0xE with HANDLE_ALL_FEATURES
-        await self.connection.write(GshockAPI.HANDLE_ALL_FEATURES, short_str)
+        await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
     async def read_write_dst_watch_states(self) -> None:
         # Use dict instead of generic Map/Any
@@ -119,7 +119,7 @@ class GshockAPI:
         
         # Type inference for item and its keys
         for item in array_of_dst_watch_state[: watch_info.dstCount]:
-            function: RequestFunction = item["function"] # type: ignore[assignment] noqa: F821 # type: ignore
+            function: RequestFunction = item["function"] # type: ignore[assignment] noqa: F821 # type: ignore  # noqa: F821
             state: DtsState = item["state"] # type: ignore[assignment]
             await self.read_and_write(function, state)
 
@@ -136,7 +136,7 @@ class GshockAPI:
 
         # Type inference for item and its keys
         for item in array_of_get_dst_for_world_cities[: watch_info.worldCitiesCount]:
-            function: RequestFunction = item["function"] # type: ignore[assignment]
+            function: RequestFunction = item["function"] # type: ignore[assignment]  # noqa: F821
             city_number: int = item["city_number"] # type: ignore[assignment]
             await self.read_and_write(function, city_number)
 
@@ -293,11 +293,9 @@ class GshockAPI:
         result: str = await message_dispatcher.AppInfoIO.request(self.connection)
         return result
 
-    # notification is a dictionary representing the notification payload
     async def send_app_notification(self, notification: dict[str, object]) -> None:
         # Assuming AppNotificationIO methods handle the conversion of the dict values
         encoded_buffer: bytes = AppNotificationIO.encode_notification_packet(notification)
         encrypted_buffer: bytes = AppNotificationIO.xor_encode_buffer(encoded_buffer)
         
-        # Replaced 0xD with HANDLE_NOTIFICATION
-        await self.connection.write(GshockAPI.HANDLE_NOTIFICATION, encrypted_buffer)
+        await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)

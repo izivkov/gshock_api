@@ -1,25 +1,30 @@
+from connection_protocol import ConnectionProtocol
+
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 
-CHARACTERISTICS = CasioConstants.CHARACTERISTICS
+CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
 
 class DstForWorldCitiesIO:
     result: CancelableResult = None
     connection = None
 
     @staticmethod
-    async def request(connection, city_number: int):
+    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
         DstForWorldCitiesIO.connection = connection
         key = f"1e0{city_number}"
         await connection.request(key)
 
         DstForWorldCitiesIO.result = CancelableResult()
-        return DstForWorldCitiesIO.result.get_result()
+        return await DstForWorldCitiesIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(connection) -> None:
-        connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_DST_SETTING"]]))
+    async def send_to_watch(connection: ConnectionProtocol) -> None:
+        await connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_DST_SETTING"]]))
 
     @staticmethod
-    def on_received(data) -> None:
+    def on_received(data: bytes) -> None:
+        if DstForWorldCitiesIO.result is None:
+            raise RuntimeError("DstForWorldCitiesIO.result is not set")
         DstForWorldCitiesIO.result.set_result(data)

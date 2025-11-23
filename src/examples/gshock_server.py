@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Sequence
 from datetime import datetime
 import sys
 
@@ -18,10 +19,12 @@ __author__ = "Ivo Zivkov"
 __copyright__ = "Ivo Zivkov"
 __license__ = "MIT"
 
-async def main(argv):
+
+async def main(argv: Sequence[str]) -> None:
     await run_time_server()
 
-def prompt():
+
+def prompt() -> None:
     logger.info(
         "=============================================================================================="
     )
@@ -35,7 +38,8 @@ def prompt():
     )
     logger.info("")
 
-async def run_time_server():
+
+async def run_time_server() -> None:
     prompt()
 
     while True:
@@ -48,18 +52,16 @@ async def run_time_server():
             api = GshockAPI(connection)
             pressed_button = await api.get_pressed_button()
             if (
-                pressed_button != WatchButton.LOWER_RIGHT
-                and pressed_button != WatchButton.NO_BUTTON
-                and pressed_button != WatchButton.LOWER_LEFT
+                pressed_button not in (WatchButton.LOWER_RIGHT, WatchButton.NO_BUTTON, WatchButton.LOWER_LEFT)
             ):
                 continue
 
-            await api.get_watch_name()
+            name = await api.get_watch_name()
+            logger.info(f"name: {name}")
 
-            # Apply fine adjustment to the time
             fine_adjustment_secs = args.get().fine_adjustment_secs
-            
             await api.set_time(offset=fine_adjustment_secs)
+
             logger.info(f"Time set at {datetime.now()} on {watch_info.name}")
 
             if not watch_info.alwaysConnected:
