@@ -1,4 +1,4 @@
-name: gshock-time-server
+name: Gshock-time-server
 channels:
   - defaults
   - conda-forge
