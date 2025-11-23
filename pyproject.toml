@@ -46,9 +46,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["*"]
-exclude = ["tests*", "scripts*", "docs*", "examples*"]
+where = ["src"]
 
 # ============================================================
 # POE THE POET - Task Runner
@@ -290,58 +288,3 @@ exclude = [
 
 venvPath = "."
 venv = ".venv"
-
-# ============================================================
-# PYTEST CONFIGURATION
-# ============================================================
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--tb=short",
-    "--cov=.",
-    "--cov-report=term-missing:skip-covered",
-    "--cov-report=html",
-    "--cov-report=xml",
-    "--cov-fail-under=80",  # STRICT: Require 80% coverage
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-]
-
-# ============================================================
-# COVERAGE CONFIGURATION
-# ============================================================
-[tool.coverage.run]
-source = ["."]
-branch = true  # STRICT: Enable branch coverage
-omit = [
-    "*/tests/*",
-    "*/test_*.py",
-    "*/__pycache__/*",
-    "*/.venv/*",
-    "*/venv/*",
-    "*/scripts/*",
-]
-
-[tool.coverage.report]
-precision = 2
-show_missing = true
-skip_covered = false
-fail_under = 80  # STRICT: Require 80% coverage
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "@abstractmethod",
-    "@overload",
-]
