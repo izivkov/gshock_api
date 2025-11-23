@@ -10,7 +10,7 @@ class WatchNameIO:
     async def request(connection: object) -> str | None:
         WatchNameIO.connection = connection
         await connection.request("23")
-        WatchNameIO.result = CancelableResult()
+        WatchNameIO.result = CancelableResult[str]()
         return await WatchNameIO.result.get_result()
 
     @staticmethod

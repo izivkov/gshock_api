@@ -22,14 +22,14 @@ class SettingsDict(TypedDict):
 
 
 class SettingsIO:
-    result: CancelableResult | None = None
+    result: CancelableResult[str] | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
         SettingsIO.connection = connection
         await connection.request("13")
-        SettingsIO.result = CancelableResult()
+        SettingsIO.result = CancelableResult[str]()
         return await SettingsIO.result.get_result()
 
     @staticmethod

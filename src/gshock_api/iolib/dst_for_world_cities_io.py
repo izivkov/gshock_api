@@ -10,7 +10,7 @@ class DstForWorldCitiesIO:
     connection = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult:
+    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
         DstForWorldCitiesIO.connection = connection
         key = f"1e0{city_number}"
         await connection.request(key)

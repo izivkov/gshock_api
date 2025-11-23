@@ -6,16 +6,16 @@ CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
 
 class WorldCitiesIO:
-    result: CancelableResult | None = None
+    result: CancelableResult[bytes] | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, cityNumber: int) -> CancelableResult:
+    async def request(connection: ConnectionProtocol, cityNumber: int) -> CancelableResult[bytes]:
         WorldCitiesIO.connection = connection
         key = f"1f0{cityNumber}"
         await connection.request(key)
 
-        WorldCitiesIO.result = CancelableResult()
+        WorldCitiesIO.result = CancelableResult[bytes]()
         return await WorldCitiesIO.result.get_result()
 
     @staticmethod

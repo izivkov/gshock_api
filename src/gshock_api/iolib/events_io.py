@@ -58,7 +58,7 @@ class EventsIO:
         EventsIO.connection = connection
         await connection.request(f"30{event_number}")  # reminder title
         await connection.request(f"31{event_number}")  # reminder time
-        EventsIO.result = CancelableResult()
+        EventsIO.result = CancelableResult[dict[str, object]]()
         return await EventsIO.result.get_result()
 
     @staticmethod

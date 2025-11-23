@@ -49,9 +49,9 @@ class AlarmsIO:
         return AlarmsIO.result
 
     @staticmethod
-    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult:
+    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
         await connection.sendMessage('{ "action": "GET_ALARMS"}')
-        AlarmsIO.result = CancelableResult()
+        AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
         return await AlarmsIO.result.get_result()
 
     @staticmethod

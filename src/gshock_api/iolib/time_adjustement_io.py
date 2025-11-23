@@ -17,15 +17,15 @@ class TimeAdjustmentValueDict(TypedDict):
 
 
 class TimeAdjustmentIO:
-    result: CancelableResult | None = None
+    result: CancelableResult[dict[str, object]] | None = None
     connection: ConnectionProtocol | None = None
     original_value: str | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, object]]:
         TimeAdjustmentIO.connection = connection
         await connection.request("11")
-        TimeAdjustmentIO.result = CancelableResult()
+        TimeAdjustmentIO.result = CancelableResult[dict[str, object]]()
         return await TimeAdjustmentIO.result.get_result()
 
     @staticmethod
