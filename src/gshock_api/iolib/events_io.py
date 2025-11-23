@@ -1,10 +1,9 @@
 import json
 from typing import List, TypedDict  # noqa: UP035
 
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.logger import logger
 from gshock_api.utils import (
     clean_str,
@@ -50,16 +49,16 @@ class ReminderTimeDict(TypedDict):
 
 
 class EventsIO:
-    result: CancelableResult[dict[str, object]] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
     title: dict[str, object] | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, event_number: int) -> CancelableResult[dict[str, object]]:
+    async def request(connection: ConnectionProtocol, event_number: int) -> CancelableResult:
         EventsIO.connection = connection
         await connection.request(f"30{event_number}")  # reminder title
         await connection.request(f"31{event_number}")  # reminder time
-        EventsIO.result = CancelableResult[dict[str, object]]()
+        EventsIO.result = CancelableResult()
         return await EventsIO.result.get_result()
 
     @staticmethod

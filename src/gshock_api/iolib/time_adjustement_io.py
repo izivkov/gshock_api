@@ -1,10 +1,9 @@
 import json
 from typing import Literal, TypedDict
 
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.logger import logger
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
@@ -18,15 +17,15 @@ class TimeAdjustmentValueDict(TypedDict):
 
 
 class TimeAdjustmentIO:
-    result: CancelableResult[dict[str, object]] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
     original_value: str | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, object]]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         TimeAdjustmentIO.connection = connection
         await connection.request("11")
-        TimeAdjustmentIO.result = CancelableResult[dict[str, object]]()
+        TimeAdjustmentIO.result = CancelableResult()
         return await TimeAdjustmentIO.result.get_result()
 
     @staticmethod

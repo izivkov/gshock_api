@@ -1,9 +1,8 @@
 from typing import TypedDict
 
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.watch_info import watch_info
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -15,14 +14,14 @@ class WatchConditionValue(TypedDict):
 
 
 class WatchConditionIO:
-    result: CancelableResult[dict[str, int]] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, int]]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         WatchConditionIO.connection = connection
         await connection.request("28")
-        WatchConditionIO.result = CancelableResult[dict[str, int]]()
+        WatchConditionIO.result = CancelableResult()
         return await WatchConditionIO.result.get_result()
 
     @staticmethod

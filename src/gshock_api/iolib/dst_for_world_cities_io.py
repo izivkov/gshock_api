@@ -1,7 +1,6 @@
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -11,7 +10,7 @@ class DstForWorldCitiesIO:
     connection = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
+    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult:
         DstForWorldCitiesIO.connection = connection
         key = f"1e0{city_number}"
         await connection.request(key)

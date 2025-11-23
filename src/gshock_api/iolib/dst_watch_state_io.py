@@ -1,9 +1,8 @@
 from enum import IntEnum
 
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -15,15 +14,15 @@ class DtsState(IntEnum):
 
 
 class DstWatchStateIO:
-    result: CancelableResult[bytes] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, state: DtsState) -> CancelableResult[bytes]:
+    async def request(connection: ConnectionProtocol, state: DtsState) -> CancelableResult:
         DstWatchStateIO.connection = connection
         key = f"1d0{state.value}"
         await connection.request(key)
-        DstWatchStateIO.result = CancelableResult[bytes]()
+        DstWatchStateIO.result = CancelableResult()
         return await DstWatchStateIO.result.get_result()
 
     @staticmethod

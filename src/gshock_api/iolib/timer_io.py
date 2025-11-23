@@ -1,23 +1,22 @@
 import json
 
-from connection_protocol import ConnectionProtocol
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_compact_string, to_hex_string
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
 
 class TimerIO:
-    result: CancelableResult[int] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[int]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         TimerIO.connection = connection
         await connection.request("18")
-        TimerIO.result = CancelableResult[int]()
+        TimerIO.result = CancelableResult()
         return await TimerIO.result.get_result()
 
     @staticmethod

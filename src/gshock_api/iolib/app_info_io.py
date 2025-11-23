@@ -17,14 +17,14 @@ class ConnectionProtocol(Protocol):
 
 
 class AppInfoIO:
-    result: Optional[CancelableResult[str]] = None
-    connection: Optional[ConnectionProtocol] = None
+    result: CancelableResult = None
+    connection: ConnectionProtocol = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         AppInfoIO.connection = connection
         await connection.request("22")
-        AppInfoIO.result = CancelableResult[str]()
+        AppInfoIO.result = CancelableResult()
         return await AppInfoIO.result.get_result()
 
     @staticmethod

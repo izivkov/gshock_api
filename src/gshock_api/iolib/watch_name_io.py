@@ -3,14 +3,14 @@ from gshock_api.utils import clean_str, to_ascii_string, to_hex_string
 
 
 class WatchNameIO:
-    result: CancelableResult[str] | None = None
+    result: CancelableResult | None = None
     connection: object | None = None  # Replace 'object' with a Protocol for connection if available
 
     @staticmethod
     async def request(connection: object) -> str | None:
         WatchNameIO.connection = connection
         await connection.request("23")
-        WatchNameIO.result = CancelableResult[str]()
+        WatchNameIO.result = CancelableResult()
         return await WatchNameIO.result.get_result()
 
     @staticmethod

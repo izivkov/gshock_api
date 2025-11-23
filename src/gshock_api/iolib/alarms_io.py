@@ -1,21 +1,14 @@
 import json
-from typing import Optional, Protocol, List
+from typing import Protocol
 
 from gshock_api.alarms import alarm_decoder, alarms_inst
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_compact_string, to_hex_string
-
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
-
-class ConnectionProtocol(Protocol):
-    async def sendMessage(self, message: str) -> None:
-        ...
-
-    async def write(self, handle: int, data: str) -> None:
-        ...
 
 
 class AlarmDecoderProtocol(Protocol):
@@ -44,11 +37,11 @@ alarms_inst_typed: AlarmsInstProtocol = alarms_inst  # type: ignore[assignment]
 
 
 class AlarmsIO:
-    result: Optional[CancelableResult[list[dict[str, object]]]] = None
-    connection: Optional[ConnectionProtocol] = None
+    result: CancelableResult | None = None
+    connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         AlarmsIO.connection = connection
         alarms_inst_typed.clear()
         await AlarmsIO._get_alarms(connection)
@@ -56,13 +49,13 @@ class AlarmsIO:
         return AlarmsIO.result
 
     @staticmethod
-    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
+    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult:
         await connection.sendMessage('{ "action": "GET_ALARMS"}')
-        AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
+        AlarmsIO.result = CancelableResult()
         return await AlarmsIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(message: str = "") -> None:
+    async def send_to_watch(_: str = "") -> None:
         if AlarmsIO.connection is None:
             raise RuntimeError("AlarmsIO.connection is not set")
 

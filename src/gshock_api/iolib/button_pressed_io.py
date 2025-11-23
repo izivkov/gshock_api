@@ -1,10 +1,8 @@
 from enum import IntEnum
-from typing import Protocol
-
-from connection_protocol import ConnectionProtocol
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_hex_string, to_int_array
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -20,16 +18,15 @@ class WatchButton(IntEnum):
     FIND = 7
 
 
-
 class ButtonPressedIO:
-    result: CancelableResult[WatchButton] | None = None
+    result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[WatchButton]:
+    async def request(connection: ConnectionProtocol) -> CancelableResult:
         ButtonPressedIO.connection = connection
         await connection.request("10")
-        ButtonPressedIO.result = CancelableResult[WatchButton]()
+        ButtonPressedIO.result = CancelableResult()
         return await ButtonPressedIO.result.get_result()
 
     @staticmethod

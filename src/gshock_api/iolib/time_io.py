@@ -3,7 +3,7 @@ import json
 import time
 from typing import Optional, Protocol
 
-from connection_protocol import ConnectionProtocol
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.exceptions import GShockIgnorableException
@@ -32,9 +32,10 @@ class TimeIO:
     @staticmethod
     async def send_to_watch_set(message: str) -> None:
         data: dict[str, object] = json.loads(message)
-        value: dict[str, object] = value = data.get("value", {})
+        value: dict[str, object] = data.get("value", {})
 
-        timestamp: Optional[float] = value.get("time")  # type: ignore
+
+        timestamp: float | None = value.get("time")  # type: ignore
         offset: int = int(value.get("offset", 0))      # type: ignore
 
         if timestamp is None:
