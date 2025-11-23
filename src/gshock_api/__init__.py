@@ -1,5 +1,4 @@
 from importlib.metadata import PackageNotFoundError, version  # pragma: no cover
-import sys
 
 try:
     dist_name = "gshock_api"

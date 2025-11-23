@@ -6,7 +6,6 @@ from gshock_api.casio_constants import CasioConstants
 from gshock_api.logger import logger
 from gshock_api.utils import to_int_array
 
-
 HOURLY_CHIME_MASK: int = 0b10000000
 ENABLED_MASK: int = 0b01000000
 ALARM_CONSTANT_VALUE: int = 0x40

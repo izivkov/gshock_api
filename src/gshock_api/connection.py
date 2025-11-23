@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 from bleak import BleakClient
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.exc import BleakDBusError
+
 from gshock_api import message_dispatcher
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.exceptions import GShockConnectionError, GShockIgnorableException

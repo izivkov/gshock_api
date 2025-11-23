@@ -12,23 +12,23 @@ ModelMap: TypeAlias = dict[Any, ModelCapability]  # type: ignore  # noqa: F821, 
 class WatchModel(IntEnum):
     """Enum for watch models replacing WATCH_MODEL class"""
     # Using explicit types for better compatibility, though IntEnum handles this
-    GA: Final[int] = 1  
-    GW: Final[int] = 2
-    DW: Final[int] = 3
-    GMW: Final[int] = 4
-    GPR: Final[int] = 5
-    GST: Final[int] = 6
-    MSG: Final[int] = 7
-    GB001: Final[int] = 8
-    GBD: Final[int] = 9
-    ECB: Final[int] = 10
-    MRG: Final[int] = 11
-    OCW: Final[int] = 12
-    GB: Final[int] = 13
-    GM: Final[int] = 14
-    ABL: Final[int] = 15
-    DW_H: Final[int] = 16
-    UNKNOWN: Final[int] = 20
+    GA: int = 1  
+    GW: int = 2
+    DW: int = 3
+    GMW: int = 4
+    GPR: int = 5
+    GST: int = 6
+    MSG: int = 7
+    GB001: int = 8
+    GBD: int = 9
+    ECB: int = 10
+    MRG: int = 11
+    OCW: int = 12
+    GB: int = 13
+    GM: int = 14
+    ABL: int = 15
+    DW_H: int = 16
+    UNKNOWN: int = 20
 
 @dataclass
 class WatchInfo:
