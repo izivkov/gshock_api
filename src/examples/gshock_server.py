@@ -23,7 +23,6 @@ __license__ = "MIT"
 async def main(argv: Sequence[str]) -> None:
     await run_time_server()
 
-
 def prompt() -> None:
     logger.info(
         "=============================================================================================="
