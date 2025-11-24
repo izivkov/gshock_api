@@ -145,7 +145,7 @@ wheels = [
 
 [[package]]
 name = "gshock-api"
-version = "2.0.31"
+version = "2.0.32"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
