@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any, Final, TypeAlias
 
-ModelCapability: TypeAlias = dict[str, Any]
-ModelMap: TypeAlias = dict[Any, ChainMap]
+ModelCapability: TypeAlias = dict[str, Any] # noqa: UP040
+ModelMap: TypeAlias = dict[Any, ChainMap]  # noqa: UP040
 
 
 class WatchModel(IntEnum):

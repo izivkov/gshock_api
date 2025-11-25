@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import Sequence
 from datetime import datetime
 import json
+from pprint import pprint
 import sys
 import time
 from typing import Optional
@@ -111,11 +112,13 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             + """}}"""
         )
         Event().create_event(json.loads(event_json_str))
-        logger.info(f"Created event: {event_json_str}")
+        print("Created event: ")  # noqa: T201
+        pprint(event_json_str)  # noqa: T203
 
         reminders = await api.get_reminders()
         for reminder in reminders:
-            logger.info(f"reminder: {reminder}")
+            print ("reminder: ") # noqa: T201
+            pprint (reminder) # noqa: T203
 
         reminders[3]["title"] = "Test Event"
 

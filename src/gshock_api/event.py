@@ -1,7 +1,7 @@
 from __future__ import annotations  # Enables forward references like 'Event'
 
 from dataclasses import dataclass
-from datetime import date, datetime, tzinfo
+from datetime import datetime
 import json
 import types
 from typing import TYPE_CHECKING, Final, TypeVar
@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from collections.abc import (  # Using Mapping for dict types where object values are complex
         Mapping,
     )
+    from datetime import date, tzinfo
 
 # Define a Type Variable T for generic message objects
 T = TypeVar("T") 
