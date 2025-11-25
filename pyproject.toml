@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gshock_api"  # Change to your project name
-version = "2.0.32"
+version = "2.0.34"
 description = "Pythgon API for GShock Watches using BLE"
 authors = [{ name = "Ivo Zivkov", email = "izivkov@gmail.com" }]
 
@@ -25,6 +25,7 @@ dependencies = [
     "types-requests",
     "python-dotenv",
     "typing-extensions>=4.12",
+    "twine>=6.2.0",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
