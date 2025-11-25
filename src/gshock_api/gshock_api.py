@@ -124,38 +124,16 @@ class GshockAPI:
             await self.read_and_write(function, state)
 
     async def read_write_dst_for_world_cities(self) -> None:
-        # Use dict instead of generic Map/Any
-        array_of_get_dst_for_world_cities: list[dict[str, RequestFunction | int]] = [  # noqa: F821 # type: ignore
-            {"function": self.get_dst_for_world_cities, "city_number": 0},
-            {"function": self.get_dst_for_world_cities, "city_number": 1},
-            {"function": self.get_dst_for_world_cities, "city_number": 2},
-            {"function": self.get_dst_for_world_cities, "city_number": 3},
-            {"function": self.get_dst_for_world_cities, "city_number": 4},
-            {"function": self.get_dst_for_world_cities, "city_number": 5},
-        ]
+        fn = self.get_dst_for_world_cities
 
-        # Type inference for item and its keys
-        for item in array_of_get_dst_for_world_cities[: watch_info.worldCitiesCount]:
-            function: RequestFunction = item["function"] # type: ignore[assignment]  # noqa: F821
-            city_number: int = item["city_number"] # type: ignore[assignment]
-            await self.read_and_write(function, city_number)
+        for city_number in range(watch_info.worldCitiesCount):
+            await self.read_and_write(fn, city_number)
 
     async def read_write_world_cities(self) -> None:
-        # Use dict instead of generic Map/Any
-        array_of_world_cities: list[dict[str, RequestFunction | int]] = [  # noqa: F821 # type: ignore
-            {"function": self.get_world_cities, "city_number": 0},
-            {"function": self.get_world_cities, "city_number": 1},
-            {"function": self.get_world_cities, "city_number": 2},
-            {"function": self.get_world_cities, "city_number": 3},
-            {"function": self.get_world_cities, "city_number": 4},
-            {"function": self.get_world_cities, "city_number": 5},
-        ]
+        fn = self.get_world_cities
 
-        # Type inference for item and its keys
-        for item in array_of_world_cities[: watch_info.worldCitiesCount]:
-            function: RequestFunction = item["function"]  # noqa: F821 # type: ignore
-            city_number: int = item["city_number"] # type: ignore[assignment]
-            await self.read_and_write(function, city_number)
+        for city_number in range(watch_info.worldCitiesCount):
+            await self.read_and_write(fn, city_number)
 
     # current_time is unknown type, using object | None
     async def set_time(
@@ -241,16 +219,7 @@ class GshockAPI:
 
     # get_reminders returns a list of unknown Event objects (list[T])
     async def get_reminders(self) -> list[T]:
-        """Gets the current reminders (events) from the watch."""
-        reminders: list[T] = [] # type: ignore[assignment]
-
-        reminders.append(await self.get_event_from_watch(1)) # type: ignore[arg-type]
-        reminders.append(await self.get_event_from_watch(2)) # type: ignore[arg-type]
-        reminders.append(await self.get_event_from_watch(3)) # type: ignore[arg-type]
-        reminders.append(await self.get_event_from_watch(4)) # type: ignore[arg-type]
-        reminders.append(await self.get_event_from_watch(5)) # type: ignore[arg-type]
-
-        return reminders
+        return [await self.get_event_from_watch(i) for i in range(1, 6)]
 
     # get_event_from_watch returns an unknown Event object (T)
     async def get_event_from_watch(self, event_number: int) -> T:

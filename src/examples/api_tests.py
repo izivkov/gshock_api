@@ -2,7 +2,7 @@ import asyncio
 from collections.abc import Sequence
 from datetime import datetime
 import json
-from pprint import pprint
+from pprint import pformat
 import sys
 import time
 from typing import Optional
@@ -59,7 +59,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         await api.set_time(time.time() + 10 * 60)
 
         alarms = await api.get_alarms()
-        logger.info(f"alarms: {alarms}")
+        logger.info(f"alarms: {pformat(alarms)}")
 
         alarms[3]["enabled"] = True
         alarms[3]["hour"] = 7
@@ -80,7 +80,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         logger.info(f"condition: {condition}")
 
         settings_local = await api.get_basic_settings()
-        logger.info(f"settings: {settings_local}")
+        logger.info(f"settings: {pformat(settings_local)}")
 
         settings_local["button_tone"] = True
         settings_local["language"] = "Russian"
@@ -112,13 +112,11 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             + """}}"""
         )
         Event().create_event(json.loads(event_json_str))
-        print("Created event: ")  # noqa: T201
-        pprint(event_json_str)  # noqa: T203
+        logger.info(f"Created event: {pformat(json.loads(event_json_str))}")
 
         reminders = await api.get_reminders()
         for reminder in reminders:
-            print ("reminder: ") # noqa: T201
-            pprint (reminder) # noqa: T203
+            logger.info (f"reminder: {pformat(reminder)}")
 
         reminders[3]["title"] = "Test Event"
 
