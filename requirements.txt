@@ -1,7 +1,0 @@
-pytz
-bleak>=1.0.1
-pydantic>=2.0.0
-types-requests
-python-dotenv
-typing-extensions>=4.12
-twine>=6.2.0

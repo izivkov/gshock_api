@@ -41,24 +41,6 @@ It can perform the following tasks:
 - Get/Set watch's Timer
 - Send notifications to watch (supported models)
 
-Dependencies
-============
-
-This project requires the following Python packages:
-.. code-block:: sh
-
-   pytz
-   bleak
-
-
-So you can install them using the following command:
-.. code-block:: sh
-    
-   pip3 install -r requirements.txt
-
-
-To understand how to use the library, please refer to the **`src/examples`** folder.
-
 Running the tests
 =================
 
@@ -78,13 +60,15 @@ or activate `venv`` first and then run using python:
 Installing the library for your project:
 ========================================
 
+Add dependency on this library in your `pyproject.toml`
+
 .. code-block:: sh
 
-   pip3 install gshock-api
+   dependencies = [
+    "gshock-api>=2.0.35",
+    ...
+]
 
-See `this project <https://github.com/izivkov/GShockTimeServer>`_ using this library to run a time server for G-Shock watches.
-
-See also `this blog <https://digitalsober.wordpress.com/2024/05/05/g-shock-watch-integration-with-sxmo/>`_ for using the library in the `SXMO <https://sxmo.org/>`_ mobile environment.
 
 Troubleshooting:
 ================
