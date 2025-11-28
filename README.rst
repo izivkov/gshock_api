@@ -79,15 +79,16 @@ It is recommended that you create a virtual environment to run the tests:
 
 2. Run the tests:
 
-```
-uv run src/examples/api_tests.py
-```
- or activate `venv`` first and then run using python:
- ```
-source .venv/bin/activate
-python src/examples/api_tests.py
+   .. code-block:: sh
 
- ```
+      uv run src/examples/api_tests.py
+
+or activate `venv`` first and then run using python:
+
+   .. code-block:: sh
+      
+      source .venv/bin/activate
+      python src/examples/api_tests.py
 
 Installing the library for your project:
 ========================================
