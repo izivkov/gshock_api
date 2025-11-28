@@ -100,8 +100,7 @@ class Connection:
     def is_service_supported(self, handle: int) -> bool:
         """Checks if a characteristic UUID mapped to a handle is present in the discovered characteristics."""
         uuid: str | None = self.handles_map.get(handle)
-        
-        return uuid not in self.characteristics_map
+        return uuid is not None and uuid in self.characteristics_map
 
     async def write(self, handle: int, data: bytes) -> None:
         """Writes data to a characteristic identified by its handle."""
@@ -118,13 +117,14 @@ class Connection:
                     )
                 return
 
-            responseType: bool = handle == 0x0E  # noqa: N806, PLR2004
+            # 0x0E is CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (requires response)
+            response_type: bool = handle == 0x0E
             
             cmd_data: bytes = to_casio_cmd(data)
 
             if self.client:
                 await self.client.write_gatt_char(
-                    uuid, cmd_data, response=responseType
+                    uuid, cmd_data, response=response_type
                 )
 
         except Exception as e:
@@ -155,6 +155,6 @@ class Connection:
         return handles_map
 
     # Replaced Any with TypeVar T
-    async def sendMessage(self, message: T) -> None:  # noqa: N802
+    async def send_message(self, message: T) -> None:
         """Sends a message to the watch using the message dispatcher."""
         await message_dispatcher.MessageDispatcher.send_to_watch(message)

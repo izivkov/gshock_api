@@ -54,23 +54,23 @@ class GshockAPI:
         result: WatchButton = await message_dispatcher.ButtonPressedIO.request(self.connection)
         return result
 
-    async def get_world_cities(self, cityNumber: int) -> str:  # noqa: N803
+    async def get_world_cities(self, city_number: int) -> str:
         """Get the name for a particular World City set on the watch."""
-        return await self._get_world_cities(cityNumber)
+        return await self._get_world_cities(city_number)
 
-    async def _get_world_cities(self, key: int) -> str:
+    async def _get_world_cities(self, city_number: int) -> str:
         # Assuming WorldCitiesIO.request returns a string
-        result: str = await message_dispatcher.WorldCitiesIO.request(self.connection, key)
+        result: str = await message_dispatcher.WorldCitiesIO.request(self.connection, city_number)
         return result
 
-    async def get_dst_for_world_cities(self, cityNumber: int) -> str:  # noqa: N803
+    async def get_dst_for_world_cities(self, city_number: int) -> str:
         """Get the **Daylight Saving Time** for a particular World City set on the watch."""
-        return await self._get_dst_for_world_cities(cityNumber)
+        return await self._get_dst_for_world_cities(city_number)
 
-    async def _get_dst_for_world_cities(self, key: int) -> str:
+    async def _get_dst_for_world_cities(self, city_number: int) -> str:
         # Assuming DstForWorldCitiesIO.request returns a string
         result: str = await message_dispatcher.DstForWorldCitiesIO.request(
-            self.connection, key
+            self.connection, city_number
         )
         return result
 
@@ -169,8 +169,8 @@ class GshockAPI:
         # Assuming T objects are JSON serializable
         alarms_str: str = json.dumps(alarms)
         set_action_cmd: str = f'{{"action":"SET_ALARMS", "value":{alarms_str} }}'
-        # connection.sendMessage expects T, which must be convertible to a watch message
-        await self.connection.sendMessage(set_action_cmd)
+        # connection.send_message expects T, which must be convertible to a watch message
+        await self.connection.send_message(set_action_cmd)
 
     async def get_timer(self) -> int:
         """Get Timer value in seconds."""
@@ -181,10 +181,10 @@ class GshockAPI:
         result: int = await message_dispatcher.TimerIO.request(self.connection)
         return result
 
-    async def set_timer(self, timerValue: int) -> None:  # noqa: N803
+    async def set_timer(self, timer_value: int) -> None:
         """Set Timer value in seconds."""
-        message: str = f'{{"action": "SET_TIMER", "value": {timerValue} }}'
-        await self.connection.sendMessage(message)
+        message: str = f'{{"action": "SET_TIMER", "value": {timer_value} }}'
+        await self.connection.send_message(message)
 
     # Watch condition request returns an unknown object (object)
     async def get_watch_condition(self) -> object:
@@ -202,7 +202,7 @@ class GshockAPI:
     ) -> None:
         """Sets auto-tame adjustment for the watch"""
         message: str = f"""{{"action": "SET_TIME_ADJUSTMENT", "timeAdjustment": "{time_adjustement}", "minutesAfterHour": "{minutes_after_hour}" }}"""
-        await self.connection.sendMessage(message)
+        await self.connection.send_message(message)
 
     # SettingsIO returns a list of unknown Setting objects (list[T])
     async def get_basic_settings(self) -> list[T]:
@@ -215,7 +215,7 @@ class GshockAPI:
         """Set settings to the watch."""
         setting_json: str = json.dumps(settings)
         message: str = f'{{"action": "SET_SETTINGS", "value": {setting_json} }}'
-        await self.connection.sendMessage(message)
+        await self.connection.send_message(message)
 
     # get_reminders returns a list of unknown Event objects (list[T])
     async def get_reminders(self) -> list[T]:
@@ -253,7 +253,7 @@ class GshockAPI:
         events_as_json: list[Mapping[str, object]] = to_json(events)
         enabled: list[Mapping[str, object]] = get_enabled_events(events_as_json)
 
-        await self.connection.sendMessage(
+        await self.connection.send_message(
             f"""{{"action": "SET_REMINDERS", "value": {json.dumps(enabled)}}}"""
         )
 

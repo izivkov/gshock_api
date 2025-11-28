@@ -79,16 +79,15 @@ It is recommended that you create a virtual environment to run the tests:
 
 2. Run the tests:
 
-   .. code-block:: sh
+```
+uv run src/examples/api_tests.py
+```
+ or activate `venv`` first and then run using python:
+ ```
+source .venv/bin/activate
+python src/examples/api_tests.py
 
-      python3 src/examples/api_tests.py [--multi-watch]
-
-The optional **`--multi-watch`** parameter forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
-the library will try to connect to the last connected watch only. If you have multiple watches, you should use this parameter.
-      
-The optional **`--multi-watch`** parameter forces the library to scan for watches every time it tries to connect to a watch. If not provided, 
-the library will try to connect to the last connected watch only. If you have multiple watches, you should use this parameter.
-
+ ```
 
 Installing the library for your project:
 ========================================
@@ -99,7 +98,7 @@ Installing the library for your project:
 
 See `this project <https://github.com/izivkov/GShockTimeServer>`_ using this library to run a time server for G-Shock watches.
 
-See also `this blog <https://digitalsober.wordpress.com/2025/05/05/g-shock-watch-integration-with-sxmo/>`_ for using the library in the `SXMO <https://sxmo.org/>`_ mobile environment.
+See also `this blog <https://digitalsober.wordpress.com/2024/05/05/g-shock-watch-integration-with-sxmo/>`_ for using the library in the `SXMO <https://sxmo.org/>`_ mobile environment.
 
 Troubleshooting:
 ================

@@ -27,7 +27,7 @@ class TimeIO:
                 "offset": offset,  # must always be an integer
             },
         }
-        await connection.sendMessage(json.dumps(message))
+        await connection.send_message(json.dumps(message))
 
     @staticmethod
     async def send_to_watch_set(message: str) -> None:

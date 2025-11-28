@@ -1,5 +1,5 @@
 import json
-from typing import List, TypedDict  # noqa: UP035
+from typing import TypedDict
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
@@ -45,7 +45,7 @@ class ReminderTimeDict(TypedDict):
     repeat_period: str
     start_date: DateDict
     end_date: DateDict
-    days_of_week: List[str]
+    days_of_week: list[str]
 
 
 class EventsIO:

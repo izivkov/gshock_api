@@ -1,10 +1,10 @@
 from collections import ChainMap
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Final, TypeAlias
+from typing import Any, Final
 
-ModelCapability: TypeAlias = dict[str, Any] # noqa: UP040
-ModelMap: TypeAlias = dict[Any, ChainMap]  # noqa: UP040
+type ModelCapability = dict[str, Any]
+type ModelMap = dict[Any, ChainMap]
 
 
 class WatchModel(IntEnum):

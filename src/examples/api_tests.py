@@ -5,7 +5,6 @@ import json
 from pprint import pformat
 import sys
 import time
-from typing import Optional
 
 import pytz
 
@@ -205,11 +204,10 @@ async def app_notifications(api: GshockAPI) -> None:
     await api.send_app_notification(email_notification2)
 
 
-def convert_time_string_to_epoch(time_string: str) -> Optional[float]:
+def convert_time_string_to_epoch(time_string: str) -> float | None:
     try:
         time_object = datetime.strptime(time_string, "%H:%M:%S")
-        timestamp = time_object.timestamp()
-        return timestamp
+        return time_object.timestamp()
     except ValueError:
         logger.info("Invalid time format. Please use the format HH:MM:SS.")
         return None

@@ -24,10 +24,10 @@ MAX_SCAN_RETRIES: Final[int] = 60
 # --- Type Aliases ---
 
 # WatchFilter is a function that takes a BLEDevice name (str) and returns a boolean.
-WatchFilter: Final[Callable[[str], bool]] = Callable[[str], bool]
+type WatchFilter = Callable[[str], bool] | None
 
 # Type for the filter used in find_device_by_filter (takes device and ad data, returns bool)
-BleakDeviceFilter: Final[Callable[[BLEDevice, AdvertisementData], bool]] = Callable[[BLEDevice, AdvertisementData], bool]
+type BleakDeviceFilter = Callable[[BLEDevice, AdvertisementData], bool]
 
 
 class Scanner:
@@ -38,8 +38,7 @@ class Scanner:
     async def scan(
         self,
         device_address: str | None = None,
-        # Replaced the untyped watch_filter=None with a properly typed Callable or None
-        watch_filter: WatchFilter | None = None, # type: ignore
+        watch_filter: WatchFilter = None,
         max_retries: int = MAX_SCAN_RETRIES
     ) -> BLEDevice | None:
         

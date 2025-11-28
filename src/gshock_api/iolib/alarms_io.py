@@ -45,12 +45,13 @@ class AlarmsIO:
         AlarmsIO.connection = connection
         alarms_inst_typed.clear()
         await AlarmsIO._get_alarms(connection)
-        assert AlarmsIO.result is not None  # noqa: S101
+        if AlarmsIO.result is None:
+            raise RuntimeError("AlarmsIO.result must not be None after _get_alarms")
         return AlarmsIO.result
 
     @staticmethod
     async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
-        await connection.sendMessage('{ "action": "GET_ALARMS"}')
+        await connection.send_message('{ "action": "GET_ALARMS"}')
         AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
         return await AlarmsIO.result.get_result()
 

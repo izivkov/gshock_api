@@ -10,9 +10,9 @@ class WorldCitiesIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, cityNumber: int) -> CancelableResult[bytes]:
+    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
         WorldCitiesIO.connection = connection
-        key = f"1f0{cityNumber}"
+        key = f"1f0{city_number}"
         await connection.request(key)
 
         WorldCitiesIO.result = CancelableResult[bytes]()
