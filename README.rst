@@ -59,25 +59,10 @@ So you can install them using the following command:
 
 To understand how to use the library, please refer to the **`src/examples`** folder.
 
-Virtual Environment Setup
-=========================
+Running the tests
+=================
 
-It is recommended that you create a virtual environment to run the tests:
-
-1. Create a virtual environment:
-
-   .. code-block:: sh
-
-      # Create a virtual environment
-      python3 -m venv venv
-
-      # Activate it (Mac/Linux)
-      source venv/bin/activate
-
-      # Install dependencies
-      pip3 install -e .
-
-2. Run the tests:
+To run the test do the following:
 
    .. code-block:: sh
 
@@ -86,7 +71,7 @@ It is recommended that you create a virtual environment to run the tests:
 or activate `venv`` first and then run using python:
 
    .. code-block:: sh
-      
+
       source .venv/bin/activate
       python src/examples/api_tests.py
 
