@@ -1,6 +1,7 @@
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.iolib.packet import Header, Protocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -12,7 +13,7 @@ class DstForWorldCitiesIO:
     @staticmethod
     async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
         DstForWorldCitiesIO.connection = connection
-        key = f"1e0{city_number}"
+        key = f"{Protocol.DST_SETTING.value:02x}0{city_number}"
         await connection.request(key)
 
         DstForWorldCitiesIO.result = CancelableResult()
@@ -20,7 +21,8 @@ class DstForWorldCitiesIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        await connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_DST_SETTING"]]))
+        header = Header(Protocol.DST_SETTING, size=1)
+        await connection.write(0x000C, bytearray([header.protocol.value]))
 
     @staticmethod
     def on_received(data: bytes) -> None:

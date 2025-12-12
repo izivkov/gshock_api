@@ -4,6 +4,7 @@ from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_hex_string, to_int_array
+from gshock_api.iolib.packet import Header, Payload, Protocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -25,13 +26,14 @@ class ButtonPressedIO:
     @staticmethod
     async def request(connection: ConnectionProtocol) -> CancelableResult[WatchButton]:
         ButtonPressedIO.connection = connection
-        await connection.request("10")
+        await connection.request(f"{Protocol.BLE_FEATURES.value:02X}")
         ButtonPressedIO.result = CancelableResult[WatchButton]()
         return await ButtonPressedIO.result.get_result()
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        await connection.write(0x000C, bytearray([CHARACTERISTICS["CASIO_BLE_FEATURES"]]))
+        header = Header(Protocol.BLE_FEATURES, size=1)
+        await connection.write(0x000C, bytearray([header.protocol.value]))
 
     @staticmethod
     async def send_to_watch_set(data: bytes | str) -> None:
@@ -50,11 +52,20 @@ class ButtonPressedIO:
             AUTO-TIME:    0x10 17 62 16 05 85 dd 7f ->03<- 03 0f ff ff ff ff 24 00 00 00 // no button pressed
             """
             default_button = WatchButton.INVALID
+            
             if len(data_bytes) < 19:
                 return default_button
-
-            ble_int_arr = to_int_array(to_hex_string(data_bytes))
-            button_indicator = ble_int_arr[8]
+            
+            try:
+                header = Header(Protocol(data_bytes[0]), size=len(data_bytes))
+                if header.protocol != Protocol.BLE_FEATURES:
+                     return default_button
+                
+                payload = Payload(bytearray(data_bytes[1:]))
+                # Original index 8 fits at payload index 7
+                button_indicator = payload.data[7]
+            except (ValueError, IndexError):
+                return default_button
 
             class ButtonIndicatorCodes:
                 RESET = 0

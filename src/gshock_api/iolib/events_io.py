@@ -48,6 +48,9 @@ class ReminderTimeDict(TypedDict):
     days_of_week: list[str]
 
 
+from gshock_api.iolib.packet import Header, Payload, Protocol
+
+
 class EventsIO:
     result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
@@ -56,8 +59,10 @@ class EventsIO:
     @staticmethod
     async def request(connection: ConnectionProtocol, event_number: int) -> CancelableResult:
         EventsIO.connection = connection
-        await connection.request(f"30{event_number}")  # reminder title
-        await connection.request(f"31{event_number}")  # reminder time
+        # 30 is REMINDER_TITLE (0x30)
+        await connection.request(f"{Protocol.REMINDER_TITLE.value:02X}{event_number}")  # reminder title
+        # 31 is REMINDER_TIME (0x31)
+        await connection.request(f"{Protocol.REMINDER_TIME.value:02X}{event_number}")  # reminder time
         EventsIO.result = CancelableResult[dict[str, object]]()
         return await EventsIO.result.get_result()
 
@@ -181,21 +186,26 @@ class EventsIO:
             reminder_json: dict[str, object] = element
             title = reminder_title_from_json(reminder_json)
 
-            title_byte_arr = bytearray([CHARACTERISTICS["CASIO_REMINDER_TITLE"]])
-            title_byte_arr += bytearray([index + 1])
-            title_byte_arr += title
-            title_byte_arr_to_send = to_compact_string(to_hex_string(title_byte_arr))
+            # Reminder Title Packet = [0x30] + [index+1] + [title...]
+            # Header protocol=0x30. Payload=[index+1] + [title...]
+            
+            payload_title = Payload(data=bytearray([index + 1]) + title)
+            packet_bytes_title = bytearray([Protocol.REMINDER_TITLE.value]) + payload_title.data
+            
+            title_byte_arr_to_send = to_compact_string(to_hex_string(packet_bytes_title))
 
             if EventsIO.connection is None:
                 raise RuntimeError("EventsIO.connection not set")
 
             await EventsIO.connection.write(0x000E, title_byte_arr_to_send)
-
-            reminder_time_byte_arr = bytearray()
-            reminder_time_byte_arr += bytearray([CHARACTERISTICS["CASIO_REMINDER_TIME"]])
-            reminder_time_byte_arr += bytearray([index + 1])
-            reminder_time_byte_arr += reminder_time_from_json(reminder_json.get("time"))
-            reminder_time_byte_arr_to_send = to_compact_string(to_hex_string(bytearray(reminder_time_byte_arr)))
+            
+            # Reminder Time Packet = [0x31] + [index+1] + [time...]
+            
+            time_data = reminder_time_from_json(reminder_json.get("time"))
+            payload_time = Payload(data=bytearray([index + 1]) + time_data)
+            packet_bytes_time = bytearray([Protocol.REMINDER_TIME.value]) + payload_time.data
+            
+            reminder_time_byte_arr_to_send = to_compact_string(to_hex_string(packet_bytes_time))
 
             await EventsIO.connection.write(0x000E, reminder_time_byte_arr_to_send)
 

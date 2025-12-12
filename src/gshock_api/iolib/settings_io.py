@@ -7,6 +7,7 @@ from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.logger import logger
 from gshock_api.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
+from gshock_api.iolib.packet import Header, Payload, Protocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -28,16 +29,18 @@ class SettingsIO:
     @staticmethod
     async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
         SettingsIO.connection = connection
-        await connection.request("13")
+        await connection.request(f"{Protocol.SETTING_FOR_BASIC.value:02X}")
         SettingsIO.result = CancelableResult[str]()
         return await SettingsIO.result.get_result()
 
     @staticmethod
-    def send_to_watch(message: str) -> None:
+    async def send_to_watch(message: str) -> None:
         if SettingsIO.connection is None:
             raise RuntimeError("SettingsIO.connection is not set")
-        SettingsIO.connection.write(
-            0x000C, bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_BASIC"]])
+        
+        header = Header(Protocol.SETTING_FOR_BASIC, size=1)
+        await SettingsIO.connection.write(
+            0x000C, bytearray([header.protocol.value])
         )
 
     @staticmethod
@@ -49,7 +52,7 @@ class SettingsIO:
             POWER_SAVING_MODE = 0b00010000
 
             arr = bytearray(12)
-            arr[0] = CHARACTERISTICS["CASIO_SETTING_FOR_BASIC"]
+            arr[0] = Protocol.SETTING_FOR_BASIC.value
             if settings["time_format"] == "24h":
                 arr[1] |= mask_24_hours
             if not settings["button_tone"]:
@@ -79,8 +82,18 @@ class SettingsIO:
         json_setting: SettingsDict = json.loads(message).get("value")  # type: ignore
         if SettingsIO.connection is None:
             raise RuntimeError("SettingsIO.connection is not set")
+        
         encoded_setting = encode(json_setting)
-        setting_to_set = to_compact_string(to_hex_string(encoded_setting))
+        # encoded_setting[0] is header/protocol. 
+        # Construct packet properly?
+        # Protocol is SETTING_FOR_BASIC. Payload is the rest.
+        
+        payload = Payload(data=encoded_setting[1:])
+        
+        # Reconstruct bytes for sending: Protocol + Payload
+        packet_bytes = bytearray([Protocol.SETTING_FOR_BASIC.value]) + payload.data
+        
+        setting_to_set = to_compact_string(to_hex_string(packet_bytes))
         await SettingsIO.connection.write(0x000E, setting_to_set)
 
     @staticmethod
