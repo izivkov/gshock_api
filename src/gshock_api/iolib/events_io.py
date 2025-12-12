@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass
 from typing import TypedDict
 
 from gshock_api.cancelable_result import CancelableResult
@@ -46,6 +47,12 @@ class ReminderTimeDict(TypedDict):
     start_date: DateDict
     end_date: DateDict
     days_of_week: list[str]
+
+
+@dataclass
+class TimePeriod:
+    enabled: bool
+    repeat_period: str
 
 
 from gshock_api.iolib.packet import Header, Payload, Protocol
@@ -217,7 +224,7 @@ class EventsIO:
             def convert_array_list_to_json_array(array_list: list[object]) -> list[object]:
                 return [item for item in array_list]
 
-            def decode_time_period(time_period: int) -> tuple[bool, str]:
+            def decode_time_period(time_period: int) -> TimePeriod:
                 enabled = (time_period & ReminderMasks.ENABLED_MASK) == ReminderMasks.ENABLED_MASK
                 if (time_period & ReminderMasks.WEEKLY_MASK) == ReminderMasks.WEEKLY_MASK:
                     repeat_period = "WEEKLY"
@@ -227,7 +234,7 @@ class EventsIO:
                     repeat_period = "YEARLY"
                 else:
                     repeat_period = "NEVER"
-                return enabled, repeat_period
+                return TimePeriod(enabled, repeat_period)
 
             def decode_time_detail(time_detail: list[int]) -> dict[str, object]:
                 def decode_date(time_detail: list[int]) -> dict[str, object]:
@@ -279,8 +286,8 @@ class EventsIO:
             reminder = reminder_all[2:]
             reminder_json: dict[str, object] = {}
             time_period = decode_time_period(reminder[0])
-            reminder_json["enabled"] = time_period[0]
-            reminder_json["repeat_period"] = time_period[1]
+            reminder_json["enabled"] = time_period.enabled
+            reminder_json["repeat_period"] = time_period.repeat_period
 
             time_detail_map = decode_time_detail(reminder)
 

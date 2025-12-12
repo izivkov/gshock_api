@@ -1,4 +1,11 @@
+from dataclasses import dataclass
 from gshock_api.app_notification import AppNotification, NotificationType
+
+
+@dataclass
+class StringResult:
+    string: str
+    offset: int
 
 
 class AppNotificationIO:
@@ -30,7 +37,7 @@ class AppNotificationIO:
         encoded_bytes = bytes(b ^ key for b in decoded_bytes)
         return encoded_bytes.hex()
 
-    def read_length_prefixed_string(buf: bytes, offset: int) -> tuple[str, int]:
+    def read_length_prefixed_string(buf: bytes, offset: int) -> StringResult:
         if offset + 2 > len(buf):
             raise ValueError("Not enough data to read length prefix")
 
@@ -44,7 +51,7 @@ class AppNotificationIO:
             raise ValueError("String length exceeds buffer")
 
         string = buf[start:end].decode("utf-8")
-        return string, end
+        return StringResult(string, end)
 
     def decode_notification_packet(buf: bytes) -> AppNotification:
         """
@@ -68,16 +75,23 @@ class AppNotificationIO:
         offset += 15
 
         # Read app name (length-prefixed UTF-8 string)
-        app, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        app_res = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        app = app_res.string
+        offset = app_res.offset
 
         # Read title (length-prefixed UTF-8 string)
-        title, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        title_res = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        title = title_res.string
+        offset = title_res.offset
 
         # Read empty string (length-prefixed UTF-8 string, skip)
-        _, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        empty_res = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        offset = empty_res.offset
 
         # Read text (length-prefixed UTF-8 string)
-        text, offset = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        text_res = AppNotificationIO.read_length_prefixed_string(buf, offset)
+        text = text_res.string
+        offset = text_res.offset
 
         # Construct and return AppNotification object
         notification = AppNotification(
