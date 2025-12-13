@@ -65,9 +65,9 @@ Add dependency on this library in your `pyproject.toml`
 .. code-block:: sh
 
    dependencies = [
-    "gshock-api>=2.0.36",
-    ...
-]
+      "gshock-api>=2.0.36",
+      ...
+   ]
 
 
 Troubleshooting:
