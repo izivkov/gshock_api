@@ -139,7 +139,7 @@ class GshockAPI:
     async def set_time(
         self, current_time: object | None = None, offset: int = 0
     ) -> None:
-        """Sets the current time on the watch from the time on the phone."""
+        """Sets the current time on the watch from the time on the device."""
         await self.initialize_for_setting_time()
         await self._set_time(current_time, offset)
         # current_time = None is redundant as it's a local variable/parameter

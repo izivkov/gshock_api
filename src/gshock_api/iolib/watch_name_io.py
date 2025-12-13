@@ -3,7 +3,6 @@ from gshock_api.utils import clean_str, to_ascii_string, to_hex_string
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Protocol
 
-
 class WatchNameIO:
     result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
