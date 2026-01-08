@@ -45,6 +45,8 @@ class CasioConstants:
         "CASIO_REMINDER_TITLE": 0x30,
         "CASIO_REMINDER_TIME": 0x31,
         "CASIO_TIMER": 0x18,
+        "CASIO_LIFE_LOG": 0x2E,
+        "CASIO_HEALTH_DATA": 0x05,
         "ERROR": 0xFF,
         "UNKNOWN": 0x0A,
 

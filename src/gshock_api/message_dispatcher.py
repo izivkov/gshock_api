@@ -11,6 +11,7 @@ from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
 from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
+from gshock_api.iolib.health_data_io import HealthDataIO
 from gshock_api.iolib.settings_io import SettingsIO
 from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
 from gshock_api.iolib.time_io import TimeIO
@@ -50,6 +51,7 @@ class MessageDispatcher:
         "GET_TIMER": TimerIO.send_to_watch,
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
+        "GET_LIFE_LOG": HealthDataIO.request,
     }
 
     # Map of Characteristic keys (integers from CHARACTERISTICS) to their synchronous handler functions.
@@ -70,6 +72,7 @@ class MessageDispatcher:
         CHARACTERISTICS["CASIO_SETTING_FOR_BLE"]: TimeAdjustmentIO.on_received,
         CHARACTERISTICS["ERROR"]: ErrorIO.on_received,
         CHARACTERISTICS["UNKNOWN"]: UnknownIO.on_received,
+        CHARACTERISTICS["CASIO_HEALTH_DATA"]: HealthDataIO.on_received,
 
         # ECB-30
         CHARACTERISTICS["CMD_SET_TIMEMODE"]: UnknownIO.on_received,

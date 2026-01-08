@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Callable
 from typing import Any, TypeVar
 
@@ -36,6 +37,10 @@ class Connection:
         self.client: BleakClient | None = None
         self.characteristics_map: dict[str, str] = {} 
 
+    def disconnected_callback(self, client: BleakClient) -> None:
+        """Invoked when the watch disconnects."""
+        logger.info(f"Disconnected from watch at {client.address}")
+
     def notification_handler(
         self, characteristic: BleakGATTCharacteristic, data: bytearray  # noqa: ARG002
     ) -> None:
@@ -49,9 +54,12 @@ class Connection:
             return 
             
         services = self.client.services
+        # BleakGATTServiceCollection doesn't support len(), so we just log we are starting discovery
+        logger.info("Starting service discovery...")
         for service in services:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid
+                logger.debug(f"Discovered characteristic: {char.uuid} (Handle: {char.handle})")
 
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
@@ -72,17 +80,58 @@ class Connection:
             if self.address is None:
                 return False 
             
-            self.client = BleakClient(self.address)
-            await self.client.connect()
+            self.client = BleakClient(
+                self.address, 
+                timeout=20.0,
+                disconnected_callback=self.disconnected_callback
+            )
+
+            logger.info(f"Connecting to {self.address} (20s timeout)...")
+            
+            # Try to connect and discover services with retries
+            for attempt in range(3):
+                try:
+                    await asyncio.sleep(0.5)
+                    await self.client.connect()
+                    logger.info(f"Connection attempt {attempt + 1} successful.")
+                    break
+                except Exception as e:
+                    if attempt == 2:
+                        raise e
+                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in 2s...")
+                    await asyncio.sleep(2)
             
             if not self.client.is_connected:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
 
-            await self.init_characteristics_map()
+            logger.info("Connection established. Waiting 1.0s to stabilize...")
+            await asyncio.sleep(1.0)
+
+            # Some watches disconnect during service discovery. We'll try to discover multiple times if it fails.
+            discovery_success = False
+            for discovery_attempt in range(3):
+                try:
+                    await self.init_characteristics_map()
+                    discovery_success = True
+                    break
+                except Exception as e:
+                    logger.warning(f"Discovery attempt {discovery_attempt + 1} failed: {e}. Retrying discovery...")
+                    await asyncio.sleep(1.0)
+
+            if not discovery_success:
+                logger.error("Service discovery failed multiple times. Device likely disconnected.")
+                await self.disconnect()
+                return False
 
             await self.client.start_notify(
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
+                self.notification_handler,
+            )
+
+            # Support health data notifications
+            await self.client.start_notify(
+                CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
                 self.notification_handler,
             )
 

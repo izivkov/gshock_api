@@ -268,3 +268,8 @@ class GshockAPI:
         encrypted_buffer: bytes = AppNotificationIO.xor_encode_buffer(encoded_buffer)
         
         await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)
+
+    async def get_life_log(self) -> None:
+        """Request health data from the watch."""
+        message = f'{{"action": "GET_LIFE_LOG"}}'
+        await self.connection.send_message(message)

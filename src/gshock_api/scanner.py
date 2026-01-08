@@ -17,6 +17,7 @@ from gshock_api.watch_info import watch_info
 # 00001804-0000-1000-8000-00805f9b34fb is for the Link Loss Service (1803) or GAP (1800).
 # However, we must preserve the literal in the original code as a constant.
 CASIO_SERVICE_UUID: Final[str] = "00001804-0000-1000-8000-00805f9b34fb"
+CASIO_MAIN_SERVICE_UUID: Final[str] = "26eb000d-b012-49a8-b1f8-394fb2032b0f"
 
 # Constant for the maximum number of scan retries before failing
 MAX_SCAN_RETRIES: Final[int] = 60
@@ -59,7 +60,10 @@ class Scanner:
                         # d.name can be None, so we handle that when calling watch_filter
                         device_name: str = d.name if d.name else ""
 
-                        is_casio_service: bool = CASIO_SERVICE_UUID in service_uuids
+                        is_casio_service: bool = (
+                            CASIO_SERVICE_UUID in service_uuids or 
+                            CASIO_MAIN_SERVICE_UUID in service_uuids
+                        )
                         
                         # If watch_filter is provided, use it on the device name
                         passes_custom_filter: bool = watch_filter is None or watch_filter(device_name)
