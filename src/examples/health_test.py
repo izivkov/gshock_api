@@ -1,15 +1,53 @@
-from gshock_api.iolib.app_notification_io import AppNotificationIO
+import asyncio
+import logging
+import sys
+from gshock_api.connection import Connection
+from gshock_api.gshock_api import GshockAPI
+from gshock_api.logger import logger
 
-buffer = "05a9ebffffffef0ff7df0ff7df0ff7df0ff7df0ff74992"
-buffer1 = "058ddaffffffdafaf9ecef0ff723f7d9fdfefefee3c0ffffffff01e5ffff84ffffffff00f3fffc52"
-buffer2 = "05ad3afdffff01010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701"
-buffer3 = "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff74caf"
-buffer4 = "05fff0ffffffe6faf4eed7adedffffffffffff50fc756a"
+async def run_test():
+    logger.info("========================================================================")
+    logger.info("Press and hold lower-left button on your watch for 3 seconds to start...")
+    logger.info("========================================================================")
+    logger.info("")
 
-# XOR-decode the buffer with key 255
-decoded = AppNotificationIO.xor_decode_buffer(buffer, key=255)
-print(decoded.hex())
+    # If None, it will scan for G-Shock watches
+    connection = Connection()
+    api = GshockAPI(connection)
+    
+    logger.info("Waiting for connection...")
+    if await connection.connect():
+        try:
+            logger.info("Connected!")
+            
+            # Step 1: Identification
+            name = await api.get_watch_name()
+            logger.info(f"Watch Name: {name}")
+            
+            # Step 2: Request Life Log
+            logger.info("Requesting Life Log data (Health Data)...")
+            await api.get_life_log()
+            
+            logger.info("Waiting for data notifications... (Press Ctrl+C to stop)")
+            # Keep the connection open to receive notifications
+            # We'll wait a generous amount of time or until Ctrl+C
+            while True:
+                await asyncio.sleep(1)
+                
+        except asyncio.CancelledError:
+            logger.info("Test stopped by user.")
+        except Exception as e:
+            logger.error(f"Error during test: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+        finally:
+            await connection.disconnect()
+            logger.info("Disconnected.")
+    else:
+        logger.error("Failed to connect.")
 
-# fa 56 14 00 00 00 10 f0 08 20 f0 08 20 f0 08 20 f0 08 20 f0 08 b6 6d
-
-
+if __name__ == "__main__":
+    try:
+        asyncio.run(run_test())
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user.")
