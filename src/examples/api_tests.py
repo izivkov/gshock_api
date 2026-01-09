@@ -16,6 +16,7 @@ from gshock_api.connection import Connection
 from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
+from gshock_api.iolib.health_data_io import HealthDataIO
 from gshock_api.logger import logger
 
 
@@ -44,7 +45,19 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         await connection.connect(watch_filter.connection_filter)
         logger.info("Connected...")
 
+        # Initialize connection for HealthDataIO
+        HealthDataIO.connection = connection
+
         api = GshockAPI(connection)
+        
+        app_info = await api.get_app_info()
+        logger.info(f"app info: {app_info}")
+
+        pressed_button = await api.get_pressed_button()
+        logger.info(f"pressed button: {pressed_button}")
+
+        await test_health_data(api)
+        return # Skip the rest for now
 
         app_info = await api.get_app_info()
         logger.info(f"app info: {app_info}")
@@ -202,6 +215,37 @@ async def app_notifications(api: GshockAPI) -> None:
     )
 
     await api.send_app_notification(email_notification2)
+
+
+async def test_health_data(api: GshockAPI) -> None:
+    logger.info("Testing Health Data request...")
+    
+    # Commands from parsed.txt for Life Log (0x2E)
+    commands = [
+        "002EFFFFFFFFFF",
+        "002E0014000000",
+        "002E51B9030000",
+        "002E523D090000",
+        "002E53E5070000",
+        "002E56D30D0000",
+    ]
+    
+    for cmd in commands:
+        # Try writing 07 handshake to CONVOY (0x14) before the life log request
+        # Based on parsed.txt line 103: Write Cmd Handle: 0x0013 Value: 070000000000000000000000000000
+        logger.info("Sending CONVOY handshake (07...)")
+        convoy_handshake = "070000000000000000000000000000"
+        await api.connection.write(0x14, convoy_handshake)
+        
+        logger.info(f"Requesting health data with custom command: {cmd}")
+        message = f'{{"action": "GET_LIFE_LOG", "value": "{cmd}"}}'
+        await api.connection.send_message(message)
+        
+        logger.info("Waiting 3 seconds for notifications...")
+        await asyncio.sleep(3)
+
+    logger.info("Waiting another 5 seconds for any delayed data...")
+    await asyncio.sleep(5)
 
 
 def convert_time_string_to_epoch(time_string: str) -> float | None:

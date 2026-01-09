@@ -1,9 +1,9 @@
 import asyncio
-import logging
-import sys
+
 from gshock_api.connection import Connection
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
+
 
 async def run_test():
     logger.info("========================================================================")
