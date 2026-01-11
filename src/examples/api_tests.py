@@ -19,7 +19,6 @@ from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.health_data_io import HealthDataIO
 from gshock_api.logger import logger
 
-
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
 
@@ -218,34 +217,23 @@ async def app_notifications(api: GshockAPI) -> None:
 
 
 async def test_health_data(api: GshockAPI) -> None:
-    logger.info("Testing Health Data request...")
+    logger.info("Testing Health Data request (GET_LIFE_LOG) via API...")
     
-    # Commands from parsed.txt for Life Log (0x2E)
-    commands = [
-        "002EFFFFFFFFFF",
-        "002E0014000000",
-        "002E51B9030000",
-        "002E523D090000",
-        "002E53E5070000",
-        "002E56D30D0000",
-    ]
+    # 002EFFFFFFFFFF seems to be a general request or request for latest?
+    cmd = "002EFFFFFFFFFF"
     
-    for cmd in commands:
-        # Try writing 07 handshake to CONVOY (0x14) before the life log request
-        # Based on parsed.txt line 103: Write Cmd Handle: 0x0013 Value: 070000000000000000000000000000
-        logger.info("Sending CONVOY handshake (07...)")
-        convoy_handshake = "070000000000000000000000000000"
-        await api.connection.write(0x14, convoy_handshake)
-        
-        logger.info(f"Requesting health data with custom command: {cmd}")
-        message = f'{{"action": "GET_LIFE_LOG", "value": "{cmd}"}}'
-        await api.connection.send_message(message)
-        
-        logger.info("Waiting 3 seconds for notifications...")
-        await asyncio.sleep(3)
-
-    logger.info("Waiting another 5 seconds for any delayed data...")
-    await asyncio.sleep(5)
+    logger.info(f"Requesting health data: {cmd}")
+    message = f'{{"action": "GET_LIFE_LOG", "value": "{cmd}"}}'
+    
+    # This will trigger the sequence in HealthDataIO.request
+    await api.connection.send_message(message)
+    
+    logger.info("request sent. Waiting 30 seconds for data stream...")
+    # Monitor for 30 seconds to allow the sequence to complete (~5-6s) and data to flow
+    for i in range(30):
+        await asyncio.sleep(1)
+        if i % 10 == 0:
+            logger.info(f"Still waiting... {i}s")
 
 
 def convert_time_string_to_epoch(time_string: str) -> float | None:
