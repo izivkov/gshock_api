@@ -11,13 +11,19 @@ null_char: Final[str] = "\0"
 
 def to_casio_cmd(bytes_str: str) -> bytes:
     """
-    Converts a compact hexadecimal string (e.g., 'A3010C') into a bytes object.
+    Converts a hexadecimal string (compact or space-separated, with or without 0x) 
+    into a bytes object.
     """
+    # Remove spaces and "0x" prefix
+    bytes_str = bytes_str.replace(" ", "")
+    if bytes_str.startswith(hex_prefix):
+        bytes_str = remove_prefix(bytes_str, hex_prefix)
+    
     # Split the string into two-character parts ('A3', '01', '0C')
     parts: list[str] = [bytes_str[i: i + 2] for i in range(0, len(bytes_str), 2)]
     
     # Convert each part to an integer from base 16
-    hex_arr: list[int] = [int(s, 16) for s in parts]
+    hex_arr: list[int] = [int(s, 16) for s in parts if s]
     
     # Return the final bytes object
     return bytes(hex_arr)

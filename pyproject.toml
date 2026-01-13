@@ -25,7 +25,9 @@ dependencies = [
     "types-requests",
     "python-dotenv",
     "typing-extensions>=4.12",
-    "twine>=6.2.0",
+    "bleak>=0.20.0",
+    "bluez-peripheral",
+    "pytz",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -43,7 +45,8 @@ dev = [
     "gitingest",
     "poethepoet",
     "radon",
-    "vulture"
+    "vulture",
+    "twine>=6.2.0"
 ]
 
 [tool.setuptools.packages.find]

@@ -56,6 +56,7 @@ class WatchInfo:
         "hasDnD": False,
         "hasBatteryLevel": False,
         "hasWorldCities": True,
+        "hasHealthData": False,
     })
 
     # The per-model overrides
@@ -150,6 +151,7 @@ class WatchInfo:
             "findButtonUserDefined": True,
             "hasPowerSavingMode": False,
             "hasDnD": True,
+            "hasHealthData": True,
         },
     ])
 

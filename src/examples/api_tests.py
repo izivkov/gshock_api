@@ -18,6 +18,7 @@ from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.iolib.health_data_io import HealthDataIO
 from gshock_api.logger import logger
+from gshock_api.watch_info import watch_info
 
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
@@ -49,14 +50,17 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
 
         api = GshockAPI(connection)
         
-        app_info = await api.get_app_info()
+        app_info = await api.get_app_info() 
         logger.info(f"app info: {app_info}")
 
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
 
-        await test_health_data(api)
-        return # Skip the rest for now
+        if watch_info.hasHealthData:
+            await test_health_data(api)
+
+        # Return for now
+        # return
 
         app_info = await api.get_app_info()
         logger.info(f"app info: {app_info}")
@@ -217,24 +221,33 @@ async def app_notifications(api: GshockAPI) -> None:
 
 
 async def test_health_data(api: GshockAPI) -> None:
-    logger.info("Testing Health Data request (GET_LIFE_LOG) via API...")
+    logger.info("Testing Health Data request (GET_HEALTH_DATA) via API...")
+    await api.get_health_data()
+    
+async def test_health_data_ORIG(api: GshockAPI) -> None:
+    logger.info("Testing Health Data request (GET_HEALTH_DATA) via API...")
+    
+    # Define a callback to handle incoming data
+    def handle_health_data(data):
+        from gshock_api.health_data import DailyHealthData
+        if isinstance(data, DailyHealthData):
+            logger.info(f"Callback received DAILY data for {data.date}: {data.snapshots}")
+        # Real-time health data handling removed as per request
+        else:
+            logger.info("Callback received unknown data")
+
+    # Register the callback
+    HealthDataIO.on_data_update = handle_health_data
     
     # 002EFFFFFFFFFF seems to be a general request or request for latest?
     cmd = "002EFFFFFFFFFF"
     
     logger.info(f"Requesting health data: {cmd}")
-    message = f'{{"action": "GET_LIFE_LOG", "value": "{cmd}"}}'
+    message = f'{{"action": "GET_HEALTH_DATA", "value": "{cmd}"}}'
     
     # This will trigger the sequence in HealthDataIO.request
     await api.connection.send_message(message)
     
-    logger.info("request sent. Waiting 30 seconds for data stream...")
-    # Monitor for 30 seconds to allow the sequence to complete (~5-6s) and data to flow
-    for i in range(30):
-        await asyncio.sleep(1)
-        if i % 10 == 0:
-            logger.info(f"Still waiting... {i}s")
-
 
 def convert_time_string_to_epoch(time_string: str) -> float | None:
     try:

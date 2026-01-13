@@ -26,7 +26,7 @@ async def run_test():
             
             # Step 2: Request Life Log
             logger.info("Requesting Life Log data (Health Data)...")
-            await api.get_life_log()
+            await api.get_health_data()
             
             logger.info("Waiting for data notifications... (Press Ctrl+C to stop)")
             # Keep the connection open to receive notifications

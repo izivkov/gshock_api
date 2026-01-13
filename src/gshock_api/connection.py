@@ -6,6 +6,10 @@ from bleak import BleakClient
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.exc import BleakDBusError
 
+# New imports for Linux Pairing Agent
+from bluez_peripheral.util import get_message_bus
+from bluez_peripheral.agent import NoIoAgent
+
 from gshock_api import message_dispatcher
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.exceptions import GShockConnectionError, GShockIgnorableException
@@ -13,48 +17,56 @@ from gshock_api.logger import logger
 from gshock_api.scanner import scanner
 from gshock_api.utils import to_casio_cmd
 
-# Define a Type Variable T for generic request/message objects 
-# as their specific class is not defined here.
 T = TypeVar("T") 
-
-# Define a type for the watch filter function. 
-# It takes a BleakDevice object (the device found during scan) and returns a bool.
 WatchFilter = Callable[[Any], bool] | None
-# The scanner.scan returns a BleakDevice or None.
 Device = Any | None
 
-
 class Connection:
-    """Manages the BLE connection to a G-Shock watch using Bleak."""
+    """Manages the BLE connection and pairing agent for G-Shock watches on Linux."""
     
-    # Class-level type alias for the handles map structure
     HandleMap = dict[int, str]
 
     def __init__(self, address: str | None = None) -> None:
-        # Instance attributes with Type Hints
         self.handles_map: Connection.HandleMap = self.init_handles_map()
         self.address: str | None = address
         self.client: BleakClient | None = None
         self.characteristics_map: dict[str, str] = {} 
+        
+        # Internals for BlueZ Agent
+        self._bus = None
+        self._agent = None
+
+    async def _setup_agent(self):
+        """Registers a NoIoAgent to handle pairing prompts programmatically."""
+        try:
+            if self._bus is None:
+                self._bus = await get_message_bus()
+            
+            if self._agent is None:
+                self._agent = NoIoAgent()
+                # 'default=True' lets this script catch pairing requests from the OS.
+                # This call requires the script to be run with sudo.
+                await self._agent.register(self._bus, default=True)
+                logger.info("Linux Bluetooth Pairing Agent registered.")
+        except Exception as e:
+            logger.error(f"Failed to register Pairing Agent: {e}. Check sudo permissions.")
 
     def disconnected_callback(self, client: BleakClient) -> None:
         """Invoked when the watch disconnects."""
         logger.info(f"Disconnected from watch at {client.address}")
 
     def notification_handler(
-        self, characteristic: BleakGATTCharacteristic, data: bytearray  # noqa: ARG002
+        self, characteristic: BleakGATTCharacteristic, data: bytearray
     ) -> None:
+        logger.info(f"Notification received on {characteristic.uuid}: {data.hex()}")
         message_dispatcher.MessageDispatcher.on_received(data)
 
     async def init_characteristics_map(self) -> None:
-        """
-        Populates self.characteristics_map with UUIDs of all available characteristics.
-        """
+        """Populates self.characteristics_map with UUIDs of all available characteristics."""
         if self.client is None:
             return 
             
         services = self.client.services
-        # BleakGATTServiceCollection doesn't support len(), so we just log we are starting discovery
         logger.info("Starting service discovery...")
         for service in services:
             for char in service.characteristics:
@@ -62,10 +74,12 @@ class Connection:
                 logger.debug(f"Discovered characteristic: {char.uuid} (Handle: {char.handle})")
 
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
-        """Connects to the G-Shock watch, optionally scanning if no address is provided."""
+        """Connects and pairs with the G-Shock watch."""
         try:
+            # Setup the background pairing agent
+            await self._setup_agent()
+
             if self.address is None:
-                # scanner.scan is typed to return BleakDevice | None
                 device: Device = await scanner.scan(
                     device_address=self.address,
                     watch_filter=watch_filter
@@ -73,8 +87,6 @@ class Connection:
                 if device is None:
                     logger.info("No G-Shock device found or name matches excluded watches.")
                     return False
-
-                # BleakDevice has an address attribute
                 self.address = device.address
 
             if self.address is None:
@@ -86,29 +98,32 @@ class Connection:
                 disconnected_callback=self.disconnected_callback
             )
 
-            logger.info(f"Connecting to {self.address} (20s timeout)...")
+            logger.info(f"Connecting and pairing with {self.address}...")
             
-            # Try to connect and discover services with retries
             for attempt in range(3):
                 try:
                     await asyncio.sleep(0.5)
                     await self.client.connect()
+                    
+                    # On Linux, explicitly triggering .pair() ensures the Agent 
+                    # handshakes with the watch and stores the bond in BlueZ.
+                    logger.info("Initiating bonding...")
+                    await self.client.pair()
+                    
                     logger.info(f"Connection attempt {attempt + 1} successful.")
                     break
                 except Exception as e:
                     if attempt == 2:
                         raise e
-                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in 2s...")
+                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying...")
                     await asyncio.sleep(2)
             
             if not self.client.is_connected:
-                logger.info(f"Failed to connect to {self.address}")
                 return False
 
             logger.info("Connection established. Waiting 1.0s to stabilize...")
             await asyncio.sleep(1.0)
 
-            # Some watches disconnect during service discovery. We'll try to discover multiple times if it fails.
             discovery_success = False
             for discovery_attempt in range(3):
                 try:
@@ -116,24 +131,24 @@ class Connection:
                     discovery_success = True
                     break
                 except Exception as e:
-                    logger.warning(f"Discovery attempt {discovery_attempt + 1} failed: {e}. Retrying discovery...")
+                    logger.warning(f"Discovery attempt {discovery_attempt + 1} failed. Retrying...")
                     await asyncio.sleep(1.0)
 
             if not discovery_success:
-                logger.error("Service discovery failed multiple times. Device likely disconnected.")
+                logger.error("Service discovery failed. Device likely disconnected.")
                 await self.disconnect()
                 return False
 
-            await self.client.start_notify(
+            # Characteristics to notify
+            uuids_to_notify = [
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
-                self.notification_handler,
-            )
-
-            # Support health data notifications
-            await self.client.start_notify(
                 CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
-                self.notification_handler,
-            )
+                CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID
+            ]
+
+            for uuid in uuids_to_notify:
+                if uuid in self.characteristics_map:
+                    await self.client.start_notify(uuid, self.notification_handler)
 
             return True
 
@@ -142,49 +157,37 @@ class Connection:
             return False
         
     async def disconnect(self) -> None:
-        """Disconnects the BLE client if connected."""
+        """Disconnects the BLE client."""
         if self.client and self.client.is_connected:
             await self.client.disconnect()
 
     def is_service_supported(self, handle: int) -> bool:
-        """Checks if a characteristic UUID mapped to a handle is present in the discovered characteristics."""
         uuid: str | None = self.handles_map.get(handle)
         return uuid is not None and uuid in self.characteristics_map
 
-    async def write(self, handle: int, data: bytes) -> None:
+    async def write(self, handle: int, data: bytes | str) -> None:
         """Writes data to a characteristic identified by its handle."""
         try:
             uuid: str | None = self.handles_map.get(handle)
 
             if uuid is None or uuid not in self.characteristics_map:
-                logger.info(
-                    f"write failed: handle {handle} not in characteristics map"
-                )
-                if handle == 0x0D:
-                    logger.info(
-                        "Your watch does not support notifications..."
-                    )
+                logger.info(f"write failed: handle {handle} not in map")
                 return
 
-            # 0x0E is CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (requires response)
-            response_type: bool = handle == 0x0E
-            
-            cmd_data: bytes = to_casio_cmd(data)
+            response_type: bool = handle in [0x0E, 0x11]
+            cmd_data = to_casio_cmd(data) if isinstance(data, str) else bytes(data)
 
             if self.client:
-                await self.client.write_gatt_char(
-                    uuid, cmd_data, response=response_type
-                )
+                logger.info(f"Writing to {uuid} (handle {handle:02X}): {cmd_data.hex()}")
+                await self.client.write_gatt_char(uuid, cmd_data, response=response_type)
 
         except Exception as e:
-            e.args = (type(e).__name__,)
             if isinstance(e, (BleakDBusError, EOFError)):
                 raise GShockIgnorableException(e) from e
-            raise GShockConnectionError(f"Unable to send time to watch: {e}") from e
+            raise GShockConnectionError(f"Unable to send data: {e}") from e
 
-    # Replaced Any with TypeVar T
     async def request(self, request: T) -> None:
-        """Sends a request using the read request characteristic handle (0x0C)."""
+        """Sends a request using handle 0x0C."""
         await self.write(0x0C, request)
 
     def init_handles_map(self) -> HandleMap:

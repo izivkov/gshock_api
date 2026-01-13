@@ -11,6 +11,7 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.iolib.health_data_io import HealthDataIO, DailyHealthData, HealthData
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
@@ -269,7 +270,11 @@ class GshockAPI:
         
         await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)
 
-    async def get_life_log(self) -> None:
-        """Request health data from the watch."""
-        message = f'{{"action": "GET_LIFE_LOG"}}'
-        await self.connection.send_message(message)
+    async def get_health_data(self, days: int = 1) -> DailyHealthData | None:
+        await self.connection.send_message(
+            f"""{{"action": "GET_HEALTH_DATA", "value": {json.dumps(days)}}}"""
+        )
+
+        # result: str = await message_dispatcher.HealthDataIO.request(self.connection)
+        # return result
+

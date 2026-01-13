@@ -51,7 +51,7 @@ class MessageDispatcher:
         "GET_TIMER": TimerIO.send_to_watch,
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
-        "GET_LIFE_LOG": HealthDataIO.request,
+        "GET_HEALTH_DATA": HealthDataIO.send_to_watch,
     }
 
     # Map of Characteristic keys (integers from CHARACTERISTICS) to their synchronous handler functions.
@@ -77,6 +77,11 @@ class MessageDispatcher:
         # ECB-30
         CHARACTERISTICS["CMD_SET_TIMEMODE"]: UnknownIO.on_received,
         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
+
+        # Response keys
+        0x00: HealthDataIO.on_received_response,
+        0x07: HealthDataIO.on_received_response,
+        0x11: HealthDataIO.on_received_request_notification,
     }
 
     @staticmethod
