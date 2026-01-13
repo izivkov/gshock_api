@@ -271,10 +271,10 @@ class GshockAPI:
         await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)
 
     async def get_health_data(self, days: int = 1) -> DailyHealthData | None:
-        await self.connection.send_message(
-            f"""{{"action": "GET_HEALTH_DATA", "value": {json.dumps(days)}}}"""
-        )
+        # await self.connection.send_message(
+        #     f"""{{"action": "GET_HEALTH_DATA", "value": {json.dumps(days)}}}"""
+        # )
 
-        # result: str = await message_dispatcher.HealthDataIO.request(self.connection)
-        # return result
+        result: str = await message_dispatcher.HealthDataIO.request(self.connection)
+        return result
 

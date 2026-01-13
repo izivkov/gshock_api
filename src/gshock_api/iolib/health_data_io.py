@@ -16,28 +16,23 @@ class HealthDataIO:
     @staticmethod
     async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
         HealthDataIO.connection = connection
-        await connection.request("002EFFFFFFFFFF")
+        await HealthDataIO.get_data()
         HealthDataIO.result = CancelableResult()
         return await HealthDataIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(message: str) -> None:
+    async def get_data() -> None:
         """Wrapper to conform to MessageDispatcher's send_to_watch pattern.
         Delegates to :meth:`request` which performs the health‑data request.
         """
         import asyncio
 
+        # NEW
+        await HealthDataIO.connection.write(0x11, "002EFFFFFFFFFF")
+
         # Default command to request health data
         cmd_hex = "002E51B9030000"
         
-        # Try to parse custom command from message if provided
-        try:
-            parsed = json.loads(message)
-            if "value" in parsed:
-                cmd_hex = parsed["value"]
-        except Exception:
-            pass
-
         logger.info(f"HealthDataIO: Starting data request sequence for {cmd_hex}")
         
         # 1. Send Request on 0x11
@@ -90,7 +85,9 @@ class HealthDataIO:
             logger.info(f"HealthDataIO decoded: {decoded.hex()}")
             decoded_data = HealthDataIO.decode_health_data(decoded)
 
-        HealthDataIO.result.set_result(decoded_data)
+        logger.info(f">>>>>>>>>> HealthDataIO decoded data: {decoded_data}")
+        if HealthDataIO.result:
+            HealthDataIO.result.set_result(decoded_data)
 
     @staticmethod
     def on_received_response(data: bytes) -> None:
@@ -160,8 +157,8 @@ class HealthDataIO:
                 snapshots=[snapshot]
             )
             
-            if HealthDataIO.on_data_update:
-                HealthDataIO.on_data_update(daily_data)
+            # if HealthDataIO.on_data_update:
+            #     HealthDataIO.on_data_update(daily_data)
                 
             return daily_data
 

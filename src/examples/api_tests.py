@@ -60,7 +60,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             await test_health_data(api)
 
         # Return for now
-        # return
+        return
 
         app_info = await api.get_app_info()
         logger.info(f"app info: {app_info}")
@@ -222,32 +222,8 @@ async def app_notifications(api: GshockAPI) -> None:
 
 async def test_health_data(api: GshockAPI) -> None:
     logger.info("Testing Health Data request (GET_HEALTH_DATA) via API...")
-    await api.get_health_data()
-    
-async def test_health_data_ORIG(api: GshockAPI) -> None:
-    logger.info("Testing Health Data request (GET_HEALTH_DATA) via API...")
-    
-    # Define a callback to handle incoming data
-    def handle_health_data(data):
-        from gshock_api.health_data import DailyHealthData
-        if isinstance(data, DailyHealthData):
-            logger.info(f"Callback received DAILY data for {data.date}: {data.snapshots}")
-        # Real-time health data handling removed as per request
-        else:
-            logger.info("Callback received unknown data")
-
-    # Register the callback
-    HealthDataIO.on_data_update = handle_health_data
-    
-    # 002EFFFFFFFFFF seems to be a general request or request for latest?
-    cmd = "002EFFFFFFFFFF"
-    
-    logger.info(f"Requesting health data: {cmd}")
-    message = f'{{"action": "GET_HEALTH_DATA", "value": "{cmd}"}}'
-    
-    # This will trigger the sequence in HealthDataIO.request
-    await api.connection.send_message(message)
-    
+    data = await api.get_health_data()    
+    logger.info(f"Health Data: {data}")
 
 def convert_time_string_to_epoch(time_string: str) -> float | None:
     try:

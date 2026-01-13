@@ -51,7 +51,7 @@ class MessageDispatcher:
         "GET_TIMER": TimerIO.send_to_watch,
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
-        "GET_HEALTH_DATA": HealthDataIO.send_to_watch,
+        # "GET_HEALTH_DATA": HealthDataIO.send_to_watch,
     }
 
     # Map of Characteristic keys (integers from CHARACTERISTICS) to their synchronous handler functions.

@@ -16,7 +16,7 @@ logging.basicConfig(
 
 def run_hardcoded_test():
     logger.info("Starting Hardcoded Health Parser Test (FINAL)...")
-    
+
     test_buffers = [
         # 1. Jan 7 Live Update (Steps 0, Calories 702) - RAW
         "05FFF0FFFFFFE5FEF8F1DFC9BAFFFFFFFFFFFF41FDEF7B", 
