@@ -25,13 +25,6 @@ def run_hardcoded_test():
         # This is a segment from a long buffer that contains: 26 01 07 ec ...
         "059C8DFFFFFFD9FEF813A2D185FCFFA30BFBFFFFBFE0FFFFF0FF9FFFFFFFFF9DFFFFFFFFF0F0FFFFD8FFFFFFFFFEC9EFDAFEFFEECF009E010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FF00A157FFCFFFC8FF9B00007E2B",
         
-        # 3. Real-time HR: 86 BPM - RAW
-        # Original decoded: 07 d1 56 d3 0d 00 00
-        "072EA92CF2FFFF",
-
-        # 4. Real-time HR: 81 BPM - RAW
-        # Original decoded: 07 d1 51 b9 03 00 00
-        "072EAE46FCFFFF",
     ]
     
     for i, buf_hex in enumerate(test_buffers):

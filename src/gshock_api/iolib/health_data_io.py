@@ -117,6 +117,20 @@ class HealthDataIO:
 
     @staticmethod
     def decode_health_data(decoded: bytes) -> DailyHealthData | None:
+
+        # Example decoded: 000f0000001a010b153bacf50000000000001c050371
+        # Offsets (Guessing based on typical Casio formats):
+        # 0-4:  Header/Flags? (00 0f 00 00 00)
+        # 5:    Year (1a -> 26 -> 2026)
+        # 6:    Month (01)
+        # 7:    Day (0b -> 11)
+        # 8:    Hour (15 -> 21)
+        # 9:    Minute (3b -> 59)
+        # 10-11: Value A? (ac f5)
+        # 12-17: Zeros?
+        # 18-19: Value B? (1c 05 -> 1391? Steps?)
+        # 20-21: Value C? (03 71 -> 881? Calories?)
+
         try:
             if len(decoded) < 20:
                 logger.info(f"Decoded data too short to parse: {decoded.hex()}")
