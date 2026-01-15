@@ -16,7 +16,7 @@ from gshock_api.connection import Connection
 from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
-from gshock_api.iolib.health_data_io import HealthDataIO
+from gshock_api.iolib.health_data_io import HealthDataIO, DailyHealthData
 from gshock_api.logger import logger
 from gshock_api.watch_info import watch_info
 
@@ -59,51 +59,8 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         if watch_info.hasHealthData:
             await test_health_data(api)
 
-        # Return for now
+        # Disable other tests to avoid noise and ATT errors
         return
-
-        app_info = await api.get_app_info()
-        logger.info(f"app info: {app_info}")
-
-        pressed_button = await api.get_pressed_button()
-        logger.info(f"pressed button: {pressed_button}")
-
-        watch_name = await api.get_watch_name()
-        logger.info(f"got watch name: {watch_name}")
-
-        await api.set_time(time.time() + 10 * 60)
-
-        alarms = await api.get_alarms()
-        logger.info(f"alarms: {pformat(alarms)}")
-
-        alarms[3]["enabled"] = True
-        alarms[3]["hour"] = 7
-        alarms[3]["minute"] = 25
-        alarms[3]["enabled"] = False
-        await api.set_alarms(alarms)
-
-        seconds = await api.get_timer()
-        logger.info(f"timer: {seconds} seconds")
-
-        await api.set_timer(seconds + 10)
-        time_adjstment = await api.get_time_adjustment()
-        logger.info(f"time_adjstment: {time_adjstment}")
-
-        await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
-
-        condition = await api.get_watch_condition()
-        logger.info(f"condition: {condition}")
-
-        settings_local = await api.get_basic_settings()
-        logger.info(f"settings: {pformat(settings_local)}")
-
-        settings_local["button_tone"] = True
-        settings_local["language"] = "Russian"
-        settings_local["time_format"] = "24h"
-
-        await api.set_settings(settings_local)
-        settings_local = await api.get_basic_settings()
-        await app_notifications(api)
 
         # Create a single event
         tz = pytz.timezone("America/Toronto")
@@ -222,8 +179,47 @@ async def app_notifications(api: GshockAPI) -> None:
 
 async def test_health_data(api: GshockAPI) -> None:
     logger.info("Testing Health Data request (GET_HEALTH_DATA) via API...")
-    data = await api.get_health_data()    
-    logger.info(f"Health Data: {data}")
+    
+    all_data = []
+    
+    def on_health_update(data: DailyHealthData):
+        logger.info(f"CALLBACK RECEIVED HEALTH DATA:\n{data}")
+        # Dedup by date + snapshot count or just keep all for now
+        all_data.append(data)
+
+    try:
+        # Set callback
+        from gshock_api.iolib.health_data_io import HealthDataIO
+        HealthDataIO.on_data_update = on_health_update
+        
+        # Set indices for HealthDataIO.get_data
+        HealthDataIO.indices = ["64", "63", "62", "61", "60"]
+
+        # Start request
+        await api.get_health_data()
+        
+        # Give it a bit more time to collect the other indices
+        await asyncio.sleep(15.0)
+        
+    except Exception as e:
+        logger.error(f"Health data request failed: {e}")
+    
+    # Final sorted print
+    if all_data:
+        # Sort by date
+        all_data.sort(key=lambda d: d.date)
+        
+        logger.info("\n" + "="*40)
+        logger.info("FINAL COLLECTED HEALTH HISTORY:")
+        logger.info("="*40)
+        
+        for daily in all_data:
+            logger.info(daily)
+            logger.info("-" * 20)
+        logger.info("="*40)
+    else:
+        logger.info("Final collection contains 0 records.")
+    logger.info("\n")
 
 def convert_time_string_to_epoch(time_string: str) -> float | None:
     try:

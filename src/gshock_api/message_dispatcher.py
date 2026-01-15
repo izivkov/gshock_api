@@ -80,6 +80,8 @@ class MessageDispatcher:
 
         # Response keys
         0x00: HealthDataIO.on_received_response,
+        0x04: HealthDataIO.on_received_response,
+        0x06: HealthDataIO.on_received_response,
         0x07: HealthDataIO.on_received_response,
         0x11: HealthDataIO.on_received_request_notification,
     }
