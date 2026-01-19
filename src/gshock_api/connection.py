@@ -44,6 +44,7 @@ class Connection:
     async def init_characteristics_map(self) -> None:
         """
         Populates self.characteristics_map with UUIDs of all available characteristics.
+        Manually injects specific characteristic UUIDs for testing purposes.
         """
         if self.client is None:
             return 
@@ -51,7 +52,25 @@ class Connection:
         services = self.client.services
         for service in services:
             for char in service.characteristics:
+                logger.info(f"Characteristics: {char.uuid}")
                 self.characteristics_map[char.uuid] = char.uuid
+
+        # --- Manual injection for GW-BX5600 testing ---
+        # We manually ensure these UUIDs exist in the map so lookups don't fail
+        
+        # Configuration Notify (Handle 0x19 / 25)
+        config_notify_uuid: str = CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
+        self.characteristics_map[config_notify_uuid] = config_notify_uuid
+        
+        # Configuration Write (Handle 0x17 / 23)
+        config_write_uuid: str = CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
+        self.characteristics_map[config_write_uuid] = config_write_uuid
+        
+        # All Features Write (Handle 0x0E / 14)
+        all_features_uuid: str = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
+        self.characteristics_map[all_features_uuid] = all_features_uuid
+
+        logger.info("Manual characteristic injection complete for testing.")
 
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
@@ -138,20 +157,37 @@ class Connection:
         """Sends a request using the read request characteristic handle (0x0C)."""
         await self.write(0x0C, request)
 
-    def init_handles_map(self) -> HandleMap:
-        """Initializes and returns the mapping of integer handles to characteristic UUIDs."""
-        handles_map: Connection.HandleMap = {}
+    def init_handles_map(self) -> dict[int, str]:
+        """
+        Initializes and returns the mapping of integer handles to characteristic UUIDs.
+        Updated with handles 0x07, 0x17, and 0x19 from the CASIO GW-BX5600 logs.
+        """
+        handles_map: dict[int, str] = {}
 
-        handles_map[0x04] = CasioConstants.CASIO_GET_DEVICE_NAME
-        handles_map[0x06] = CasioConstants.CASIO_APPEARANCE
-        handles_map[0x09] = CasioConstants.TX_POWER_LEVEL_CHARACTERISTIC_UUID
-        handles_map[0x0C] = CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID
-        handles_map[0x0E] = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
-        handles_map[0x0D] = CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID
-        handles_map[0x11] = CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID
-        handles_map[0x14] = CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
-        handles_map[0xFF] = CasioConstants.SERIAL_NUMBER_STRING
+        # Legacy and Core Handles
+        handles_map[CasioConstants.HANDLE_DEVICE_NAME_LEGACY] = CasioConstants.CASIO_GET_DEVICE_NAME
+        handles_map[CasioConstants.HANDLE_APPEARANCE] = CasioConstants.CASIO_APPEARANCE
+        handles_map[CasioConstants.HANDLE_TX_POWER] = CasioConstants.TX_POWER_LEVEL_CHARACTERISTIC_UUID
+        
+        # Features and Time Sync Handles
+        handles_map[CasioConstants.HANDLE_READ_ALL_FEATURES] = CasioConstants.CASIO_READ_REQUEST_FOR_ALL_FEATURES_CHARACTERISTIC_UUID
+        handles_map[CasioConstants.HANDLE_ALL_FEATURES_NOTIFICATION] = CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID
+        handles_map[CasioConstants.HANDLE_ALL_FEATURES_WRITE] = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
 
+        # New Handles identified from BT_HCI_2026_0108_170122_UTC+0800.log
+        # Handle 7 (0x07)
+        handles_map[CasioConstants.HANDLE_DEVICE_NAME_GW] = CasioConstants.CASIO_GET_DEVICE_NAME
+        
+        # Handle 14 (0x0E) - used for the final Time Command
+        handles_map[CasioConstants.HANDLE_ALL_FEATURES_WRITE] = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
+        
+        # Handle 23 (0x17)
+        handles_map[CasioConstants.HANDLE_CONFIG_WRITE] = CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
+        
+        # Handle 25 (0x19) 
+        handles_map[CasioConstants.HANDLE_CONFIG_NOTIFY] = CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
+
+        # Add other legacy handles as needed...
         return handles_map
 
     # Replaced Any with TypeVar T
