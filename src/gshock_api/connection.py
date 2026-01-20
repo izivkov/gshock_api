@@ -52,7 +52,7 @@ class Connection:
         services = self.client.services
         for service in services:
             for char in service.characteristics:
-                logger.info(f"Characteristics: {char.uuid}")
+                # logger.info(f"Characteristics: {char.uuid}")
                 self.characteristics_map[char.uuid] = char.uuid
 
         # --- Manual injection for GW-BX5600 testing ---
@@ -142,6 +142,7 @@ class Connection:
             cmd_data: bytes = to_casio_cmd(data)
 
             if self.client:
+                logger.info(f">>>: {cmd_data.hex()}")
                 await self.client.write_gatt_char(
                     uuid, cmd_data, response=response_type
                 )
