@@ -6,6 +6,7 @@ from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -53,7 +54,13 @@ class AlarmsIO:
     async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
         await connection.send_message('{ "action": "GET_ALARMS"}')
         AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
-        return await AlarmsIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("AlarmsIO", AlarmsIO.result)
+        try:
+            return await AlarmsIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("AlarmsIO")
 
     @staticmethod
     async def send_to_watch(_: str = "") -> None:

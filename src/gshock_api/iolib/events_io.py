@@ -15,6 +15,7 @@ from gshock_api.utils import (
     to_hex_string,
     to_int_array,
 )
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -71,7 +72,13 @@ class EventsIO:
         # 31 is REMINDER_TIME (0x31)
         await connection.request(f"{Protocol.REMINDER_TIME.value:02X}{event_number}")  # reminder time
         EventsIO.result = CancelableResult[dict[str, object]]()
-        return await EventsIO.result.get_result()
+        # Register the pending request with unique name based on event number
+        PendingRequestsRegistry.register(f"EventsIO_{event_number}", EventsIO.result)
+        try:
+            return await EventsIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister(f"EventsIO_{event_number}")
 
     @staticmethod
     async def send_to_watch_set(message: str) -> None:

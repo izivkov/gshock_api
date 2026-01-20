@@ -24,6 +24,7 @@ class WatchModel(IntEnum):
     GM = 14
     ABL = 15
     DW_H = 16
+    GW_BX5600 = 17
     UNKNOWN = 20
 
 
@@ -61,6 +62,16 @@ class WatchInfo:
     # The per-model overrides
     model_caps: list[ModelCapability] = field(default_factory=lambda: [
         {
+            "model": WatchModel.GW_BX5600,
+            "worldCitiesCount": 6,
+            "hasReminders": True,
+            "shortLightDuration": "2s",
+            "longLightDuration": "4s",
+            "batteryLevelLowerLimit": 9,
+            "batteryLevelUpperLimit": 19,
+            "dstCount": 2,
+        },
+        {
             "model": WatchModel.GW,
             "worldCitiesCount": 6,
             "hasReminders": True,
@@ -95,8 +106,8 @@ class WatchInfo:
             "longLightDuration": "3s",
         },
         {
-            "model": WatchModel.GA,
-            "worldCitiesCount": 2,
+            "model": WatchModel.GA, 
+            "worldCitiesCount": 2, # Test only, should be 2
             "hasAutoLight": True,
             "hasReminders": True,
         },
@@ -198,6 +209,7 @@ class WatchInfo:
             model = WatchModel.GST
         else:
             prefix_map = [
+                ("GW-B5600", WatchModel.GW_BX5600),
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),

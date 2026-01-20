@@ -1,0 +1,22 @@
+pi@raspberrypi:~/gshock_api-GW-BX5600/src/examples $ uv run gshock_server.py
+2026-01-20 14:39:12,518 gshock_api.logger INFO: ==============================================================================================
+2026-01-20 14:39:12,519 gshock_api.logger INFO: Short-press lower-right button on your watch to set time...
+2026-01-20 14:39:12,519 gshock_api.logger INFO: 
+2026-01-20 14:39:12,519 gshock_api.logger INFO: If Auto-time set on watch, the watch will connect and run automatically up to 4 times per day.
+2026-01-20 14:39:12,519 gshock_api.logger INFO: ==============================================================================================
+2026-01-20 14:39:12,519 gshock_api.logger INFO: 
+2026-01-20 14:39:12,519 gshock_api.logger INFO: Waiting for connection...
+2026-01-20 14:39:25,315 gshock_api.logger INFO: ✅ Found: CASIO GW-BX5600 (D3:02:2C:4E:E0:26)
+2026-01-20 14:39:26,687 gshock_api.logger INFO: Manual characteristic injection complete for testing.
+2026-01-20 14:39:27,246 gshock_api.logger INFO: Connected...
+2026-01-20 14:39:27,246 gshock_api.logger INFO: >>>: 10
+2026-01-20 14:39:27,538 gshock_api.logger INFO: >>>: 23
+2026-01-20 14:39:27,733 gshock_api.logger INFO: name: CASIO GW-BX5600
+2026-01-20 14:39:27,734 gshock_api.logger INFO: >>>: 1d00
+2026-01-20 14:39:27,928 gshock_api.logger INFO: >>>: 1d000106065e761901ffffffffffff
+2026-01-20 14:39:28,123 gshock_api.logger INFO: >>>: 1d02
+2026-01-20 14:39:28,318 gshock_api.logger INFO: >>>: 1d0203020000000000ffffffffffff
+2026-01-20 14:39:28,611 gshock_api.logger INFO: >>>: 1d04
+2026-01-20 14:39:28,805 gshock_api.logger INFO: ErrorIO onReceived: bytearray(b'\xff\x81\x1d')
+2026-01-20 14:39:38,617 gshock_api.logger ERROR: Got error: Timeout waiting for response from the watch: 
+2026-01-20 14:39:38,618 gshock_api.logger INFO: Waiting for connection...

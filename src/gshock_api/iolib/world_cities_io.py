@@ -2,6 +2,7 @@ from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Protocol
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -17,7 +18,13 @@ class WorldCitiesIO:
         await connection.request(key)
 
         WorldCitiesIO.result = CancelableResult[bytes]()
-        return await WorldCitiesIO.result.get_result()
+        # Register the pending request with unique name based on city number
+        PendingRequestsRegistry.register(f"WorldCitiesIO_{city_number}", WorldCitiesIO.result)
+        try:
+            return await WorldCitiesIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister(f"WorldCitiesIO_{city_number}")
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:

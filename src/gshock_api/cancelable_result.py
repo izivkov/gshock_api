@@ -38,3 +38,8 @@ class CancelableResult(Generic[T]):  # noqa: UP046
     def set_result(self, value: T) -> None:
         if not self._future.done():
             self._future.set_result(value)
+    
+    def set_exception(self, exception: BaseException) -> None:
+        """Set an exception on the future to unblock waiting calls with an error."""
+        if not self._future.done():
+            self._future.set_exception(exception)
