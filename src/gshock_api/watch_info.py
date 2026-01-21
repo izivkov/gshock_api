@@ -107,7 +107,7 @@ class WatchInfo:
         },
         {
             "model": WatchModel.GA, 
-            "worldCitiesCount": 2, # Test only, should be 2
+            "worldCitiesCount": 2,
             "hasAutoLight": True,
             "hasReminders": True,
         },
@@ -209,7 +209,7 @@ class WatchInfo:
             model = WatchModel.GST
         else:
             prefix_map = [
-                ("GW-B5600", WatchModel.GW_BX5600),
+                ("GW-BX5600", WatchModel.GW_BX5600),
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),
