@@ -63,7 +63,7 @@ class WatchInfo:
     model_caps: list[ModelCapability] = field(default_factory=lambda: [
         {
             "model": WatchModel.GW_BX5600,
-            "worldCitiesCount": 6,
+            "worldCitiesCount": 3,
             "hasReminders": True,
             "shortLightDuration": "2s",
             "longLightDuration": "4s",
