@@ -74,10 +74,6 @@ async def run_gw_bx_sequence(connection: Connection):
     # 5. Final Time Setting (Expected to set watch to 2026-01-10 00:30:35)
     # await send_raw_command(connection, 0x000E, "09EA07010A001E23060501")
 
-    await send_raw_command(connection, 0x000C, "20")
-    await send_raw_command(connection, 0x000C, "28")
-    await send_raw_command(connection, 0x000C, "20")
-    await send_raw_command(connection, 0x000C, "28")
     await send_raw_command(connection, 0x0017, "051D001D00240024012402")
     await send_raw_command(connection, 0x0019, "020F001D000106065E761901FFFFFFFFFFFF0F001D020302000000FFFFFFFFFFFFFFFF")
     await send_raw_command(connection, 0x0017, "031E001E001E00")
