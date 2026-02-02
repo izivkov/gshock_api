@@ -78,6 +78,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         condition = await api.get_watch_condition()
         logger.info(f"condition: {condition}")
 
+        lifelog_steps = await api.get_lifelog_steps()
+        logger.info(f"lifelog steps: {lifelog_steps}")
+
         settings_local = await api.get_basic_settings()
         logger.info(f"settings: {pformat(settings_local)}")
 

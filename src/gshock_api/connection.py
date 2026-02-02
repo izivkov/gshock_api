@@ -85,6 +85,14 @@ class Connection:
                 CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
                 self.notification_handler,
             )
+            await self.client.start_notify(
+                CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID,
+                lambda _c, data: message_dispatcher.MessageDispatcher.on_drsp_received(data),
+            )
+            await self.client.start_notify(
+                CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
+                lambda _c, data: message_dispatcher.MessageDispatcher.on_convoy_received(data),
+            )
 
             return True
 
@@ -118,7 +126,8 @@ class Connection:
                 return
 
             # 0x0E is CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (requires response)
-            response_type: bool = handle == 0x0E
+            # 0x11 is CASIO_DATA_REQUEST_SP (lifelog needs response)
+            response_type: bool = handle in (0x0E, 0x11)
             
             cmd_data: bytes = to_casio_cmd(data)
 

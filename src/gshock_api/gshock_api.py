@@ -11,6 +11,7 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.iolib.lifelog_io import LifelogIO
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
@@ -190,6 +191,10 @@ class GshockAPI:
     async def get_watch_condition(self) -> object:
         result: object = await message_dispatcher.WatchConditionIO.request(self.connection)
         return result
+
+    async def get_lifelog_steps(self) -> int:
+        """Get lifelog steps count."""
+        return await LifelogIO.request(self.connection)
 
     async def get_time_adjustment(self) -> bool:
         """Determine if auto-tame adjustment is set or not"""

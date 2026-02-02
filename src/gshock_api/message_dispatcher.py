@@ -19,6 +19,7 @@ from gshock_api.iolib.unknown_io import UnknownIO
 from gshock_api.iolib.watch_condition_io import WatchConditionIO
 from gshock_api.iolib.watch_name_io import WatchNameIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
+from gshock_api.iolib.lifelog_io import LifelogIO
 from gshock_api.logger import logger
 
 CHARACTERISTICS: Final[Mapping[str, int]] = CasioConstants.CHARACTERISTICS
@@ -117,6 +118,16 @@ class MessageDispatcher:
             logger.info(f"Unknown characteristic key received: {key}")
         else:
             MessageDispatcher.data_received_messages[key](data)
+
+    @staticmethod
+    def on_drsp_received(data: bytes) -> None:
+        """Handles Data Request SP notifications (lifelog)."""
+        LifelogIO.on_drsp_received(data)
+
+    @staticmethod
+    def on_convoy_received(data: bytes) -> None:
+        """Handles Convoy notifications (lifelog)."""
+        LifelogIO.on_convoy_received(data)
 
 # Usage example (unchanged logic)
 if __name__ == "__main__":
