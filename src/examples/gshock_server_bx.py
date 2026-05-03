@@ -48,8 +48,10 @@ async def run_gw_bx_sequence(connection: Connection):
     # await send_raw_command(connection, 0x000C, "22")
     # await send_raw_command(connection, 0x000C, "10")
     
-    # # 2. Echo Watch Name
-    # await send_raw_command(connection, 0x000E, "23434153494F2047572D42583536303000000000")
+    # # 2. Set Watch Name
+    # await send_raw_command(connection, 0x000E, "23434153494F2047572D42583536303000000000") # GW-BX5600
+    # await send_raw_command(connection, 0x000E, "23434153494F2047412D42323130300000000000") # GA-B2100
+    # await send_raw_command(connection, 0x000E, "23434153494F2047572D42353630300000000000") # GW-B5600
     
     # # 3. Request Watch Info
     # await send_raw_command(connection, 0x000C, "26")
@@ -74,13 +76,32 @@ async def run_gw_bx_sequence(connection: Connection):
     # 5. Final Time Setting (Expected to set watch to 2026-01-10 00:30:35)
     # await send_raw_command(connection, 0x000E, "09EA07010A001E23060501")
 
-    await send_raw_command(connection, 0x0017, "051D001D00240024012402")
-    await send_raw_command(connection, 0x0019, "020F001D000106065E761901FFFFFFFFFFFF0F001D020302000000FFFFFFFFFFFFFFFF")
-    await send_raw_command(connection, 0x0017, "031E001E001E00")
-    await send_raw_command(connection, 0x0019, "0607001E005E7620040007001E01190124040007001E02000000000014002400014036B9173FB7A5F4405C90B5350092CD0314002401014041D841355475A3406176227D028A1E0214002402014049C00000000000000000000000000000")
-    await send_raw_command(connection, 0x0017, "061F001F061F011F071F021F08")
-    await send_raw_command(connection, 0x0019, "0614001F005348414E474841490000000000000000000014001F0653484100000000000000000000000000000014001F01544F4B594F0000000000000000000000000014001F0754594F00000000000000000000000000000014001F0228555443290000000000000000000000000014001F08555443000000000000000000000000000000")
-    await send_raw_command(connection, 0x000E, "09EA070115161B03036801")
+    # 1. Base initialization (Set Watch Name)
+    await send_raw_command(connection, 0x000E, "23434153494F2047572D42583536303000000000") # GW-BX5600
+    
+    # 2. Setup configuration parameters (from trace)
+    await send_raw_command(connection, 0x000E, "110F0F0F0600500004000100001E03")
+    
+    # 3. Request Watch Info / Configuration on 0x0011
+    await send_raw_command(connection, 0x0011, "0005D80000")
+    await send_raw_command(connection, 0x0011, "0405D80000")
+    
+    # 4. DST / World Cities handshake (Replaying logs exactly as sent to 0x0019)
+    await send_raw_command(connection, 0x0019, "020F001D00010606E9760000FFFFFFFFFFFF0F001D020302001901FFFFFFFFFFFFFFFF")
+    await send_raw_command(connection, 0x0019, "0607001E00E97604040207001E01000000000007001E02190124040014002400014044BA36EF8055FC4002007372BE637D041400240101000000000000000000000000000000000014002402010000000000000000000000000000000002")
+    await send_raw_command(connection, 0x0019, "0614001F004D414452494400000000000000000000000014001F064D414400000000000000000000000000000014001F0128555443290000000000000000000000000014001F0755544300000000000000000000000000000014001F02544F4B594F0000000000000000000000000014001F0854594F000000000000000000000000000000")
+    
+    # 5. Final Time Setting
+    # The pattern is: 09 [YearLSB] [YearMSB] [Month] [Day] [Hour] [Minute] [Second] [DayOfWeek] [FractionLSB] [FractionMSB]
+    # Note: DayOfWeek is Monday=1 ... Sunday=7
+    now = datetime.now()
+    year_hex = f"{now.year & 0xFF:02X}{(now.year >> 8) & 0xFF:02X}"
+    day_of_week = now.weekday() + 1
+    fraction_ms = int(now.microsecond / 1000)
+    fraction_hex = f"{fraction_ms & 0xFF:02X}{(fraction_ms >> 8) & 0xFF:02X}"
+    
+    time_cmd = f"09{year_hex}{now.month:02X}{now.day:02X}{now.hour:02X}{now.minute:02X}{now.second:02X}{day_of_week:02X}{fraction_hex}"
+    await send_raw_command(connection, 0x000E, time_cmd)
 
     logger.info("Sequence complete.")
 
