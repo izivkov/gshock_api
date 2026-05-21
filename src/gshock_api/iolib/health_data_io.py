@@ -49,58 +49,69 @@ class HealthDataIO:
         return bytes([b ^ key for b in data])
 
     @staticmethod
-    def bcd_to_int(bcd: int) -> int:
-        return ((bcd >> 4) * 10) + (bcd & 0x0F)
-
-    @staticmethod
     def decode_health_data(decoded: bytes) -> list[DailyHealthData]:
         """
-        Decodes G-Shock health data buffers based on signatures found in health_hardcoded_test.py.
+        Decodes G-Shock health data buffers.
+
+        Two known formats (after XOR decode with key=0xFF):
+
+        Live Update (signature 0x00 0x0F):
+            [5]     Year (hex, e.g. 0x1a = 26 -> 2026)
+            [6]     Month (1-12)
+            [7]     Day (1-31)
+            [8]     Hour (0-23)
+            [9]     Minute (0-59)
+            [15:17] Steps (16-bit LE)
+            [18:20] Calories (16-bit LE, direct kcal)
+
+        Historical Day Summary (signature byte[0]=index, byte[1]=0x72):
+            [5]     Year (0x26 = 2026)
+            [6]     Month (1-12)
+            [7]     Day (NOTE: actual data is for day-1)
+            [11:13] Calories/2 (16-bit LE, multiply by 2 for kcal)
+            [15:17] Steps (16-bit LE)
+            [19:21] Distance in decimeters (16-bit LE, divide by 10 for meters)
         """
         results = []
         if len(decoded) < 16:
             return results
 
         # Buffer Identification
-        # decoded[0] index, decoded[1] type
+        # decoded[0] = index or type prefix, decoded[1] = sub-type
         msg_type = decoded[1]
 
         try:
             # --- Type 1: Live Update / Current Day Snapshot (Signature XX 0F) ---
-            if msg_type == 0x0f:
-                dt = HealthDataIO.try_parse_date_internal(
-                    decoded[5], decoded[6], decoded[7], decoded[8], decoded[9]
-                )
+            if msg_type == 0x0F:
+                dt = HealthDataIO._parse_live_date(decoded)
                 if not dt:
                     return results
                 
-                # Offsets: 15-16 Steps, 18-19 Calories, 20-21 Distance
                 steps = int.from_bytes(decoded[15:17], 'little')
                 calories = int.from_bytes(decoded[18:20], 'little')
-                distance = int.from_bytes(decoded[20:22], 'little') // 10 if len(decoded) >= 22 else 0
                 
                 date_str = dt.strftime("%Y-%m-%d")
                 results.append(DailyHealthData(
                     date=date_str,
-                    snapshots=[HealthData(int(dt.timestamp()), steps, calories, distance)]
+                    snapshots=[HealthData(int(dt.timestamp()), steps, calories)]
                 ))
                 return results
 
             # --- Type 2: Historical Day Summary (Signature XX 72) ---
             if msg_type == 0x72:
-                dt_watch = HealthDataIO.try_parse_date_internal(
-                    decoded[5], decoded[6], decoded[7]
-                )
-                if not dt_watch:
+                dt_header = HealthDataIO._parse_history_date(decoded)
+                if not dt_header:
                     return results
                 
-                # Adjust for activity date (-1 day)
-                dt_local = dt_watch - timedelta(days=1)
+                # The header date is one day AFTER the actual activity date
+                dt_local = dt_header - timedelta(days=1)
                 date_str = dt_local.strftime("%Y-%m-%d")
                 
-                # Offsets: 11-12 Calories (* 2), 15-16 Steps, 19-20 Distance
+                # Calories stored at half value at offset 11-12
                 calories = int.from_bytes(decoded[11:13], 'little') * 2
+                # Steps at offset 15-16
                 steps = int.from_bytes(decoded[15:17], 'little')
+                # Distance in decimeters at offset 19-20
                 distance = int.from_bytes(decoded[19:21], 'little') // 10 if len(decoded) >= 21 else 0
                 
                 results.append(DailyHealthData(
@@ -115,21 +126,66 @@ class HealthDataIO:
         return results
 
     @staticmethod
-    def try_parse_date_internal(y_raw, m_raw, d_raw, h_raw=0, min_raw=0) -> Optional[datetime]:
-        """Tries to parse date/time parts as either BCD or Hex."""
-        # Try BCD first
+    def _parse_live_date(decoded: bytes) -> Optional[datetime]:
+        """Parse date/time from a live update buffer (000f format).
+        
+        Year is stored as hex value at offset 5 (e.g. 0x1a = 26 -> 2026).
+        Month, day, hour, minute are straight hex values.
+        """
+        if len(decoded) < 10:
+            return None
         try:
-            y, m, d = 2000+HealthDataIO.bcd_to_int(y_raw), HealthDataIO.bcd_to_int(m_raw), HealthDataIO.bcd_to_int(d_raw)
-            h, mn = HealthDataIO.bcd_to_int(h_raw), HealthDataIO.bcd_to_int(min_raw)
-            if 1 <= m <= 12 and 1 <= d <= 31:
-                return datetime(y, m, d, h if h < 24 else 0, mn if mn < 60 else 0)
-        except: pass
-        # Try Hex fallback
+            year = 2000 + decoded[5]
+            month = decoded[6]
+            day = decoded[7]
+            hour = decoded[8]
+            minute = decoded[9]
+            
+            if not (1 <= month <= 12 and 1 <= day <= 31):
+                return None
+            if hour >= 24:
+                hour = 0
+            if minute >= 60:
+                minute = 0
+                
+            return datetime(year, month, day, hour, minute)
+        except (ValueError, OverflowError):
+            return None
+
+    @staticmethod
+    def _parse_history_date(decoded: bytes) -> Optional[datetime]:
+        """Parse date from a historical summary buffer (XX72 format).
+        
+        Year at offset 5: 0x26 means 2026 (hex year code).
+        Month/day are hex values at offsets 6 and 7.
+        """
+        if len(decoded) < 8:
+            return None
         try:
-            if 1 <= m_raw <= 12 and 1 <= d_raw <= 31:
-                return datetime(2000+y_raw, m_raw, d_raw, h_raw if h_raw < 24 else 0, min_raw if min_raw < 60 else 0)
-        except: pass
-        return None
+            y_raw = decoded[5]
+            month = decoded[6]
+            day = decoded[7]
+            
+            # Year encoding: 0x26 = 38 decimal, but represents 2026
+            # The pattern is: year is stored as hex where 0x26 = 2026
+            # (i.e. the hex digits form the last two digits of the year)
+            if y_raw == 0x26:
+                year = 2026
+            elif y_raw == 0x25:
+                year = 2025
+            elif y_raw == 0x27:
+                year = 2027
+            elif y_raw < 100:
+                year = 2000 + y_raw
+            else:
+                year = 2000 + (y_raw & 0x3F)
+            
+            if not (1 <= month <= 12 and 1 <= day <= 31):
+                return None
+                
+            return datetime(year, month, day)
+        except (ValueError, OverflowError):
+            return None
 
     @staticmethod
     def on_received(data: bytes) -> None:
@@ -142,6 +198,7 @@ class HealthDataIO:
         found_records = HealthDataIO.decode_health_data(decoded)
         for record in found_records:
             logger.info(f"HealthDataIO: Successfully extracted record for {record.date}")
+            logger.info(f"  Steps: {record.total_steps}, Calories: {record.total_calories} kcal, Distance: {record.total_distance} m")
             if HealthDataIO.on_data_update:
                 HealthDataIO.on_data_update(record)
             

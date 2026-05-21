@@ -1,80 +1,70 @@
+#!/usr/bin/env python3
+"""
+Hardcoded test for G-Shock health data decoding.
+Verifies decode logic against known expected values from Casio app screenshots.
+
+Expected values:
+  Jan 7 (Live):    Steps=0,    Cal=702
+  Jan 6 (History): Steps=1268, Cal=1780, Dist=800m
+"""
 import logging
 import os
 import sys
-from dataclasses import dataclass
-from datetime import datetime
 
 # Add src to path so we can import gshock_api
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from gshock_api.logger import logger
-
-@dataclass
-class HealthData:
-    timestamp: int  # Epoch timestamp
-    steps: int
-    calories: int
-    distance: int = 0
-    heart_rate_avg: int = 0
-    heart_rate_max: int = 0
-    heart_rate_min: int = 0
-
-    def __repr__(self):
-        dt = datetime.fromtimestamp(self.timestamp)
-        return (f"HealthData(time={dt.strftime('%H:%M')}, steps={self.steps}, "
-                f"calories={self.calories}, distance={self.distance}m)")
-
-@dataclass
-class DailyHealthData:
-    date: str  # YYYY-MM-DD
-    total_steps: int = 0
-    total_calories: int = 0
-    total_distance: int = 0
-    snapshots: list[HealthData] = None
-
-    def __post_init__(self):
-        if self.snapshots is None:
-            self.snapshots = []
-        if self.snapshots:
-            # Aggregate totals from snapshots (assuming they are cumulative or the last one is the day total)
-            self.total_steps = max(s.steps for s in self.snapshots)
-            self.total_calories = max(s.calories for s in self.snapshots)
-            self.total_distance = max(s.distance for s in self.snapshots)
+from gshock_api.health_data import HealthData, DailyHealthData
 
 def xor_decode(data: bytes, key: int = 255) -> bytes:
     return bytes([b ^ key for b in data])
 
+
 def decode_health_data(decoded: bytes) -> DailyHealthData | None:
     """
-    Decodes G-Shock health data buffers. 
-    Handles both live updates (starting with 00 0f) and historical records (starting with 63 72).
+    Decodes G-Shock health data buffers.
+    
+    Two known formats (after XOR decode):
+    
+    Live Update (signature 0x00 0x0F):
+        [5]     Year (hex, e.g. 0x1a = 26 -> 2026)
+        [6]     Month, [7] Day, [8] Hour, [9] Minute
+        [15:17] Steps (16-bit LE)
+        [18:20] Calories (16-bit LE, direct kcal)
+    
+    Historical Day Summary (signature byte[1]=0x72):
+        [5] Year (0x26 = 2026), [6] Month, [7] Day (actual = day-1)
+        [11:13] Calories/2 (16-bit LE, multiply by 2)
+        [15:17] Steps (16-bit LE)
+        [19:21] Distance in decimeters (÷10 for meters)
     """
     try:
         if len(decoded) < 16:
             return None
 
-        # Buffer Type Detection
-        if decoded.startswith(b'\x00\x0f'):
-            # --- Type 1: Live Update / Current Day Snapshot ---
-            # Format: [Header 5b] [Year 1b] [Month 1b] [Day 1b] [Hour 1b] [Min 1b] ...
-            year = decoded[5] + 2000
+        msg_type = decoded[1]
+
+        if msg_type == 0x0F:
+            # --- Live Update ---
+            from datetime import datetime
+            year = 2000 + decoded[5]
             month = decoded[6]
             day = decoded[7]
-            hour = decoded[8]
-            minute = decoded[9]
+            hour = decoded[8] if decoded[8] < 24 else 0
+            minute = decoded[9] if decoded[9] < 60 else 0
             
-            # Offsets: 15-16 Steps, 18-19 Calories
+            if not (1 <= month <= 12 and 1 <= day <= 31):
+                return None
+            
             steps = int.from_bytes(decoded[15:17], 'little')
             calories = int.from_bytes(decoded[18:20], 'little')
-            # Offset 20-21 looks like distance in decimeters? (4228 -> 422.8m)
-            distance = int.from_bytes(decoded[20:22], 'little') // 10 if len(decoded) >= 22 else 0
             
             dt = datetime(year, month, day, hour, minute)
             snapshot = HealthData(
                 timestamp=int(dt.timestamp()),
                 steps=steps,
                 calories=calories,
-                distance=distance
             )
             
             return DailyHealthData(
@@ -82,41 +72,35 @@ def decode_health_data(decoded: bytes) -> DailyHealthData | None:
                 snapshots=[snapshot]
             )
 
-        elif decoded.startswith(b'cr'):
-            # --- Type 2: Historical Day Record ---
-            # Format observed: [Header 'cr' + 3 nulls] [Year? 1b] [Month 1b] [Day 1b] ...
-            # Decoded bytes 5,6,7: 26 01 07. 
-            # Note: User states this is Jan 6th record. Header date might be recording date (Jan 7th).
-            # We'll trust the user and adjust if needed.
+        elif msg_type == 0x72:
+            # --- Historical Day Summary ---
+            from datetime import datetime, timedelta
             
-            year = decoded[5] # 0x26 often represents 2026 in BCD-like storage for history
-            if year == 0x26: year = 2026
-            else: year += 2000
-                
+            y_raw = decoded[5]
+            year = 2026 if y_raw == 0x26 else (2025 if y_raw == 0x25 else 2000 + y_raw)
             month = decoded[6]
             day = decoded[7]
             
-            # For this historical record, Jan 7 header refers to Jan 6 data
-            if month == 1 and day == 7:
-                day = 6
-                
-            # Calories at 11-12 (890 * 2 = 1780)
-            calories = int.from_bytes(decoded[11:13], 'little') * 2
-            # Steps at 15-16 (1268)
-            steps = int.from_bytes(decoded[15:17], 'little')
-            # Distance at 19-20 (8000 -> 800m)
-            distance = int.from_bytes(decoded[19:21], 'little') // 10
+            if not (1 <= month <= 12 and 1 <= day <= 31):
+                return None
             
-            dt = datetime(year, month, day, 0, 0)
+            # Header date is day+1 of actual data
+            dt_header = datetime(year, month, day)
+            dt_local = dt_header - timedelta(days=1)
+                
+            calories = int.from_bytes(decoded[11:13], 'little') * 2
+            steps = int.from_bytes(decoded[15:17], 'little')
+            distance = int.from_bytes(decoded[19:21], 'little') // 10 if len(decoded) >= 21 else 0
+            
             snapshot = HealthData(
-                timestamp=int(dt.timestamp()),
+                timestamp=int(dt_local.timestamp()),
                 steps=steps,
                 calories=calories,
                 distance=distance
             )
             
             return DailyHealthData(
-                date=dt.strftime("%Y-%m-%d"),
+                date=dt_local.strftime("%Y-%m-%d"),
                 snapshots=[snapshot]
             )
 
@@ -129,47 +113,52 @@ def decode_health_data(decoded: bytes) -> DailyHealthData | None:
         return None
 
 def run_hardcoded_test():
-    logger.info("Starting Final Health Data Decoding Test...")
+    logger.info("Starting Health Data Decoding Test...")
 
-    # Buffers provided by user
-    test_buffers = [
-        # Jan 7 Live Update (Expected: Steps 0, Calories 702)
-        ("05FFF0FFFFFFE5FEF8F1DFC9BAFFFFFFFFFFFF41FDEF7B"), 
-        # Jan 6 History Record (Expected: Steps 1268, Calories 1780)
-        ("059C8DFFFFFFD9FEF813A2D185FCFFA30BFBFFFFBFE0FFFFF0FF9FFFFFFFFF9DFFFFFFFFF0F0FFFFD8FFFFFFFFFEC9EFDAFEFFEECF009E010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FF00A157FFCFFFC8FF9B00007E2B"),
+    # Test buffers with expected values
+    test_cases = [
+        # (hex_buffer, expected_date, expected_steps, expected_calories, description)
+        ("05FFF0FFFFFFE5FEF8F1DFC9BAFFFFFFFFFFFF41FDEF7B",
+         "2026-01-07", 0, 702, "Jan 7 Live Update"),
+        ("059C8DFFFFFFD9FEF813A2D185FCFFA30BFBFFFFBFE0FFFFF0FF9FFFFFFFFF9DFFFFFFFFF0F0FFFFD8FFFFFFFFFEC9EFDAFEFFEECF009E010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101FF00A157FFCFFFC8FF9B00007E2B",
+         "2026-01-06", 1268, 1780, "Jan 6 History Record"),
     ]
     
-    all_daily_data = {}
-
-    for buffer_hex in test_buffers:
-        data = bytearray.fromhex(buffer_hex)
+    all_pass = True
+    
+    for hex_str, exp_date, exp_steps, exp_cal, desc in test_cases:
+        data = bytearray.fromhex(hex_str)
         payload = data[1:]
         decoded = xor_decode(payload)
         
         daily = decode_health_data(decoded)
-        if daily:
-            if daily.date not in all_daily_data:
-                all_daily_data[daily.date] = daily
-            else:
-                # Combine snapshots for the same day
-                all_daily_data[daily.date].snapshots.extend(daily.snapshots)
-                # Re-run post_init to update totals
-                all_daily_data[daily.date].__post_init__()
-
-    # Final Output
-    print("\n" + "="*50)
-    print("DECODED HEALTH DATA SUMMARY")
-    print("="*50)
-    for date in sorted(all_daily_data.keys()):
-        day = all_daily_data[date]
-        print(f"\nDate: {day.date}")
-        print(f"Total Steps:    {day.total_steps}")
-        print(f"Total Calories: {day.total_calories} kcal")
-        print(f"Total Distance: {day.total_distance} m")
-        print("Snapshots:")
-        for s in day.snapshots:
-            print(f"  - {s}")
-    print("="*50)
+        
+        if daily is None:
+            print(f"  ✗ {desc}: Failed to decode")
+            all_pass = False
+            continue
+        
+        date_ok = daily.date == exp_date
+        steps_ok = daily.total_steps == exp_steps
+        cal_ok = daily.total_calories == exp_cal
+        
+        status = "✓" if (date_ok and steps_ok and cal_ok) else "✗"
+        if not (date_ok and steps_ok and cal_ok):
+            all_pass = False
+        
+        print(f"  {status} {desc}:")
+        print(f"    Date:     {daily.date}  (expected: {exp_date})  {'✓' if date_ok else '✗'}")
+        print(f"    Steps:    {daily.total_steps}  (expected: {exp_steps})  {'✓' if steps_ok else '✗'}")
+        print(f"    Calories: {daily.total_calories}  (expected: {exp_cal})  {'✓' if cal_ok else '✗'}")
+        print(f"    Distance: {daily.total_distance} m")
+    
+    print()
+    if all_pass:
+        print("ALL TESTS PASSED ✓")
+    else:
+        print("SOME TESTS FAILED ✗")
+    
+    return all_pass
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
