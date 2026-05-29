@@ -16,10 +16,11 @@ class HealthDataIO:
     on_data_update: Optional[Callable[[DailyHealthData], None]] = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
+    async def request(connection: ConnectionProtocol) -> str:
         HealthDataIO.connection = connection
         HealthDataIO.result = CancelableResult()
         await HealthDataIO.get_data()
+        HealthDataIO.result.set_result("OK")
         return await HealthDataIO.result.get_result()
 
     @staticmethod

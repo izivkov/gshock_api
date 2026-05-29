@@ -75,6 +75,7 @@ class TimeEncoder:
         arr[5] = dt.minute
         arr[6] = dt.second
         arr[7] = dt.weekday()
-        arr[8] = 0
+        nanos: int = dt.microsecond * 1_000  # microseconds → nanoseconds
+        arr[8] = (nanos * 256 // 1_000_000_000) & 0xFF
         arr[9] = 1
         return arr
