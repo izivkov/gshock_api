@@ -1,12 +1,10 @@
 from typing import TypedDict
 
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol
 from gshock_api.watch_info import watch_info
-
-CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
 
 class WatchConditionValue(TypedDict):
@@ -14,7 +12,60 @@ class WatchConditionValue(TypedDict):
     temperature: int
 
 
+class WatchConditionIOFunctional:
+    """
+    Pure functional watch condition modules implementing Monoids.
+    """
+
+    @staticmethod
+    def decode(data_bytes: bytes) -> WatchConditionValue:
+        min_bytes_len = 3
+        if len(data_bytes) < min_bytes_len:
+            return {"battery_level_percent": 0, "temperature": 0}
+
+        try:
+            header = Header(Protocol(data_bytes[0]), size=len(data_bytes))
+            if header.protocol != Protocol.WATCH_CONDITION:
+                return {"battery_level_percent": 0, "temperature": 0}
+
+            payload = Payload(data=bytearray(data_bytes[1:]))
+            bytes_data = payload.data
+        except (ValueError, IndexError):
+            return {"battery_level_percent": 0, "temperature": 0}
+
+        min_payload_len = 2
+        if len(bytes_data) >= min_payload_len:
+            battery_level_lower_limit = watch_info.batteryLevelLowerLimit
+            battery_level_upper_limit = watch_info.batteryLevelUpperLimit
+
+            multiplier = round(
+                100.0 / (battery_level_upper_limit - battery_level_lower_limit)
+            )
+            battery_level = int(bytes_data[0]) - battery_level_lower_limit
+            battery_level_percent = min(max(battery_level * multiplier, 0), 100)
+            temperature = int(bytes_data[1])
+
+            return {
+                "battery_level_percent": battery_level_percent,
+                "temperature": temperature,
+            }
+        return {"battery_level_percent": 0, "temperature": 0}
+
+    @staticmethod
+    def prepare_watch_commands() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([Protocol.WATCH_CONDITION.value])
+            )
+        ]
+
+
 class WatchConditionIO:
+    """
+    Stateful backward-compatible wrapper.
+    Acts as the interpreter for WatchConditionIOFunctional commands.
+    """
     result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
@@ -27,47 +78,14 @@ class WatchConditionIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        header = Header(Protocol.WATCH_CONDITION, size=1)
-        await connection.write(0x000C, bytearray([header.protocol.value]))
+        commands = WatchConditionIOFunctional.prepare_watch_commands()
+        for command in commands:
+            if isinstance(command, Write):
+                await connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:
-        def decode_value(data_bytes: bytes) -> WatchConditionValue:
-            # Assuming data starts with Protocol (Header) or is just payload?
-            # Original code: int_arr = list(map(int, data_str))
-            # bytes_data = bytes(int_arr[1:]) -> skipped index 0. Index 0 is protocol.
-            
-            # Using data as bytes directly
-            if len(data_bytes) < 3: # Protocol + 2 bytes
-                return {"battery_level_percent": 0, "temperature": 0}
-
-            header = Header(Protocol(data_bytes[0]), size=len(data_bytes))
-            # Payload starts at 1
-            payload = Payload(data=bytearray(data_bytes[1:]))
-            
-            bytes_data = payload.data
-
-            if len(bytes_data) >= 2:
-                battery_level_lower_limit = watch_info.batteryLevelLowerLimit
-                battery_level_upper_limit = watch_info.batteryLevelUpperLimit
-
-                multiplier = round(
-                    100.0 / (battery_level_upper_limit - battery_level_lower_limit)
-                )
-                battery_level = int(bytes_data[0]) - battery_level_lower_limit
-                battery_level_percent = min(max(battery_level * multiplier, 0), 100)
-                temperature = int(bytes_data[1])
-
-                return {
-                    "battery_level_percent": battery_level_percent,
-                    "temperature": temperature,
-                }
-            return {"battery_level_percent": 0, "temperature": 0}
-        
-        # If input was string in original, we need to handle bytes now.
-        # Assuming caller passes bytes. 
-        # But wait, original signature was `data: str`.
-        # I changed it to `data: bytes` in signature.
+        decoded = WatchConditionIOFunctional.decode(data)
         if WatchConditionIO.result is None:
             raise RuntimeError("WatchConditionIO.result is not set")
-        WatchConditionIO.result.set_result(decode_value(data))
+        WatchConditionIO.result.set_result(decoded)  # type: ignore[arg-type]

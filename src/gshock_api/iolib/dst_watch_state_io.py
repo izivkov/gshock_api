@@ -1,11 +1,9 @@
 from enum import IntEnum
 
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-from gshock_api.iolib.packet import Header, Protocol
-
-CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+from gshock_api.iolib.packet import Protocol
 
 
 class DtsState(IntEnum):
@@ -14,7 +12,26 @@ class DtsState(IntEnum):
     FOUR = 4
 
 
+class DstWatchStateIOFunctional:
+    """
+    Pure functional DST watch state modules implementing Monoids.
+    """
+
+    @staticmethod
+    def prepare_watch_commands() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([Protocol.DST_WATCH_STATE.value])
+            )
+        ]
+
+
 class DstWatchStateIO:
+    """
+    Stateful backward-compatible wrapper.
+    Acts as the interpreter for DstWatchStateIOFunctional commands.
+    """
     result: CancelableResult[bytes] | None = None
     connection: ConnectionProtocol | None = None
 
@@ -28,8 +45,10 @@ class DstWatchStateIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        header = Header(Protocol.DST_WATCH_STATE, size=1)
-        await connection.write(0x000C, bytearray([header.protocol.value]))
+        commands = DstWatchStateIOFunctional.prepare_watch_commands()
+        for command in commands:
+            if isinstance(command, Write):
+                await connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:
