@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Union
+
 
 class Protocol(IntEnum):
     APP_INFO = 0x22

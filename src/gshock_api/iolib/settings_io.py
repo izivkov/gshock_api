@@ -4,10 +4,10 @@ from typing import Literal, TypedDict
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.iolib.packet import Header, Payload, Protocol
 from gshock_api.logger import logger
 from gshock_api.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
-from gshock_api.iolib.packet import Header, Payload, Protocol
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 

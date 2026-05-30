@@ -1,5 +1,5 @@
-import json
 from dataclasses import dataclass
+import json
 from typing import TypedDict
 
 from gshock_api.cancelable_result import CancelableResult
@@ -55,7 +55,7 @@ class TimePeriod:
     repeat_period: str
 
 
-from gshock_api.iolib.packet import Header, Payload, Protocol
+from gshock_api.iolib.packet import Payload, Protocol
 
 
 class EventsIO:

@@ -1,11 +1,10 @@
 from typing import TypedDict
-import json
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-from gshock_api.watch_info import watch_info
 from gshock_api.iolib.packet import Header, Payload, Protocol
+from gshock_api.watch_info import watch_info
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 

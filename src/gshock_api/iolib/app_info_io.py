@@ -1,10 +1,9 @@
-from typing import Optional, Protocol as TypingProtocol
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
-from gshock_api.utils import to_compact_string, to_hex_string
-from gshock_api.iolib.packet import Header, Payload, Trailer, Protocol
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
+from gshock_api.utils import to_hex_string
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 

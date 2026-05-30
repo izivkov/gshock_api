@@ -1,7 +1,8 @@
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.utils import clean_str, to_ascii_string, to_hex_string
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-from gshock_api.iolib.packet import Header, Protocol
+from gshock_api.iolib.packet import Protocol
+from gshock_api.utils import clean_str, to_ascii_string, to_hex_string
+
 
 class WatchNameIO:
     result: CancelableResult | None = None
