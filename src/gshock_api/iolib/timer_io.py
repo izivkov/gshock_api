@@ -1,15 +1,61 @@
 import json
 
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.iolib.packet import Protocol
 from gshock_api.utils import to_compact_string, to_hex_string
-from gshock_api.iolib.packet import Header, Payload, Protocol
 
-CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
+class TimerIOFunctional:
+    """
+    Pure functional timer modules implementing Monoids.
+    """
+
+    @staticmethod
+    def encode(seconds: int) -> bytes:
+        hours = seconds // 3600
+        minutes_and_seconds = seconds % 3600
+        minutes = minutes_and_seconds // 60
+        secs = minutes_and_seconds % 60
+
+        # Protocol.TIMER.value = 0x18, then 3 bytes for HMS, then 2 bytes padding/flags
+        return bytes([Protocol.TIMER.value, hours, minutes, secs, 0, 0])
+
+    @staticmethod
+    def decode(data_bytes: bytes) -> int:
+        header_offset = 1
+        min_data_len = 4
+        if len(data_bytes) < min_data_len:
+            return 0
+
+        hours = data_bytes[0 + header_offset]
+        minutes = data_bytes[1 + header_offset]
+        seconds = data_bytes[2 + header_offset]
+        return hours * 3600 + minutes * 60 + seconds
+
+    @staticmethod
+    def prepare_watch_commands() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([Protocol.TIMER.value])
+            )
+        ]
+
+    @staticmethod
+    def prepare_watch_commands_set(message_json: str) -> list[BLEAction]:
+        data_obj = json.loads(message_json)
+        seconds = int(data_obj.get("value", 0))
+        encoded = TimerIOFunctional.encode(seconds)
+        return [Write(handle=0x000E, data=encoded)]
 
 
 class TimerIO:
+    """
+    Stateful backward-compatible wrapper.
+    Acts as the interpreter for TimerIOFunctional commands.
+    """
     result: CancelableResult | None = None
     connection: ConnectionProtocol | None = None
 
@@ -22,53 +68,25 @@ class TimerIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        header = Header(Protocol.TIMER, size=1)
-        await connection.write(0x000C, bytearray([header.protocol.value]))
+        commands = TimerIOFunctional.prepare_watch_commands()
+        for command in commands:
+            if isinstance(command, Write):
+                await connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(data: str) -> None:
-        def encode(seconds_str: str) -> bytearray:
-            in_seconds = int(seconds_str)
-            hours = in_seconds // 3600
-            minutes_and_seconds = in_seconds % 3600
-            minutes = minutes_and_seconds // 60
-            seconds = minutes_and_seconds % 60
-
-            arr = bytearray(6)
-            # arr[0] was 0x18. We return payload (time part)
-            arr[0] = hours
-            arr[1] = minutes
-            arr[2] = seconds
-            return arr
-
-        data_obj = json.loads(data)
-        seconds_as_byte_arr = encode(data_obj.get("value", "0"))
-        
-        # Header + Payload
-        payload = Payload(data=seconds_as_byte_arr)
-        packet_bytes = bytearray([Protocol.TIMER.value]) + payload.data
-        
-        seconds_as_compact_str = to_compact_string(to_hex_string(packet_bytes))
         if TimerIO.connection is None:
             raise RuntimeError("TimerIO.connection is not set")
-        await TimerIO.connection.write(0x000E, seconds_as_compact_str)
+
+        commands = TimerIOFunctional.prepare_watch_commands_set(data)
+        for command in commands:
+            if isinstance(command, Write):
+                seconds_as_compact_str = to_compact_string(to_hex_string(command.data))
+                await TimerIO.connection.write(0x000E, seconds_as_compact_str)
 
     @staticmethod
-    def on_received(data: list[int]) -> None:
-        def decode_value(data_list: list[int]) -> int:
-            # data_list includes protocol at index 0?
-            # Original code: hours=data_list[1], mins=data_list[2]
-            # If data is full packet bytes converted to int list
-            header_offset = 1
-            if len(data_list) < 4:
-                return 0
-            
-            hours = data_list[0 + header_offset]
-            minutes = data_list[1 + header_offset]
-            seconds = data_list[2 + header_offset]
-            return hours * 3600 + minutes * 60 + seconds
-
-        decoded = decode_value(data)
+    def on_received(data: bytes) -> None:
+        decoded = TimerIOFunctional.decode(data)
         if TimerIO.result is None:
             raise RuntimeError("TimerIO.result is not set")
         TimerIO.result.set_result(decoded)

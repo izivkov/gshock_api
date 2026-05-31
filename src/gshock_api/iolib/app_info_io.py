@@ -1,15 +1,53 @@
-from typing import Optional, Protocol as TypingProtocol
-
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.casio_constants import CasioConstants
-from gshock_api.utils import to_compact_string, to_hex_string
-from gshock_api.iolib.packet import Header, Payload, Trailer, Protocol
+from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
+from gshock_api.utils import to_hex_string
 
-CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
+class AppInfoIOFunctional:
+    """
+    Pure functional app info modules implementing Monoids.
+    """
+
+    @staticmethod
+    def prepare_watch_commands() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([Protocol.APP_INFO.value])
+            )
+        ]
+
+    @staticmethod
+    def prepare_watch_response(data: bytes) -> list[BLEAction]:
+        if len(data) >= 12:
+            try:
+                protocol = Protocol(data[0])
+                header = Header(protocol=protocol, size=len(data))
+                payload = Payload(data=bytearray(data[1:11]))
+                trailer = Trailer(data=bytearray(data[11:]), checksum=data[-1])
+
+                if (header.protocol == Protocol.APP_INFO and
+                    payload.data == bytearray([0xFF] * 10) and
+                    trailer.data[0] == 0x00):
+
+                    res_header = Header(protocol=Protocol.APP_INFO, size=12)
+                    res_payload = Payload(data=bytearray.fromhex("3488F4E5D5AFC829E06D"))
+                    res_trailer = Trailer(data=bytearray([0x02]), checksum=0x02)
+
+                    packet_bytes = bytes([res_header.protocol.value]) + bytes(res_payload.data) + bytes(res_trailer.data)
+                    return [Write(handle=0xE, data=packet_bytes)]
+            except ValueError:
+                pass
+        return []
 
 
 class AppInfoIO:
+    """
+    Stateful backward-compatible wrapper.
+    Acts as the interpreter for AppInfoIOFunctional commands.
+    """
     result: CancelableResult = None
     connection: ConnectionProtocol = None
 
@@ -22,45 +60,25 @@ class AppInfoIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        header = Header(protocol=Protocol.APP_INFO, size=1)
-        await connection.write(0x000C, bytearray([header.protocol.value]))
+        commands = AppInfoIOFunctional.prepare_watch_commands()
+        for command in commands:
+            if isinstance(command, Write):
+                await connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:
-        async def set_app_info(data_str: str) -> None:
-            # Parse data into types
-            # Expected: 22 (Header) + 10 bytes (Payload) + 00 (Trailer)
-            if len(data) >= 12:
-                try:
-                    protocol = Protocol(data[0])
-                    header = Header(protocol=protocol, size=len(data))
-                    payload = Payload(data=bytearray(data[1:11]))
-                    trailer = Trailer(data=bytearray(data[11:]), checksum=data[-1])
-                    
-                    # Logic: if app_info_compact_str == "22FFFFFFFFFFFFFFFFFFFF00":
-                    if (header.protocol == Protocol.APP_INFO and 
-                        payload.data == bytearray([0xFF] * 10) and 
-                        trailer.data[0] == 0x00):
-                        
-                        if AppInfoIO.connection is None:
-                            raise RuntimeError("AppInfoIO.connection is not set")
-                        
-                        # Construct response packet using types
-                        # "223488F4E5D5AFC829E06D02"
-                        res_header = Header(protocol=Protocol.APP_INFO, size=12)
-                        res_payload = Payload(data=bytearray.fromhex("3488F4E5D5AFC829E06D"))
-                        res_trailer = Trailer(data=bytearray([0x02]), checksum=0x02)
-                        
-                        packet_bytes = bytearray([res_header.protocol.value]) + res_payload.data + res_trailer.data
-                        await AppInfoIO.connection.write(0xE, to_hex_string(packet_bytes))
-                    
-                except ValueError:
-                    # Invalid protocol or data
-                    pass
-            
+        async def set_app_info(data_bytes: bytes) -> None:
+            commands = AppInfoIOFunctional.prepare_watch_response(data_bytes)
+            if commands:
+                if AppInfoIO.connection is None:
+                    raise RuntimeError("AppInfoIO.connection is not set")
+                for command in commands:
+                    if isinstance(command, Write):
+                        await AppInfoIO.connection.write(command.handle, to_hex_string(command.data))
+
             if AppInfoIO.result is None:
                 raise RuntimeError("AppInfoIO.result is not set")
             AppInfoIO.result.set_result("OK")
 
         import asyncio
-        asyncio.create_task(set_app_info(to_hex_string(data)))
+        asyncio.create_task(set_app_info(data))

@@ -204,11 +204,13 @@ class GshockAPI:
         message: str = f"""{{"action": "SET_TIME_ADJUSTMENT", "timeAdjustment": "{time_adjustement}", "minutesAfterHour": "{minutes_after_hour}" }}"""
         await self.connection.send_message(message)
 
-    # SettingsIO returns a list of unknown Setting objects (list[T])
-    async def get_basic_settings(self) -> list[T]:
-        """Get settings from the watch."""
-        result: list[T] = await message_dispatcher.SettingsIO.request(self.connection) # type: ignore[assignment]
-        return result
+    async def get_basic_settings(self) -> dict:
+        # 1. Request the result (which returns the JSON string from SettingsIO)
+        result_str = await message_dispatcher.SettingsIO.request(self.connection)
+        
+        # 2. Automatically deserialize to a dict
+        # This prevents the TypeError in the test script!
+        return json.loads(result_str)
 
     # settings is an unknown settings object (T)
     async def set_settings(self, settings: T) -> None:

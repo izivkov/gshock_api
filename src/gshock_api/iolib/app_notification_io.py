@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from gshock_api.app_notification import AppNotification, NotificationType
 
 
