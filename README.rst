@@ -19,6 +19,16 @@ See the `examples/api_test.py <https://github.com/izivkov/gshock_api/blob/main/s
 
 Only the **DW-H5600** watch has been tested. If you have any of the watches supporting notifications, please let me know your findings.
 
+Version 2.0.38+: Functional Architecture
+=========================================
+
+Starting from version 2.0.38, the library has been refactored to use a **pure functional programming model** with monoids for all data transformations. This architectural improvement provides:
+
+* **Better composability**: Data transformation operations can be easily combined and chained
+* **Improved predictability**: Immutable data structures reduce side effects and unexpected state changes
+* **Enhanced testability**: Functional components are easier to unit test in isolation
+* **Cleaner code**: Monoid operations simplify buffer handling and packet encoding/decoding
+
 
 Overview
 ========
@@ -65,7 +75,7 @@ Add dependency on this library in your `pyproject.toml`
 .. code-block:: sh
 
    dependencies = [
-      "gshock-api>=2.0.36",
+      "gshock-api>=2.0.38",
       ...
    ]
 
