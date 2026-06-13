@@ -169,6 +169,23 @@ class WatchInfo:
             ChainMap({}, self.default_cap)
         )
 
+    def __getattr__(self, name: str):
+        """Fallback attribute lookup for capability fields.
+
+        After the watch model is resolved, capability values (e.g., ``dstCount``)
+        are stored in ``self.model_map[self.model]``.  If an attribute is not
+        found on the instance, this method attempts to retrieve it from the
+        current model capability mapping.  This mirrors the original library's
+        intention where ``WatchInfo`` exposed those keys as attributes.
+        """
+        # Guard against early access before __post_init__ has created model_map
+        if not hasattr(self, "model_map"):
+            raise AttributeError(name)
+        current_cap = self.model_map.get(self.model, self.default_cap)
+        if name in current_cap:
+            return current_cap[name]
+        raise AttributeError(name)
+
     #
     # --- Public API ---
     #
