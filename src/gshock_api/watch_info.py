@@ -57,6 +57,7 @@ class WatchInfo:
         "hasDnD": False,
         "hasBatteryLevel": False,
         "hasWorldCities": True,
+        "hasNewTimeProtocol": False,
     })
 
     # The per-model overrides
@@ -70,6 +71,7 @@ class WatchInfo:
             "batteryLevelLowerLimit": 9,
             "batteryLevelUpperLimit": 19,
             "dstCount": 2,
+            "hasNewTimeProtocol": True,
         },
         {
             "model": WatchModel.GW,
@@ -79,6 +81,7 @@ class WatchInfo:
             "longLightDuration": "4s",
             "batteryLevelLowerLimit": 9,
             "batteryLevelUpperLimit": 19,
+            "hasNewTimeProtocol": False,
         },
         {
             "model": WatchModel.MRG,
@@ -180,6 +183,31 @@ class WatchInfo:
             ChainMap({}, self.default_cap)
         )
 
+    def __getattr__(self, name: str) -> Any:
+        """
+        Fallback for any capability attribute not set directly on the instance.
+        Looks up the current model's ChainMap so watch_info.hasNewTimeProtocol,
+        watch_info.hasWorldCities etc. always resolve without needing
+        set_name_and_model() to have been called first.
+        """
+        # Guard against infinite recursion on dataclass internals
+        if name.startswith("_") or name in (
+            "model_map", "model_caps", "default_cap",
+            "name", "short_name", "address", "model",
+        ):
+            raise AttributeError(name)
+
+        try:
+            cap = self.model_map.get(self.model) or self.model_map.get(WatchModel.UNKNOWN)
+        except AttributeError:
+            raise AttributeError(f"'WatchInfo' object has no attribute '{name}'")
+
+        if cap is not None and name in cap:
+            return cap[name]
+
+        raise AttributeError(f"'WatchInfo' object has no attribute '{name}'")
+
+
     #
     # --- Public API ---
     #
@@ -188,9 +216,12 @@ class WatchInfo:
         details = self._resolve_watch_details(name)
         if not details:
             return
-        for key, value in details.items():
-            setattr(self, key, value)
-
+        # Only set identity fields — capabilities are resolved dynamically
+        # via __getattr__ so they always reflect the current model
+        self.name       = details.get("name", name)
+        self.short_name = details.get("short_name", "")
+        self.model      = details.get("model", WatchModel.UNKNOWN)
+        
     def lookup_watch_info(self, name: str) -> ModelCapability | None:
         return self._resolve_watch_details(name)
 
