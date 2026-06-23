@@ -11,7 +11,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gshock_api"  # Change to your project name
+<<<<<<< HEAD
 version = "2.0.39"
+=======
+version = "2.0.41"
+>>>>>>> GW-BX5600
 description = "Python API for GShock Watches using BLE"
 authors = [{ name = "Ivo Zivkov", email = "izivkov@gmail.com" }]
 

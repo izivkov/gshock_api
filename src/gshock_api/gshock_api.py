@@ -15,7 +15,7 @@ from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
 )
-from gshock_api.watch_info import watch_info
+from gshock_api.watch_info import watch_info, WatchModel
 
 # Type variable for unknown request/message objects (e.g., Alarm, Event)
 T = TypeVar("T") 
@@ -86,12 +86,26 @@ class GshockAPI:
         return result
 
     async def initialize_for_setting_time(self) -> None:
+        if watch_info.hasNewTimeProtocol:
+            await self._initialize_gw_bx5600_time()
+            return
+
         await self.read_write_dst_watch_states()
         await self.read_write_dst_for_world_cities()
 
         if watch_info.hasWorldCities:
             await self.read_write_world_cities()
-    
+
+    async def _initialize_gw_bx5600_time(self) -> None:
+        from datetime import datetime
+        from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
+
+        now = datetime.now()
+
+        # Switch between approaches here:
+        # await GwBx5600TimeIO.set_time_hardcoded(self.connection, now)   # ← reliable
+        await GwBx5600TimeIO.set_time_dynamic(self.connection, now)   # ← when fragmentation is fixed
+        
     # Define a Callable type for the function that will be read
     RequestFunction = Callable[[object], Coroutine[object, object, object]]
 
@@ -145,7 +159,10 @@ class GshockAPI:
         # current_time = None is redundant as it's a local variable/parameter
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
+        import asyncio
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
+        if watch_info.hasNewTimeProtocol:
+            await asyncio.sleep(1.0)
 
     # Assuming Alarm is a specific class, using TypeVar T
     async def get_alarms(self) -> list[T]:

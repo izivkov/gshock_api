@@ -5,6 +5,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 
 class TimerIOFunctional:
@@ -64,7 +65,13 @@ class TimerIO:
         TimerIO.connection = connection
         await connection.request(f"{Protocol.TIMER.value:02X}")
         TimerIO.result = CancelableResult()
-        return await TimerIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("TimerIO", TimerIO.result)
+        try:
+            return await TimerIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("TimerIO")
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:

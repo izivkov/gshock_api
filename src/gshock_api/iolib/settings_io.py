@@ -9,6 +9,7 @@ from gshock_api.iolib.packet import Protocol
 from gshock_api.logger import logger
 from gshock_api.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -121,7 +122,13 @@ class SettingsIO:
         SettingsIO.connection = connection
         await connection.request(f"{Protocol.SETTING_FOR_BASIC.value:02X}")
         SettingsIO.result = CancelableResult[str]()
-        return await SettingsIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("SettingsIO", SettingsIO.result)
+        try:
+            return await SettingsIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("SettingsIO")
 
     @staticmethod
     async def send_to_watch(_message: str) -> None:

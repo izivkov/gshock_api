@@ -4,6 +4,7 @@ from typing import Final
 class CasioConstants:
     """
     Holds constants for Casio watch Bluetooth Low Energy (BLE) characteristics.
+    Updated with handles and UUIDs for the GW-BX5600 model.
     """
     
     # BLE Characteristic UUIDs (str)
@@ -18,6 +19,22 @@ class CasioConstants:
     CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID: Final[str] = "26eb0023-b012-49a8-b1f8-394fb2032b0f"
     CASIO_CONVOY_CHARACTERISTIC_UUID: Final[str] = "26eb0024-b012-49a8-b1f8-394fb2032b0f"
     SERIAL_NUMBER_STRING: Final[str] = "00002a25-0000-1000-8000-00805f9b34fb"
+
+    # New UUIDs for Configuration (Handles 0x17 and 0x19)
+    CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID: Final[str] = "26eb002e-b012-49a8-b1f8-394fb2032b0f"
+    CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID: Final[str] = "26eb002f-b012-49a8-b1f8-394fb2032b0f"
+
+    # Static Handle Constants (Replacing literals 0x07, 0x0E, 0x17, 0x19, etc.)
+    HANDLE_DEVICE_NAME_LEGACY: Final[int] = 0x04
+    HANDLE_APPEARANCE: Final[int] = 0x06
+    HANDLE_DEVICE_NAME_GW: Final[int] = 0x07
+    HANDLE_TX_POWER: Final[int] = 0x09
+    HANDLE_READ_ALL_FEATURES: Final[int] = 0x0C
+    HANDLE_ALL_FEATURES_NOTIFICATION: Final[int] = 0x0D
+    HANDLE_ALL_FEATURES_WRITE: Final[int] = 0x0E
+    HANDLE_CONFIG_WRITE: Final[int] = 0x17
+    HANDLE_CONFIG_NOTIFY: Final[int] = 0x19
+    HANDLE_SERIAL_NUMBER: Final[int] = 0xFF
 
     # Dictionary of Characteristic Names (str) mapped to their Command/Feature Codes (int)
     CHARACTERISTICS: Final[dict[str, int]] = {
@@ -48,7 +65,7 @@ class CasioConstants:
         "ERROR": 0xFF,
         "UNKNOWN": 0x0A,
 
-        #  ECB-30
+        #  ECB-30 / GW-BX5600 specifics
         "CMD_SET_TIMEMODE": 0x47,
         "FIND_PHONE": 0x0A,
     }

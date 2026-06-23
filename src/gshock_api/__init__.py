@@ -7,3 +7,6 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 finally:
     del version, PackageNotFoundError
+
+# Display version upon import
+print(f"Loaded gshock_api version {__version__}")  # noqa: T201

@@ -5,7 +5,9 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol
 from gshock_api.watch_info import watch_info
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
+CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
 class WatchConditionValue(TypedDict):
     battery_level_percent: int
@@ -74,7 +76,13 @@ class WatchConditionIO:
         WatchConditionIO.connection = connection
         await connection.request(f"{Protocol.WATCH_CONDITION.value:02X}")
         WatchConditionIO.result = CancelableResult[dict[str, int]]()
-        return await WatchConditionIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("WatchConditionIO", WatchConditionIO.result)
+        try:
+            return await WatchConditionIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("WatchConditionIO")
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:

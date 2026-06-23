@@ -17,6 +17,7 @@ from gshock_api.utils import (
     to_hex_string,
     to_int_array,
 )
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -66,6 +67,20 @@ class EventsIOFunctional:
     def reminder_title_from_json(reminder_json: dict[str, object]) -> bytearray:
         title_str = reminder_json.get("title", "")
         return to_byte_array(title_str, 18)
+    async def request(connection: ConnectionProtocol, event_number: int) -> CancelableResult:
+        EventsIO.connection = connection
+        # 30 is REMINDER_TITLE (0x30)
+        await connection.request(f"{Protocol.REMINDER_TITLE.value:02X}{event_number}")  # reminder title
+        # 31 is REMINDER_TIME (0x31)
+        await connection.request(f"{Protocol.REMINDER_TIME.value:02X}{event_number}")  # reminder time
+        EventsIO.result = CancelableResult[dict[str, object]]()
+        # Register the pending request with unique name based on event number
+        PendingRequestsRegistry.register(f"EventsIO_{event_number}", EventsIO.result)
+        try:
+            return await EventsIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister(f"EventsIO_{event_number}")
 
     @staticmethod
     def reminder_time_from_json(reminder_json: dict[str, object] | None) -> bytearray:

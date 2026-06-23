@@ -3,7 +3,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
 from gshock_api.utils import to_hex_string
-
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 class AppInfoIOFunctional:
     """
@@ -56,7 +56,13 @@ class AppInfoIO:
         AppInfoIO.connection = connection
         await connection.request(f"{Protocol.APP_INFO.value:02X}")
         AppInfoIO.result = CancelableResult[str]()
-        return await AppInfoIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("AppInfoIO", AppInfoIO.result)
+        try:
+            return await AppInfoIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("AppInfoIO")
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:

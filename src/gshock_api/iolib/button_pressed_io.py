@@ -4,6 +4,7 @@ from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 
 class WatchButton(IntEnum):
@@ -83,7 +84,13 @@ class ButtonPressedIO:
         ButtonPressedIO.connection = connection
         await connection.request(f"{Protocol.BLE_FEATURES.value:02X}")
         ButtonPressedIO.result = CancelableResult[WatchButton]()
-        return await ButtonPressedIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("ButtonPressedIO", ButtonPressedIO.result)
+        try:
+            return await ButtonPressedIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("ButtonPressedIO")
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:

@@ -6,7 +6,6 @@ from typing import Any, Final
 type ModelCapability = dict[str, Any]
 type ModelMap = dict[Any, ChainMap]
 
-
 class WatchModel(IntEnum):
     GA = 1
     GW = 2
@@ -24,8 +23,8 @@ class WatchModel(IntEnum):
     GM = 14
     ABL = 15
     DW_H = 16
+    GW_BX5600 = 17
     UNKNOWN = 20
-
 
 @dataclass
 class WatchInfo:
@@ -56,10 +55,22 @@ class WatchInfo:
         "hasDnD": False,
         "hasBatteryLevel": False,
         "hasWorldCities": True,
+        "hasNewTimeProtocol": False,
     })
 
     # The per-model overrides
     model_caps: list[ModelCapability] = field(default_factory=lambda: [
+        {
+            "model": WatchModel.GW_BX5600,
+            "worldCitiesCount": 2,
+            "hasReminders": True,
+            "shortLightDuration": "2s",
+            "longLightDuration": "4s",
+            "batteryLevelLowerLimit": 9,
+            "batteryLevelUpperLimit": 19,
+            "dstCount": 2,
+            "hasNewTimeProtocol": True,
+        },
         {
             "model": WatchModel.GW,
             "worldCitiesCount": 6,
@@ -68,6 +79,7 @@ class WatchInfo:
             "longLightDuration": "4s",
             "batteryLevelLowerLimit": 9,
             "batteryLevelUpperLimit": 19,
+            "hasNewTimeProtocol": False,
         },
         {
             "model": WatchModel.MRG,
@@ -95,7 +107,7 @@ class WatchInfo:
             "longLightDuration": "3s",
         },
         {
-            "model": WatchModel.GA,
+            "model": WatchModel.GA, 
             "worldCitiesCount": 2,
             "hasAutoLight": True,
             "hasReminders": True,
@@ -194,9 +206,12 @@ class WatchInfo:
         details = self._resolve_watch_details(name)
         if not details:
             return
-        for key, value in details.items():
-            setattr(self, key, value)
-
+        # Only set identity fields — capabilities are resolved dynamically
+        # via __getattr__ so they always reflect the current model
+        self.name       = details.get("name", name)
+        self.short_name = details.get("short_name", "")
+        self.model      = details.get("model", WatchModel.UNKNOWN)
+        
     def lookup_watch_info(self, name: str) -> ModelCapability | None:
         return self._resolve_watch_details(name)
 
@@ -215,6 +230,7 @@ class WatchInfo:
             model = WatchModel.GST
         else:
             prefix_map = [
+                ("GW-BX5600", WatchModel.GW_BX5600),
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),

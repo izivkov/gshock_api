@@ -7,7 +7,7 @@ from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.packet import Protocol
 from gshock_api.logger import logger
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
-
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 class TimeAdjustmentIOFunctional:
     """
@@ -63,7 +63,13 @@ class TimeAdjustmentIO:
         TimeAdjustmentIO.connection = connection
         await connection.request(f"{Protocol.SETTING_FOR_BLE.value:02X}")
         TimeAdjustmentIO.result = CancelableResult[dict[str, object]]()
-        return await TimeAdjustmentIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("TimeAdjustmentIO", TimeAdjustmentIO.result)
+        try:
+            return await TimeAdjustmentIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("TimeAdjustmentIO")
 
     @staticmethod
     def send_to_watch(_message: str) -> None:

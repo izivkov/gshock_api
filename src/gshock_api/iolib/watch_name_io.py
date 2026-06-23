@@ -3,6 +3,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.utils import clean_str, to_ascii_string, to_hex_string
+from gshock_api.pending_requests_registry import PendingRequestsRegistry
 
 
 class WatchNameIOFunctional:
@@ -25,7 +26,6 @@ class WatchNameIOFunctional:
             )
         ]
 
-
 class WatchNameIO:
     """
     Stateful backward-compatible wrapper.
@@ -39,7 +39,13 @@ class WatchNameIO:
         WatchNameIO.connection = connection
         await connection.request(f"{Protocol.WATCH_NAME.value:02X}")
         WatchNameIO.result = CancelableResult[str]()
-        return await WatchNameIO.result.get_result()
+        # Register the pending request
+        PendingRequestsRegistry.register("WatchNameIO", WatchNameIO.result)
+        try:
+            return await WatchNameIO.result.get_result()
+        finally:
+            # Unregister when complete (success or error)
+            PendingRequestsRegistry.unregister("WatchNameIO")
 
     @staticmethod
     def on_received(data: bytes) -> None:
