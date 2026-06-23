@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="gshock_api",
-    version="2.0.40",
+    version="2.0.41",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[

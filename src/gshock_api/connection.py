@@ -142,7 +142,6 @@ class Connection:
             cmd_data: bytes = to_casio_cmd(data)
 
             if self.client:
-                logger.info(f">>>: {cmd_data.hex()}")
                 await self.client.write_gatt_char(
                     uuid, cmd_data, response=response_type
                 )
