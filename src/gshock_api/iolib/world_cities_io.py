@@ -1,8 +1,10 @@
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.pending_requests_registry import PendingRequestsRegistry
+
 
 class WorldCitiesIOFunctional:
     """
@@ -10,10 +12,15 @@ class WorldCitiesIOFunctional:
     """
 
     @staticmethod
+    def decode(data_bytes: bytes) -> bytes:
+        """Return raw city bytes unchanged — no city database, just echo back."""
+        return data_bytes
+
+    @staticmethod
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.WORLD_CITIES.value])
             )
         ]
@@ -28,7 +35,7 @@ class WorldCitiesIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
+    async def request(connection: ConnectionProtocol, city_number: int) -> bytes:
         WorldCitiesIO.connection = connection
         key = f"{Protocol.WORLD_CITIES.value:02X}0{city_number}"
         await connection.request(key)
@@ -43,11 +50,14 @@ class WorldCitiesIO:
             PendingRequestsRegistry.unregister(f"WorldCitiesIO_{city_number}")
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if WorldCitiesIO.connection is None:
+            raise RuntimeError("WorldCitiesIO.connection is not set")
+
         commands = WorldCitiesIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await WorldCitiesIO.connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:

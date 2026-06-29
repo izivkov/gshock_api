@@ -1,6 +1,7 @@
 import json
 
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
@@ -39,7 +40,7 @@ class TimerIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.TIMER.value])
             )
         ]
@@ -49,7 +50,7 @@ class TimerIOFunctional:
         data_obj = json.loads(message_json)
         seconds = int(data_obj.get("value", 0))
         encoded = TimerIOFunctional.encode(seconds)
-        return [Write(handle=0x000E, data=encoded)]
+        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=encoded)]
 
 
 class TimerIO:
@@ -57,14 +58,14 @@ class TimerIO:
     Stateful backward-compatible wrapper.
     Acts as the interpreter for TimerIOFunctional commands.
     """
-    result: CancelableResult | None = None
+    result: CancelableResult[int] | None = None
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+    async def request(connection: ConnectionProtocol) -> int:
         TimerIO.connection = connection
         await connection.request(f"{Protocol.TIMER.value:02X}")
-        TimerIO.result = CancelableResult()
+        TimerIO.result = CancelableResult[int]()
         # Register the pending request
         PendingRequestsRegistry.register("TimerIO", TimerIO.result)
         try:
@@ -74,11 +75,14 @@ class TimerIO:
             PendingRequestsRegistry.unregister("TimerIO")
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if TimerIO.connection is None:
+            raise RuntimeError("TimerIO.connection is not set")
+
         commands = TimerIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await TimerIO.connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(data: str) -> None:
@@ -89,7 +93,9 @@ class TimerIO:
         for command in commands:
             if isinstance(command, Write):
                 seconds_as_compact_str = to_compact_string(to_hex_string(command.data))
-                await TimerIO.connection.write(0x000E, seconds_as_compact_str)
+                await TimerIO.connection.write(
+                    CasioConstants.HANDLE_ALL_FEATURES_WRITE, seconds_as_compact_str
+                )
 
     @staticmethod
     def on_received(data: bytes) -> None:

@@ -1,9 +1,11 @@
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
 from gshock_api.utils import to_hex_string
 from gshock_api.pending_requests_registry import PendingRequestsRegistry
+
 
 class AppInfoIOFunctional:
     """
@@ -14,7 +16,7 @@ class AppInfoIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.APP_INFO.value])
             )
         ]
@@ -36,8 +38,12 @@ class AppInfoIOFunctional:
                     res_payload = Payload(data=bytearray.fromhex("3488F4E5D5AFC829E06D"))
                     res_trailer = Trailer(data=bytearray([0x02]), checksum=0x02)
 
-                    packet_bytes = bytes([res_header.protocol.value]) + bytes(res_payload.data) + bytes(res_trailer.data)
-                    return [Write(handle=0xE, data=packet_bytes)]
+                    packet_bytes = (
+                        bytes([res_header.protocol.value])
+                        + bytes(res_payload.data)
+                        + bytes(res_trailer.data)
+                    )
+                    return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=packet_bytes)]
             except ValueError:
                 pass
         return []
@@ -48,11 +54,11 @@ class AppInfoIO:
     Stateful backward-compatible wrapper.
     Acts as the interpreter for AppInfoIOFunctional commands.
     """
-    result: CancelableResult = None
-    connection: ConnectionProtocol = None
+    result: CancelableResult[str] | None = None
+    connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
+    async def request(connection: ConnectionProtocol) -> str:
         AppInfoIO.connection = connection
         await connection.request(f"{Protocol.APP_INFO.value:02X}")
         AppInfoIO.result = CancelableResult[str]()
@@ -65,11 +71,14 @@ class AppInfoIO:
             PendingRequestsRegistry.unregister("AppInfoIO")
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if AppInfoIO.connection is None:
+            raise RuntimeError("AppInfoIO.connection is not set")
+
         commands = AppInfoIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await AppInfoIO.connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:

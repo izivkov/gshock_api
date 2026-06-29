@@ -1,4 +1,5 @@
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
@@ -14,7 +15,7 @@ class DstForWorldCitiesIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.DST_SETTING.value])
             )
         ]
@@ -25,16 +26,16 @@ class DstForWorldCitiesIO:
     Stateful backward-compatible wrapper.
     Acts as the interpreter for DstForWorldCitiesIOFunctional commands.
     """
-    result: CancelableResult = None
-    connection = None
+    result: CancelableResult[bytes] | None = None
+    connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
+    async def request(connection: ConnectionProtocol, city_number: int) -> bytes:
         DstForWorldCitiesIO.connection = connection
         key = f"{Protocol.DST_SETTING.value:02x}0{city_number}"
         await connection.request(key)
 
-        DstForWorldCitiesIO.result = CancelableResult()
+        DstForWorldCitiesIO.result = CancelableResult[bytes]()
         # Register the pending request with unique name based on city number
         PendingRequestsRegistry.register(f"DstForWorldCitiesIO_{city_number}", DstForWorldCitiesIO.result)
         try:
@@ -44,11 +45,14 @@ class DstForWorldCitiesIO:
             PendingRequestsRegistry.unregister(f"DstForWorldCitiesIO_{city_number}")
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if DstForWorldCitiesIO.connection is None:
+            raise RuntimeError("DstForWorldCitiesIO.connection is not set")
+
         commands = DstForWorldCitiesIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await DstForWorldCitiesIO.connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:

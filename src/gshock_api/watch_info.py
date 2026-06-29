@@ -24,6 +24,7 @@ class WatchModel(IntEnum):
     ABL = 15
     DW_H = 16
     GW_BX5600 = 17
+    MTG = 18
     UNKNOWN = 20
 
 @dataclass
@@ -56,6 +57,7 @@ class WatchInfo:
         "hasBatteryLevel": False,
         "hasWorldCities": True,
         "hasNewTimeProtocol": False,
+        "hasSecondDial": False,
     })
 
     # The per-model overrides
@@ -70,6 +72,11 @@ class WatchInfo:
             "batteryLevelUpperLimit": 19,
             "dstCount": 2,
             "hasNewTimeProtocol": True,
+        },
+        {
+            "model": WatchModel.MTG,
+            "hasSecondDial": True,
+            "hasWorldCities": False,  # MTG-B1000 skips 0x1f
         },
         {
             "model": WatchModel.GW,
@@ -244,6 +251,7 @@ class WatchInfo:
                 ("GW", WatchModel.GW),
                 ("MRG", WatchModel.MRG),
                 ("ABL", WatchModel.ABL),
+                ("MTG", WatchModel.MTG),
             ]
             model = WatchModel.UNKNOWN
             for prefix, m in prefix_map:

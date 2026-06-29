@@ -49,6 +49,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         app_info = await api.get_app_info()
         logger.info(f"app info: {app_info}")
 
+        home_time = await api.get_home_time()
+        logger.info(f"home time: {home_time}")
+
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
 

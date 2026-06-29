@@ -1,0 +1,1164 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index dcf0438..36dbd80 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "gshock_api"  # Change to your project name
+-version = "2.0.42"
++version = "2.0.43"
+ description = "Python API for GShock Watches using BLE"
+ authors = [{ name = "Ivo Zivkov", email = "izivkov@gmail.com" }]
+ 
+diff --git a/setup.py b/setup.py
+index 0d3de40..f676b92 100644
+--- a/setup.py
++++ b/setup.py
+@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
+ 
+ setup(
+     name="gshock_api",
+-    version="2.0.42",
++    version="2.0.43",
+     package_dir={"": "src"},
+     packages=find_packages(where="src"),
+     install_requires=[
+diff --git a/src/examples/api_tests.py b/src/examples/api_tests.py
+index 1075c3c..f82d380 100644
+--- a/src/examples/api_tests.py
++++ b/src/examples/api_tests.py
+@@ -49,6 +49,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
+         app_info = await api.get_app_info()
+         logger.info(f"app info: {app_info}")
+ 
++        home_time = await api.get_home_time()
++        logger.info(f"home time: {home_time}")
++
+         pressed_button = await api.get_pressed_button()
+         logger.info(f"pressed button: {pressed_button}")
+ 
+diff --git a/src/gshock_api/casio_constants.py b/src/gshock_api/casio_constants.py
+index 4221c6c..93a6e6c 100644
+--- a/src/gshock_api/casio_constants.py
++++ b/src/gshock_api/casio_constants.py
+@@ -68,4 +68,12 @@ class CasioConstants:
+         #  ECB-30 / GW-BX5600 specifics
+         "CMD_SET_TIMEMODE": 0x47,
+         "FIND_PHONE": 0x0A,
++
++        # GW-BX5600 SP_DATA notification header bytes
++        "GW_BX5600_SP_DATA_HEADER_03": 0x03,
++        "GW_BX5600_SP_DATA_HEADER_05": 0x05,
++        "GW_BX5600_SP_DATA_HEADER_06": 0x06,
++
++        # HomeTime (dual time zone) characteristic
++        "CASIO_HOME_TIME": 0x24,
+     }
+\ No newline at end of file
+diff --git a/src/gshock_api/connection.py b/src/gshock_api/connection.py
+index c1d6db3..c40c36f 100644
+--- a/src/gshock_api/connection.py
++++ b/src/gshock_api/connection.py
+@@ -44,7 +44,6 @@ class Connection:
+     async def init_characteristics_map(self) -> None:
+         """
+         Populates self.characteristics_map with UUIDs of all available characteristics.
+-        Manually injects specific characteristic UUIDs for testing purposes.
+         """
+         if self.client is None:
+             return 
+@@ -55,23 +54,6 @@ class Connection:
+                 # logger.info(f"Characteristics: {char.uuid}")
+                 self.characteristics_map[char.uuid] = char.uuid
+ 
+-        # --- Manual injection for GW-BX5600 testing ---
+-        # We manually ensure these UUIDs exist in the map so lookups don't fail
+-        
+-        # Configuration Notify (Handle 0x19 / 25)
+-        config_notify_uuid: str = CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
+-        self.characteristics_map[config_notify_uuid] = config_notify_uuid
+-        
+-        # Configuration Write (Handle 0x17 / 23)
+-        config_write_uuid: str = CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
+-        self.characteristics_map[config_write_uuid] = config_write_uuid
+-        
+-        # All Features Write (Handle 0x0E / 14)
+-        all_features_uuid: str = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
+-        self.characteristics_map[all_features_uuid] = all_features_uuid
+-
+-        logger.info("Manual characteristic injection complete for testing.")
+-
+     async def connect(self, watch_filter: WatchFilter = None) -> bool:
+         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
+         try:
+diff --git a/src/gshock_api/gshock_api.py b/src/gshock_api/gshock_api.py
+index 9ee61b3..748f70c 100644
+--- a/src/gshock_api/gshock_api.py
++++ b/src/gshock_api/gshock_api.py
+@@ -1,12 +1,12 @@
+ from collections.abc import Callable, Coroutine, Mapping
+ import json
+ import logging
++import asyncio
+ from typing import Final, TypeVar
+ 
+ from gshock_api import message_dispatcher
+ from gshock_api.alarms import alarms_inst
+ 
+-# Assuming the Connection class from before is available, we define the type here
+ from gshock_api.connection import Connection  # type: ignore
+ from gshock_api.iolib.app_notification_io import AppNotificationIO
+ from gshock_api.iolib.button_pressed_io import WatchButton
+@@ -48,6 +48,23 @@ class GshockAPI:
+         result: str = await message_dispatcher.WatchNameIO.request(self.connection)
+         return result
+ 
++    async def get_home_time(self, slot: int = 0) -> bytes:
++        """Get the HomeTime (0x24) characteristic data for the given slot.
++
++        Slot 0 returns the main (home) city data; slot 1 returns the secondary
++        city data (used by watches with a second dial, e.g. MTG-B1000).
++        Raw bytes are returned unchanged — the watch is the authoritative source
++        for city configuration.
++
++        Args:
++            slot: City slot to read (0 = home/main city, 1 = secondary city).
++                  Defaults to 0.
++
++        Returns:
++            Raw bytes for the requested HomeTime slot.
++        """
++        return await message_dispatcher.HomeTimeIO.request(self.connection, slot)
++
+     async def get_pressed_button(self) -> WatchButton:
+         """This function tells us which button was pressed on the watch to initiate the connection."""
+         # Assuming ButtonPressedIO.request returns a WatchButton enum/object
+@@ -92,10 +109,18 @@ class GshockAPI:
+ 
+         await self.read_write_dst_watch_states()
+         await self.read_write_dst_for_world_cities()
+-
+         if watch_info.hasWorldCities:
+             await self.read_write_world_cities()
+ 
++        # Watches with a secondary dial (e.g. MTG-B1000) need an extra pass
++        # to sync the second dial city after the main time is set.
++        # ResetSequence slot 0 is also required for these watches.
++        if watch_info.hasSecondDial:
++            self.logger.info("Watch has a secondary dial — running second-dial sync.")
++            from gshock_api.iolib.second_dial_io import SecondDialIO
++            await SecondDialIO.write_reset_sequence(self.connection, slot=0)
++            await SecondDialIO.request(self.connection)
++
+     async def _initialize_gw_bx5600_time(self) -> None:
+         from datetime import datetime
+         from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
+@@ -105,23 +130,15 @@ class GshockAPI:
+         # Switch between approaches here:
+         # await GwBx5600TimeIO.set_time_hardcoded(self.connection, now)   # ← reliable
+         await GwBx5600TimeIO.set_time_dynamic(self.connection, now)   # ← when fragmentation is fixed
+-        
+-    # Define a Callable type for the function that will be read
+-    RequestFunction = Callable[[object], Coroutine[object, object, object]]
+ 
+-    # Replaced Any with object, and made function parameter specific
+-    async def read_and_write(
+-        self, function: RequestFunction, param: object
+-    ) -> None:
+-        # The return type of the function is unknown, hence object
+-        ret: object = await function(param)
+-        
+-        # Assuming ret is convertible to bytes/bytearray by to_hex_string
+-        hex_data: bytes = to_hex_string(ret)
+-        short_str: bytes = to_compact_string(hex_data)
+-        
+-        # Replaced 0xE with HANDLE_ALL_FEATURES
+-        await self.connection.write(HANDLE_ALL_FEATURES, short_str)
++    async def _write_reset_sequence(self, slot: int) -> None:
++        """
++        Sends ResetSequence command (0x21) to apply DST/HomeTime changes.
++        slot=0 applies main time, slot=1 applies secondary dial.
++        Observed in MTG-B1000 HCI log: 210001 (slot 0) and 210101 (slot 1).
++        """
++        cmd = bytes([0x21, 0x00 if slot == 0 else 0x01, 0x01])
++        await self.connection.write(0x000E, cmd.hex())
+ 
+     async def read_write_dst_watch_states(self) -> None:
+         # Use dict instead of generic Map/Any
+@@ -137,6 +154,20 @@ class GshockAPI:
+             state: DtsState = item["state"] # type: ignore[assignment]
+             await self.read_and_write(function, state)
+ 
++    # Replaced Any with object, and made function parameter specific
++    async def read_and_write(
++        self, function: RequestFunction, param: object
++    ) -> None:
++        # The return type of the function is unknown, hence object
++        ret: object = await function(param)
++        
++        # Assuming ret is convertible to bytes/bytearray by to_hex_string
++        hex_data: bytes = to_hex_string(ret)
++        short_str: bytes = to_compact_string(hex_data)
++        
++        # Replaced 0xE with HANDLE_ALL_FEATURES
++        await self.connection.write(HANDLE_ALL_FEATURES, short_str)
++
+     async def read_write_dst_for_world_cities(self) -> None:
+         fn = self.get_dst_for_world_cities
+ 
+@@ -159,7 +190,6 @@ class GshockAPI:
+         # current_time = None is redundant as it's a local variable/parameter
+ 
+     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
+-        import asyncio
+         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
+         if watch_info.hasNewTimeProtocol:
+             await asyncio.sleep(1.0)
+diff --git a/src/gshock_api/iolib/alarms_io.py b/src/gshock_api/iolib/alarms_io.py
+index 69e603c..b61a4e7 100644
+--- a/src/gshock_api/iolib/alarms_io.py
++++ b/src/gshock_api/iolib/alarms_io.py
+@@ -61,11 +61,11 @@ class AlarmsIOFunctional:
+         """
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]])
+             ),
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
+             )
+         ]
+@@ -87,8 +87,8 @@ class AlarmsIOFunctional:
+         alarm_casio = alarms_inst_typed.from_json_alarm_secondary_alarms(alarms_json_arr)
+ 
+         return [
+-            Write(handle=0x000E, data=bytes(alarm_casio0)),
+-            Write(handle=0x000E, data=bytes(alarm_casio))
++            Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=bytes(alarm_casio0)),
++            Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=bytes(alarm_casio))
+         ]
+ 
+     @staticmethod
+@@ -116,18 +116,10 @@ class AlarmsIO:
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult:
+-        """Initializes the alarm fetch sequence."""
++    async def request(connection: ConnectionProtocol) -> list[dict[str, object]]:
++        """Sends the trigger message and waits for the full alarm set to arrive."""
+         AlarmsIO.connection = connection
+         alarms_inst_typed.clear()
+-        await AlarmsIO._get_alarms(connection)
+-        if AlarmsIO.result is None:
+-            raise RuntimeError("AlarmsIO.result must not be None after _get_alarms")
+-        return AlarmsIO.result
+-
+-    @staticmethod
+-    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
+-        """Sends the trigger message to start the alarm retrieval process."""
+         await connection.send_message('{ "action": "GET_ALARMS"}')
+         AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
+         # Register the pending request
+diff --git a/src/gshock_api/iolib/app_info_io.py b/src/gshock_api/iolib/app_info_io.py
+index 50ef84c..e65f65f 100644
+--- a/src/gshock_api/iolib/app_info_io.py
++++ b/src/gshock_api/iolib/app_info_io.py
+@@ -1,10 +1,12 @@
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
+ from gshock_api.utils import to_hex_string
+ from gshock_api.pending_requests_registry import PendingRequestsRegistry
+ 
++
+ class AppInfoIOFunctional:
+     """
+     Pure functional app info modules implementing Monoids.
+@@ -14,7 +16,7 @@ class AppInfoIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.APP_INFO.value])
+             )
+         ]
+@@ -36,8 +38,12 @@ class AppInfoIOFunctional:
+                     res_payload = Payload(data=bytearray.fromhex("3488F4E5D5AFC829E06D"))
+                     res_trailer = Trailer(data=bytearray([0x02]), checksum=0x02)
+ 
+-                    packet_bytes = bytes([res_header.protocol.value]) + bytes(res_payload.data) + bytes(res_trailer.data)
+-                    return [Write(handle=0xE, data=packet_bytes)]
++                    packet_bytes = (
++                        bytes([res_header.protocol.value])
++                        + bytes(res_payload.data)
++                        + bytes(res_trailer.data)
++                    )
++                    return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=packet_bytes)]
+             except ValueError:
+                 pass
+         return []
+@@ -48,11 +54,11 @@ class AppInfoIO:
+     Stateful backward-compatible wrapper.
+     Acts as the interpreter for AppInfoIOFunctional commands.
+     """
+-    result: CancelableResult = None
+-    connection: ConnectionProtocol = None
++    result: CancelableResult[str] | None = None
++    connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
++    async def request(connection: ConnectionProtocol) -> str:
+         AppInfoIO.connection = connection
+         await connection.request(f"{Protocol.APP_INFO.value:02X}")
+         AppInfoIO.result = CancelableResult[str]()
+@@ -65,11 +71,14 @@ class AppInfoIO:
+             PendingRequestsRegistry.unregister("AppInfoIO")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if AppInfoIO.connection is None:
++            raise RuntimeError("AppInfoIO.connection is not set")
++
+         commands = AppInfoIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await AppInfoIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+diff --git a/src/gshock_api/iolib/button_pressed_io.py b/src/gshock_api/iolib/button_pressed_io.py
+index 67dc1eb..bbb674c 100644
+--- a/src/gshock_api/iolib/button_pressed_io.py
++++ b/src/gshock_api/iolib/button_pressed_io.py
+@@ -1,6 +1,7 @@
+ from enum import IntEnum
+ 
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Header, Payload, Protocol
+@@ -60,7 +61,7 @@ class ButtonPressedIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.BLE_FEATURES.value])
+             )
+         ]
+@@ -68,7 +69,7 @@ class ButtonPressedIOFunctional:
+     @staticmethod
+     def prepare_watch_commands_set(data: bytes | str) -> list[BLEAction]:
+         data_bytes = data if isinstance(data, bytes) else data.encode("utf-8")
+-        return [Write(handle=0x000E, data=data_bytes)]
++        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=data_bytes)]
+ 
+ 
+ class ButtonPressedIO:
+@@ -80,7 +81,7 @@ class ButtonPressedIO:
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult[WatchButton]:
++    async def request(connection: ConnectionProtocol) -> WatchButton:
+         ButtonPressedIO.connection = connection
+         await connection.request(f"{Protocol.BLE_FEATURES.value:02X}")
+         ButtonPressedIO.result = CancelableResult[WatchButton]()
+@@ -93,11 +94,14 @@ class ButtonPressedIO:
+             PendingRequestsRegistry.unregister("ButtonPressedIO")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if ButtonPressedIO.connection is None:
++            raise RuntimeError("ButtonPressedIO.connection is not set")
++
+         commands = ButtonPressedIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await ButtonPressedIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     async def send_to_watch_set(data: bytes | str) -> None:
+diff --git a/src/gshock_api/iolib/dst_for_world_cities_io.py b/src/gshock_api/iolib/dst_for_world_cities_io.py
+index 81d3c14..9e65c4c 100644
+--- a/src/gshock_api/iolib/dst_for_world_cities_io.py
++++ b/src/gshock_api/iolib/dst_for_world_cities_io.py
+@@ -1,4 +1,5 @@
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Protocol
+@@ -14,7 +15,7 @@ class DstForWorldCitiesIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.DST_SETTING.value])
+             )
+         ]
+@@ -25,16 +26,16 @@ class DstForWorldCitiesIO:
+     Stateful backward-compatible wrapper.
+     Acts as the interpreter for DstForWorldCitiesIOFunctional commands.
+     """
+-    result: CancelableResult = None
+-    connection = None
++    result: CancelableResult[bytes] | None = None
++    connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
++    async def request(connection: ConnectionProtocol, city_number: int) -> bytes:
+         DstForWorldCitiesIO.connection = connection
+         key = f"{Protocol.DST_SETTING.value:02x}0{city_number}"
+         await connection.request(key)
+ 
+-        DstForWorldCitiesIO.result = CancelableResult()
++        DstForWorldCitiesIO.result = CancelableResult[bytes]()
+         # Register the pending request with unique name based on city number
+         PendingRequestsRegistry.register(f"DstForWorldCitiesIO_{city_number}", DstForWorldCitiesIO.result)
+         try:
+@@ -44,11 +45,14 @@ class DstForWorldCitiesIO:
+             PendingRequestsRegistry.unregister(f"DstForWorldCitiesIO_{city_number}")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if DstForWorldCitiesIO.connection is None:
++            raise RuntimeError("DstForWorldCitiesIO.connection is not set")
++
+         commands = DstForWorldCitiesIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await DstForWorldCitiesIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+diff --git a/src/gshock_api/iolib/dst_watch_state_io.py b/src/gshock_api/iolib/dst_watch_state_io.py
+index 205cc66..200c430 100644
+--- a/src/gshock_api/iolib/dst_watch_state_io.py
++++ b/src/gshock_api/iolib/dst_watch_state_io.py
+@@ -1,6 +1,7 @@
+ from enum import IntEnum
+ 
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Protocol
+@@ -24,7 +25,7 @@ class DstWatchStateIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.DST_WATCH_STATE.value])
+             )
+         ]
+@@ -39,7 +40,7 @@ class DstWatchStateIO:
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol, state: DtsState) -> CancelableResult[bytes]:
++    async def request(connection: ConnectionProtocol, state: DtsState) -> bytes:
+         DstWatchStateIO.connection = connection
+         key = f"{Protocol.DST_WATCH_STATE.value:02x}0{state.value}"
+         await connection.request(key)
+@@ -53,11 +54,14 @@ class DstWatchStateIO:
+             PendingRequestsRegistry.unregister(f"DstWatchStateIO_{state.value}")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if DstWatchStateIO.connection is None:
++            raise RuntimeError("DstWatchStateIO.connection is not set")
++
+         commands = DstWatchStateIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await DstWatchStateIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+diff --git a/src/gshock_api/iolib/gw_bx5600_time_io.py b/src/gshock_api/iolib/gw_bx5600_time_io.py
+index 24b60cf..c71d969 100644
+--- a/src/gshock_api/iolib/gw_bx5600_time_io.py
++++ b/src/gshock_api/iolib/gw_bx5600_time_io.py
+@@ -25,7 +25,6 @@ class GwBx5600TimeIO:
+     result: ClassVar[CancelableResult[bytes] | None] = None
+ 
+     # ── Request / on_received (used by set_time_dynamic) ─────────────────────
+-
+     @staticmethod
+     async def request(
+         connection: ConnectionProtocol, step: int, req_payload: str
+@@ -49,7 +48,6 @@ class GwBx5600TimeIO:
+             GwBx5600TimeIO.result.set_result(data)
+ 
+     # ── Hardcoded set_time (reliable — values from btsnoop_hci_bx.log) ───────
+-
+     @staticmethod
+     async def set_time_hardcoded(
+         connection: ConnectionProtocol, now: datetime | None = None
+diff --git a/src/gshock_api/iolib/packet.py b/src/gshock_api/iolib/packet.py
+index 4031c3c..426a801 100644
+--- a/src/gshock_api/iolib/packet.py
++++ b/src/gshock_api/iolib/packet.py
+@@ -17,11 +17,9 @@ class Protocol(IntEnum):
+     VERSION_INFORMATION = 0x20
+     DST_WATCH_STATE = 0x1D
+     DST_SETTING = 0x1E
+-    SERVICE_DISCOVERY_MANAGER = 0x47
+     CURRENT_TIME = 0x09
+     SETTING_FOR_USER_PROFILE = 0x45
+     SETTING_FOR_TARGET_VALUE = 0x43
+-    ALERT_LEVEL = 0x0A
+     SETTING_FOR_ALM = 0x15
+     SETTING_FOR_ALM2 = 0x16
+     SETTING_FOR_BASIC = 0x13
+@@ -30,10 +28,20 @@ class Protocol(IntEnum):
+     REMINDER_TITLE = 0x30
+     REMINDER_TIME = 0x31
+     TIMER = 0x18
++    HOME_TIME = 0x24
+     ERROR = 0xFF
+-    UNKNOWN = 0x0A
+-    CMD_SET_TIMEMODE = 0x47
+-    FIND_PHONE = 0x0A
++
++    # NOTE: The values below are shared aliases. Python's IntEnum will alias them
++    # to the first enum member defined with that numeric value. They are kept for
++    # readability and dispatcher-map lookup purposes; use the CHARACTERISTICS map
++    # (not this enum) when the distinction between aliased names matters.
++    SERVICE_DISCOVERY_MANAGER = 0x47
++    CMD_SET_TIMEMODE = 0x47   # alias → SERVICE_DISCOVERY_MANAGER
++
++    ALERT_LEVEL = 0x0A
++    UNKNOWN = 0x0A            # alias → ALERT_LEVEL
++    FIND_PHONE = 0x0A         # alias → ALERT_LEVEL
++
+ 
+ @dataclass
+ class Header:
+diff --git a/src/gshock_api/iolib/settings_io.py b/src/gshock_api/iolib/settings_io.py
+index 32fb39e..41adb93 100644
+--- a/src/gshock_api/iolib/settings_io.py
++++ b/src/gshock_api/iolib/settings_io.py
+@@ -97,7 +97,7 @@ class SettingsIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.SETTING_FOR_BASIC.value])
+             )
+         ]
+@@ -106,7 +106,7 @@ class SettingsIOFunctional:
+     def prepare_watch_commands_set(message_json: str) -> list[BLEAction]:
+         json_setting: SettingsDict = json.loads(message_json).get("value")  # type: ignore
+         encoded_setting = SettingsIOFunctional.encode(json_setting)
+-        return [Write(handle=0x000E, data=encoded_setting)]
++        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=encoded_setting)]
+ 
+ 
+ class SettingsIO:
+@@ -118,7 +118,7 @@ class SettingsIO:
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
++    async def request(connection: ConnectionProtocol) -> str:
+         SettingsIO.connection = connection
+         await connection.request(f"{Protocol.SETTING_FOR_BASIC.value:02X}")
+         SettingsIO.result = CancelableResult[str]()
+diff --git a/src/gshock_api/iolib/time_adjustement_io.py b/src/gshock_api/iolib/time_adjustement_io.py
+deleted file mode 100644
+index 340484a..0000000
+--- a/src/gshock_api/iolib/time_adjustement_io.py
++++ /dev/null
+@@ -1,113 +0,0 @@
+-import json
+-
+-from gshock_api.cancelable_result import CancelableResult
+-from gshock_api.iolib.actions import BLEAction, Write
+-from gshock_api.iolib.connection_protocol import ConnectionProtocol
+-from gshock_api.iolib.error_io import ErrorIO
+-from gshock_api.iolib.packet import Protocol
+-from gshock_api.logger import logger
+-from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
+-from gshock_api.pending_requests_registry import PendingRequestsRegistry
+-
+-class TimeAdjustmentIOFunctional:
+-    """
+-    Pure functional time adjustment modules implementing Monoids.
+-    """
+-
+-    @staticmethod
+-    def encode(original_hex: str, time_adjustment: bool, minutes_after_hour: int) -> bytes:
+-        int_array = to_int_array(original_hex)
+-        int_array[12] = 0x80 if not time_adjustment else 0x00
+-        int_array[13] = minutes_after_hour
+-        return bytes(int_array)
+-
+-    @staticmethod
+-    def decode(data_bytes: bytes) -> dict[str, str]:
+-        time_adjusted = int(data_bytes[12]) == 0x00
+-        minutes_after_hour = int(data_bytes[13])
+-        return {
+-            "timeAdjusment": str(time_adjusted),
+-            "minutesAfterHour": str(minutes_after_hour),
+-        }
+-
+-    @staticmethod
+-    def prepare_watch_commands() -> list[BLEAction]:
+-        return [
+-            Write(
+-                handle=0x000C,
+-                data=bytes([Protocol.SETTING_FOR_BLE.value])
+-            )
+-        ]
+-
+-    @staticmethod
+-    def prepare_watch_commands_set(message_json: str, original_hex: str) -> list[BLEAction]:
+-        parsed_message = json.loads(message_json)
+-        time_adjustment: bool = parsed_message.get("timeAdjustment") == "True"
+-        minutes_after_hour: int = int(parsed_message.get("minutesAfterHour", "0"))
+-
+-        encoded = TimeAdjustmentIOFunctional.encode(original_hex, time_adjustment, minutes_after_hour)
+-        return [Write(handle=0x000E, data=encoded)]
+-
+-
+-class TimeAdjustmentIO:
+-    """
+-    Stateful backward-compatible wrapper.
+-    Acts as the interpreter for TimeAdjustmentIOFunctional commands.
+-    """
+-    result: CancelableResult[dict[str, object]] | None = None
+-    connection: ConnectionProtocol | None = None
+-    original_value: str | None = None
+-
+-    @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, object]]:
+-        TimeAdjustmentIO.connection = connection
+-        await connection.request(f"{Protocol.SETTING_FOR_BLE.value:02X}")
+-        TimeAdjustmentIO.result = CancelableResult[dict[str, object]]()
+-        # Register the pending request
+-        PendingRequestsRegistry.register("TimeAdjustmentIO", TimeAdjustmentIO.result)
+-        try:
+-            return await TimeAdjustmentIO.result.get_result()
+-        finally:
+-            # Unregister when complete (success or error)
+-            PendingRequestsRegistry.unregister("TimeAdjustmentIO")
+-
+-    @staticmethod
+-    def send_to_watch(_message: str) -> None:
+-        if TimeAdjustmentIO.connection is None:
+-            raise RuntimeError("TimeAdjustmentIO.connection is not set")
+-
+-        commands = TimeAdjustmentIOFunctional.prepare_watch_commands()
+-        for command in commands:
+-            if isinstance(command, Write):
+-                TimeAdjustmentIO.connection.write(command.handle, command.data)
+-
+-    @staticmethod
+-    async def send_to_watch_set(message: str) -> dict[str, str] | None:
+-        if TimeAdjustmentIO.original_value is None:
+-            return await ErrorIO.request("Error: Must call get before set")
+-
+-        if TimeAdjustmentIO.connection is None:
+-            raise RuntimeError("TimeAdjustmentIO.connection is not set")
+-
+-        commands = TimeAdjustmentIOFunctional.prepare_watch_commands_set(
+-            message, TimeAdjustmentIO.original_value
+-        )
+-        for command in commands:
+-            if isinstance(command, Write):
+-                write_cmd = to_compact_string(to_hex_string(command.data))
+-                await TimeAdjustmentIO.connection.write(0x000E, write_cmd)
+-        return None
+-
+-    @staticmethod
+-    def on_received(message: bytes) -> None:
+-        TimeAdjustmentIO.original_value = to_hex_string(message)  # save original message
+-
+-        decoded_dict = TimeAdjustmentIOFunctional.decode(message)
+-
+-        if TimeAdjustmentIO.result is None:
+-            raise RuntimeError("TimeAdjustmentIO.result is not set")
+-        TimeAdjustmentIO.result.set_result(decoded_dict)  # type: ignore[arg-type]
+-
+-    @staticmethod
+-    async def on_received_set(message: bytes) -> None:
+-        logger.info(f"TimeAdjustmentIO onReceivedSet: {message}")
+diff --git a/src/gshock_api/iolib/time_io.py b/src/gshock_api/iolib/time_io.py
+index 4dd7a1d..4db0f6c 100644
+--- a/src/gshock_api/iolib/time_io.py
++++ b/src/gshock_api/iolib/time_io.py
+@@ -1,3 +1,7 @@
++"""
++time_io.py — Time (0x09) characteristic I/O.
++"""
++
+ from datetime import datetime
+ import json
+ import time
+@@ -18,14 +22,7 @@ class TimeEncoderPure:
+ 
+     @staticmethod
+     def encode_current_time(dt: datetime) -> bytes:
+-        """
+-        Purely encodes a datetime into the 10-byte watch payload.
+-        Uses little-endian byte ordering for the year, and normal bytes for the rest.
+-        """
+-        # Byte 0-1: Year (little endian)
+         year_bytes = dt.year.to_bytes(2, byteorder="little")
+-        
+-        # Bytes 2-7: Month, Day, Hour, Minute, Second, Weekday
+         time_bytes = bytes([
+             dt.month,
+             dt.day,
+@@ -34,15 +31,9 @@ class TimeEncoderPure:
+             dt.second,
+             dt.weekday()
+         ])
+-        
+-        # Byte 8: Nanoseconds mapped to the eighth byte formula
+         nanos = dt.microsecond * 1_000
+         nano_byte = bytes([(nanos * 256 // 1_000_000_000) & 0xFF])
+-        
+-        # Byte 9: Constants/Flags (always 1)
+         flag_byte = b"\x01"
+-        
+-        # Compose using pure Binary Monoid concatenation (+)
+         return year_bytes + time_bytes + nano_byte + flag_byte
+ 
+ 
+@@ -54,9 +45,6 @@ class TimeIOFunctional:
+ 
+     @staticmethod
+     def generate_request_message(current_time: float | None, offset: int) -> str:
+-        """
+-        Purely generates the JSON request message.
+-        """
+         return json.dumps({
+             "action": "SET_TIME",
+             "value": {
+@@ -67,28 +55,19 @@ class TimeIOFunctional:
+ 
+     @staticmethod
+     def prepare_watch_commands(message_json: str, system_time: float) -> list[BLEAction]:
+-        """
+-        Pure function to generate the BLE command stream.
+-        Given a request message and a deterministic system time, it returns
+-        an immutable list of actions to be executed.
+-        """
+-        data: dict[str, object] = json.loads(message_json)
+-        value: dict[str, object] = data.get("value", {})
++        data: dict = json.loads(message_json)
++        value: dict = data.get("value", {})
+ 
+-        timestamp: float | None = value.get("time")  # type: ignore
+-        offset: int = int(value.get("offset", 0))      # type: ignore
++        timestamp: float | None = value.get("time")
++        offset: int = int(value.get("offset", 0))
+ 
+         if timestamp is None:
+             timestamp = system_time
+ 
+-        # Calculate time with offset
+-        date_time: datetime = datetime.fromtimestamp(timestamp + offset)
+-        time_payload: bytes = TimeEncoderPure.encode_current_time(date_time)
+-        
+-        # Concatenate protocol header (CURRENT_TIME = 0x09) and the payload
++        date_time = datetime.fromtimestamp(timestamp + offset)
++        time_payload = TimeEncoderPure.encode_current_time(date_time)
+         packet_bytes = bytes([Protocol.CURRENT_TIME.value]) + time_payload
+-        
+-        # Return a list (Monoid B) of commands
++
+         return [Write(handle=0x000E, data=packet_bytes)]
+ 
+ 
+@@ -96,35 +75,38 @@ class TimeIO:
+     """
+     Stateful adapter wrapper maintaining backward compatibility.
+     Acts as the interpreter for the pure commands.
++    Initialization of DST and world cities is handled upstream in GshockAPI.
+     """
+ 
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol, current_time: float | None, offset: int) -> None:
++    async def request(
++        connection: ConnectionProtocol,
++        current_time: float | None,
++        offset: int,
++    ) -> None:
+         TimeIO.connection = connection
+         message_str = TimeIOFunctional.generate_request_message(current_time, offset)
+         await connection.send_message(message_str)
+ 
+     @staticmethod
+     async def send_to_watch_set(message: str) -> None:
+-        # Obtain system time at invocation to pass into the pure command generator
+         system_time = time.time()
+         commands = TimeIOFunctional.prepare_watch_commands(message, system_time)
+-        
++
+         if TimeIO.connection is None:
+             raise RuntimeError("TimeIO.connection is not set")
+-            
++
+         for command in commands:
+             if isinstance(command, Write):
+                 time_command: str = to_hex_string(command.data)
+                 try:
+                     await TimeIO.connection.write(
+-                        command.handle, 
++                        command.handle,
+                         to_compact_string(time_command)
+                     )
+                 except GShockIgnorableException as e:
+-                    # Ignore if the connection is closed early (lower-right button pressed)
+                     logger.info(f"Ignoring {e}")
+ 
+ 
+@@ -137,3 +119,4 @@ class TimeEncoder:
+     @staticmethod
+     def prepare_current_time(dt: datetime) -> bytearray:
+         return bytearray(TimeEncoderPure.encode_current_time(dt))
++    
+\ No newline at end of file
+diff --git a/src/gshock_api/iolib/timer_io.py b/src/gshock_api/iolib/timer_io.py
+index 0973aaf..c0dd748 100644
+--- a/src/gshock_api/iolib/timer_io.py
++++ b/src/gshock_api/iolib/timer_io.py
+@@ -1,6 +1,7 @@
+ import json
+ 
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Protocol
+@@ -39,7 +40,7 @@ class TimerIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.TIMER.value])
+             )
+         ]
+@@ -49,7 +50,7 @@ class TimerIOFunctional:
+         data_obj = json.loads(message_json)
+         seconds = int(data_obj.get("value", 0))
+         encoded = TimerIOFunctional.encode(seconds)
+-        return [Write(handle=0x000E, data=encoded)]
++        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=encoded)]
+ 
+ 
+ class TimerIO:
+@@ -57,14 +58,14 @@ class TimerIO:
+     Stateful backward-compatible wrapper.
+     Acts as the interpreter for TimerIOFunctional commands.
+     """
+-    result: CancelableResult | None = None
++    result: CancelableResult[int] | None = None
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult:
++    async def request(connection: ConnectionProtocol) -> int:
+         TimerIO.connection = connection
+         await connection.request(f"{Protocol.TIMER.value:02X}")
+-        TimerIO.result = CancelableResult()
++        TimerIO.result = CancelableResult[int]()
+         # Register the pending request
+         PendingRequestsRegistry.register("TimerIO", TimerIO.result)
+         try:
+@@ -74,11 +75,14 @@ class TimerIO:
+             PendingRequestsRegistry.unregister("TimerIO")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if TimerIO.connection is None:
++            raise RuntimeError("TimerIO.connection is not set")
++
+         commands = TimerIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await TimerIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     async def send_to_watch_set(data: str) -> None:
+@@ -89,7 +93,9 @@ class TimerIO:
+         for command in commands:
+             if isinstance(command, Write):
+                 seconds_as_compact_str = to_compact_string(to_hex_string(command.data))
+-                await TimerIO.connection.write(0x000E, seconds_as_compact_str)
++                await TimerIO.connection.write(
++                    CasioConstants.HANDLE_ALL_FEATURES_WRITE, seconds_as_compact_str
++                )
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+diff --git a/src/gshock_api/iolib/watch_condition_io.py b/src/gshock_api/iolib/watch_condition_io.py
+index 1497c07..a9bbab7 100644
+--- a/src/gshock_api/iolib/watch_condition_io.py
++++ b/src/gshock_api/iolib/watch_condition_io.py
+@@ -1,6 +1,7 @@
+ from typing import TypedDict
+ 
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Header, Payload, Protocol
+@@ -9,6 +10,7 @@ from gshock_api.pending_requests_registry import PendingRequestsRegistry
+ 
+ CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+ 
++
+ class WatchConditionValue(TypedDict):
+     battery_level_percent: int
+     temperature: int
+@@ -57,7 +59,7 @@ class WatchConditionIOFunctional:
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.WATCH_CONDITION.value])
+             )
+         ]
+@@ -68,14 +70,14 @@ class WatchConditionIO:
+     Stateful backward-compatible wrapper.
+     Acts as the interpreter for WatchConditionIOFunctional commands.
+     """
+-    result: CancelableResult | None = None
++    result: CancelableResult[WatchConditionValue] | None = None
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, int]]:
++    async def request(connection: ConnectionProtocol) -> WatchConditionValue:
+         WatchConditionIO.connection = connection
+         await connection.request(f"{Protocol.WATCH_CONDITION.value:02X}")
+-        WatchConditionIO.result = CancelableResult[dict[str, int]]()
++        WatchConditionIO.result = CancelableResult[WatchConditionValue]()
+         # Register the pending request
+         PendingRequestsRegistry.register("WatchConditionIO", WatchConditionIO.result)
+         try:
+@@ -85,15 +87,18 @@ class WatchConditionIO:
+             PendingRequestsRegistry.unregister("WatchConditionIO")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if WatchConditionIO.connection is None:
++            raise RuntimeError("WatchConditionIO.connection is not set")
++
+         commands = WatchConditionIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await WatchConditionIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+         decoded = WatchConditionIOFunctional.decode(data)
+         if WatchConditionIO.result is None:
+             raise RuntimeError("WatchConditionIO.result is not set")
+-        WatchConditionIO.result.set_result(decoded)  # type: ignore[arg-type]
++        WatchConditionIO.result.set_result(decoded)
+diff --git a/src/gshock_api/iolib/world_cities_io.py b/src/gshock_api/iolib/world_cities_io.py
+index e9a1f22..03c399f 100644
+--- a/src/gshock_api/iolib/world_cities_io.py
++++ b/src/gshock_api/iolib/world_cities_io.py
+@@ -1,19 +1,26 @@
+ from gshock_api.cancelable_result import CancelableResult
++from gshock_api.casio_constants import CasioConstants
+ from gshock_api.iolib.actions import BLEAction, Write
+ from gshock_api.iolib.connection_protocol import ConnectionProtocol
+ from gshock_api.iolib.packet import Protocol
+ from gshock_api.pending_requests_registry import PendingRequestsRegistry
+ 
++
+ class WorldCitiesIOFunctional:
+     """
+     Pure functional world cities modules implementing Monoids.
+     """
+ 
++    @staticmethod
++    def decode(data_bytes: bytes) -> bytes:
++        """Return raw city bytes unchanged — no city database, just echo back."""
++        return data_bytes
++
+     @staticmethod
+     def prepare_watch_commands() -> list[BLEAction]:
+         return [
+             Write(
+-                handle=0x000C,
++                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
+                 data=bytes([Protocol.WORLD_CITIES.value])
+             )
+         ]
+@@ -28,7 +35,7 @@ class WorldCitiesIO:
+     connection: ConnectionProtocol | None = None
+ 
+     @staticmethod
+-    async def request(connection: ConnectionProtocol, city_number: int) -> CancelableResult[bytes]:
++    async def request(connection: ConnectionProtocol, city_number: int) -> bytes:
+         WorldCitiesIO.connection = connection
+         key = f"{Protocol.WORLD_CITIES.value:02X}0{city_number}"
+         await connection.request(key)
+@@ -43,11 +50,14 @@ class WorldCitiesIO:
+             PendingRequestsRegistry.unregister(f"WorldCitiesIO_{city_number}")
+ 
+     @staticmethod
+-    async def send_to_watch(connection: ConnectionProtocol) -> None:
++    async def send_to_watch(_message: str = "") -> None:
++        if WorldCitiesIO.connection is None:
++            raise RuntimeError("WorldCitiesIO.connection is not set")
++
+         commands = WorldCitiesIOFunctional.prepare_watch_commands()
+         for command in commands:
+             if isinstance(command, Write):
+-                await connection.write(command.handle, command.data)
++                await WorldCitiesIO.connection.write(command.handle, command.data)
+ 
+     @staticmethod
+     def on_received(data: bytes) -> None:
+diff --git a/src/gshock_api/message_dispatcher.py b/src/gshock_api/message_dispatcher.py
+index cf42871..02f9ed9 100644
+--- a/src/gshock_api/message_dispatcher.py
++++ b/src/gshock_api/message_dispatcher.py
+@@ -12,7 +12,7 @@ from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
+ from gshock_api.iolib.error_io import ErrorIO
+ from gshock_api.iolib.events_io import EventsIO
+ from gshock_api.iolib.settings_io import SettingsIO
+-from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
++from gshock_api.iolib.time_adjustment_io import TimeAdjustmentIO
+ from gshock_api.iolib.time_io import TimeIO
+ from gshock_api.iolib.timer_io import TimerIO
+ from gshock_api.iolib.unknown_io import UnknownIO
+@@ -20,6 +20,8 @@ from gshock_api.iolib.watch_condition_io import WatchConditionIO
+ from gshock_api.iolib.watch_name_io import WatchNameIO
+ from gshock_api.iolib.world_cities_io import WorldCitiesIO
+ from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
++from gshock_api.iolib.home_time_io import HomeTimeIO
++
+ from gshock_api.logger import logger
+ 
+ CHARACTERISTICS: Final[Mapping[str, int]] = CasioConstants.CHARACTERISTICS
+@@ -51,6 +53,7 @@ class MessageDispatcher:
+         "GET_TIMER": TimerIO.send_to_watch,
+         "SET_TIMER": TimerIO.send_to_watch_set,
+         "SET_TIME": TimeIO.send_to_watch_set,
++        "GET_HOME_TIME": HomeTimeIO.send_to_watch,
+     }
+ 
+     # Map of Characteristic keys (integers from CHARACTERISTICS) to their synchronous handler functions.
+@@ -77,9 +80,11 @@ class MessageDispatcher:
+         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
+ 
+         # GW-BX5600 SP_DATA notification headers
+-        0x05: GwBx5600TimeIO.on_received,
+-        0x03: GwBx5600TimeIO.on_received,
+-        0x06: GwBx5600TimeIO.on_received,
++        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_03"]: GwBx5600TimeIO.on_received,
++        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
++        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,
++
++        CHARACTERISTICS["CASIO_HOME_TIME"]: HomeTimeIO.on_received,
+     }
+ 
+     @staticmethod
+@@ -99,7 +104,7 @@ class MessageDispatcher:
+         if not isinstance(action, str):
+             logger.error(f"Message has no valid 'action' key: {message}")
+             return
+-
++        
+         if action in MessageDispatcher.watch_senders:
+             await MessageDispatcher.watch_senders[action](message)
+         else:
+diff --git a/src/gshock_api/watch_info.py b/src/gshock_api/watch_info.py
+index c611fe9..757e1ba 100644
+--- a/src/gshock_api/watch_info.py
++++ b/src/gshock_api/watch_info.py
+@@ -24,6 +24,7 @@ class WatchModel(IntEnum):
+     ABL = 15
+     DW_H = 16
+     GW_BX5600 = 17
++    MTG = 18
+     UNKNOWN = 20
+ 
+ @dataclass
+@@ -56,6 +57,7 @@ class WatchInfo:
+         "hasBatteryLevel": False,
+         "hasWorldCities": True,
+         "hasNewTimeProtocol": False,
++        "hasSecondDial": False,
+     })
+ 
+     # The per-model overrides
+@@ -71,6 +73,11 @@ class WatchInfo:
+             "dstCount": 2,
+             "hasNewTimeProtocol": True,
+         },
++        {
++            "model": WatchModel.MTG,
++            "hasSecondDial": True,
++            "hasWorldCities": False,  # MTG-B1000 skips 0x1f
++        },
+         {
+             "model": WatchModel.GW,
+             "worldCitiesCount": 6,
+@@ -244,6 +251,7 @@ class WatchInfo:
+                 ("GW", WatchModel.GW),
+                 ("MRG", WatchModel.MRG),
+                 ("ABL", WatchModel.ABL),
++                ("MTG", WatchModel.MTG),
+             ]
+             model = WatchModel.UNKNOWN
+             for prefix, m in prefix_map:
+diff --git a/uv.lock b/uv.lock
+index ff7e253..186abc0 100644
+--- a/uv.lock
++++ b/uv.lock
+@@ -235,11 +235,7 @@ wheels = [
+ 
+ [[package]]
+ name = "gshock-api"
+-<<<<<<< HEAD
+-version = "2.0.38"
+-=======
+-version = "2.0.41"
+->>>>>>> GW-BX5600
++version = "2.0.43"
+ source = { editable = "." }
+ dependencies = [
+     { name = "pydantic" },

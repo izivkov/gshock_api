@@ -97,7 +97,7 @@ class SettingsIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.SETTING_FOR_BASIC.value])
             )
         ]
@@ -106,7 +106,7 @@ class SettingsIOFunctional:
     def prepare_watch_commands_set(message_json: str) -> list[BLEAction]:
         json_setting: SettingsDict = json.loads(message_json).get("value")  # type: ignore
         encoded_setting = SettingsIOFunctional.encode(json_setting)
-        return [Write(handle=0x000E, data=encoded_setting)]
+        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=encoded_setting)]
 
 
 class SettingsIO:
@@ -118,7 +118,7 @@ class SettingsIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[str]:
+    async def request(connection: ConnectionProtocol) -> str:
         SettingsIO.connection = connection
         await connection.request(f"{Protocol.SETTING_FOR_BASIC.value:02X}")
         SettingsIO.result = CancelableResult[str]()

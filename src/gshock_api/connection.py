@@ -44,7 +44,6 @@ class Connection:
     async def init_characteristics_map(self) -> None:
         """
         Populates self.characteristics_map with UUIDs of all available characteristics.
-        Manually injects specific characteristic UUIDs for testing purposes.
         """
         if self.client is None:
             return 
@@ -54,23 +53,6 @@ class Connection:
             for char in service.characteristics:
                 # logger.info(f"Characteristics: {char.uuid}")
                 self.characteristics_map[char.uuid] = char.uuid
-
-        # --- Manual injection for GW-BX5600 testing ---
-        # We manually ensure these UUIDs exist in the map so lookups don't fail
-        
-        # Configuration Notify (Handle 0x19 / 25)
-        config_notify_uuid: str = CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
-        self.characteristics_map[config_notify_uuid] = config_notify_uuid
-        
-        # Configuration Write (Handle 0x17 / 23)
-        config_write_uuid: str = CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
-        self.characteristics_map[config_write_uuid] = config_write_uuid
-        
-        # All Features Write (Handle 0x0E / 14)
-        all_features_uuid: str = CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID
-        self.characteristics_map[all_features_uuid] = all_features_uuid
-
-        logger.info("Manual characteristic injection complete for testing.")
 
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""

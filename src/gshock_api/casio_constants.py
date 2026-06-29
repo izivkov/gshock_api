@@ -68,4 +68,12 @@ class CasioConstants:
         #  ECB-30 / GW-BX5600 specifics
         "CMD_SET_TIMEMODE": 0x47,
         "FIND_PHONE": 0x0A,
+
+        # GW-BX5600 SP_DATA notification header bytes
+        "GW_BX5600_SP_DATA_HEADER_03": 0x03,
+        "GW_BX5600_SP_DATA_HEADER_05": 0x05,
+        "GW_BX5600_SP_DATA_HEADER_06": 0x06,
+
+        # HomeTime (dual time zone) characteristic
+        "CASIO_HOME_TIME": 0x24,
     }

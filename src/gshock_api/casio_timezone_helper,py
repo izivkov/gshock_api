@@ -1,0 +1,182 @@
+"""
+casio_time_zone_helper.py — Casio timezone table and lookup.
+
+Mirrors the Kotlin CasioTimeZoneHelper object, providing a table of
+Casio-supported timezones with DST rules, and a findTimeZone() lookup.
+"""
+
+from __future__ import annotations
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+#
+# Currently not used
+#
+
+class CasioTimeZoneHelper:
+
+    class CasioTimeZone:
+        def __init__(self, name: str, zone_name: str, dst_rules: int = 0):
+            self.name = zone_name
+            self.display_name = name
+            self.zone_name = zone_name
+            self.zone_id = ZoneInfo(zone_name)
+
+            self.dst_offset: int = self._get_dst_duration_minutes() // 15
+            self.offset: int = self._get_standard_offset_minutes() // 15
+            # If no DST offset, override dst_rules to 0 (Casio table may be stale)
+            self.dst_rules: int = 0 if self.dst_offset == 0 else dst_rules
+
+        def is_in_dst(self) -> bool:
+            now = datetime.now(tz=self.zone_id)
+            # utcoffset() > utcoffset at standard time → DST is active
+            utc_offset = now.utcoffset()
+            standard_offset_seconds = self._get_standard_offset_minutes() * 60
+            if utc_offset is None:
+                return False
+            return int(utc_offset.total_seconds()) > standard_offset_seconds
+
+        def has_dst(self) -> bool:
+            return self.dst_offset > 0
+
+        def has_rules(self) -> bool:
+            return self.dst_rules != 0
+
+        def _get_standard_offset_minutes(self) -> int:
+            """
+            Standard (non-DST) UTC offset in minutes.
+            Uses January 1st which is reliably outside DST for most zones.
+            """
+            jan = datetime(datetime.now().year, 1, 1, tzinfo=self.zone_id)
+            jul = datetime(datetime.now().year, 7, 1, tzinfo=self.zone_id)
+            jan_off = jan.utcoffset()
+            jul_off = jul.utcoffset()
+            if jan_off is None or jul_off is None:
+                return 0
+            # Standard offset is the lesser of the two (DST adds to it)
+            return int(min(jan_off, jul_off).total_seconds()) // 60
+
+        def _get_dst_duration_minutes(self) -> int:
+            """
+            DST offset duration in minutes (0 if zone has no DST).
+            Mirrors Kotlin getDTSDuration().
+            """
+            jan = datetime(datetime.now().year, 1, 1, tzinfo=self.zone_id)
+            jul = datetime(datetime.now().year, 7, 1, tzinfo=self.zone_id)
+            jan_off = jan.utcoffset()
+            jul_off = jul.utcoffset()
+            if jan_off is None or jul_off is None:
+                return 0
+            diff = int(abs((jul_off - jan_off).total_seconds())) // 60
+            return diff
+
+        def __repr__(self) -> str:
+            return (
+                f"CasioTimeZone(name='{self.display_name}', zone_name='{self.zone_name}', "
+                f"offset={self.offset}, dst_offset={self.dst_offset}, dst_rules={self.dst_rules})"
+            )
+
+    _timezone_table: list[CasioTimeZone] = []
+    _timezone_map: dict[str, CasioTimeZone] = {}
+    _initialized: bool = False
+
+    @classmethod
+    def _build_table(cls) -> None:
+        if cls._initialized:
+            return
+        cls._timezone_table = [
+            cls.CasioTimeZone("BAKER ISLAND",       "UTC-12"),
+            cls.CasioTimeZone("MARQUESAS ISLANDS",  "Pacific/Marquesas",  0xDA),
+            cls.CasioTimeZone("PAGO PAGO",           "Pacific/Pago_Pago"),
+            cls.CasioTimeZone("HONOLULU",            "Pacific/Honolulu"),
+            cls.CasioTimeZone("ANCHORAGE",           "America/Anchorage",  0x01),
+            cls.CasioTimeZone("LOS ANGELES",         "America/Los_Angeles",0x01),
+            cls.CasioTimeZone("DENVER",              "America/Denver",     0x01),
+            cls.CasioTimeZone("CHICAGO",             "America/Chicago",    0x01),
+            cls.CasioTimeZone("NEW YORK",            "America/New_York",   0x01),
+            cls.CasioTimeZone("HALIFAX",             "America/Halifax",    0x01),
+            cls.CasioTimeZone("ST.JOHN'S",           "America/St_Johns",   0x01),
+            cls.CasioTimeZone("RIO DE JANEIRO",      "America/Sao_Paulo"),
+            cls.CasioTimeZone("F.DE NORONHA",        "America/Noronha"),
+            cls.CasioTimeZone("PRAIA",               "Atlantic/Cape_Verde"),
+            cls.CasioTimeZone("UTC",                 "UTC"),
+            cls.CasioTimeZone("LONDON",              "Europe/London",      0x02),
+            cls.CasioTimeZone("PARIS",               "Europe/Paris",       0x02),
+            cls.CasioTimeZone("ATHENS",              "Europe/Athens",      0x02),
+            cls.CasioTimeZone("JEDDAH",              "Asia/Riyadh"),
+            cls.CasioTimeZone("JERUSALEM",           "Asia/Jerusalem",     0x2A),
+            cls.CasioTimeZone("TEHRAN",              "Asia/Tehran",        0x2B),
+            cls.CasioTimeZone("DUBAI",               "Asia/Dubai"),
+            cls.CasioTimeZone("KABUL",               "Asia/Kabul"),
+            cls.CasioTimeZone("KARACHI",             "Asia/Karachi"),
+            cls.CasioTimeZone("DELHI",               "Asia/Kolkata"),
+            cls.CasioTimeZone("KATHMANDU",           "Asia/Kathmandu"),
+            cls.CasioTimeZone("DHAKA",               "Asia/Dhaka"),
+            cls.CasioTimeZone("YANGON",              "Asia/Yangon"),
+            cls.CasioTimeZone("BANGKOK",             "Asia/Bangkok"),
+            cls.CasioTimeZone("HONG KONG",           "Asia/Hong_Kong"),
+            cls.CasioTimeZone("PYONGYANG",           "Asia/Pyongyang"),
+            cls.CasioTimeZone("EUCLA",               "Australia/Eucla"),
+            cls.CasioTimeZone("TOKYO",               "Asia/Tokyo"),
+            cls.CasioTimeZone("ADELAIDE",            "Australia/Adelaide", 0x04),
+            cls.CasioTimeZone("SYDNEY",              "Australia/Sydney",   0x04),
+            cls.CasioTimeZone("LORD HOWE ISLAND",    "Australia/Lord_Howe",0x12),
+            cls.CasioTimeZone("NOUMEA",              "Pacific/Noumea"),
+            cls.CasioTimeZone("WELLINGTON",          "Pacific/Auckland",   0x05),
+            cls.CasioTimeZone("CHATHAM ISLANDS",     "Pacific/Chatham",    0x17),
+            cls.CasioTimeZone("NUKUALOFA",           "Pacific/Tongatapu"),
+            cls.CasioTimeZone("KIRITIMATI",          "Pacific/Kiritimati"),
+            cls.CasioTimeZone("CASABLANCA",          "Africa/Casablanca",  0x0F),
+            cls.CasioTimeZone("BEIRUT",              "Asia/Beirut",        0x0C),
+            cls.CasioTimeZone("NORFOLK ISLAND",      "Pacific/Norfolk",    0x04),
+            cls.CasioTimeZone("EASTER ISLAND",       "Pacific/Easter",     0x1C),
+            cls.CasioTimeZone("HAVANA",              "America/Havana",     0x15),
+            cls.CasioTimeZone("SANTIAGO",            "America/Santiago",   0x1B),
+            cls.CasioTimeZone("ASUNCION",            "America/Asuncion",   0x09),
+            cls.CasioTimeZone("PONTA DELGADA",       "Atlantic/Azores",    0x02),
+        ]
+        cls._timezone_map = {tz.zone_name: tz for tz in cls._timezone_table}
+        cls._initialized = True
+
+    @classmethod
+    def _is_equivalent(cls, zone_name_1: str, zone_name_2: str) -> bool:
+        """
+        Two zones are equivalent if their standard offset, current DST offset,
+        and DST transition rules all match — mirrors Kotlin isEquivalent().
+        """
+        try:
+            z1 = ZoneInfo(zone_name_1)
+            z2 = ZoneInfo(zone_name_2)
+        except Exception:
+            return False
+
+        now = datetime.now(timezone.utc)
+        jan = datetime(now.year, 1, 1, tzinfo=z1)
+        jul = datetime(now.year, 7, 1, tzinfo=z1)
+
+        def offsets(z: ZoneInfo):
+            j = datetime(now.year, 1, 1, tzinfo=z).utcoffset()
+            u = datetime(now.year, 7, 1, tzinfo=z).utcoffset()
+            return j, u
+
+        j1, u1 = offsets(z1)
+        j2, u2 = offsets(z2)
+        return j1 == j2 and u1 == u2
+
+    @classmethod
+    def find_timezone(cls, timezone_name: str) -> CasioTimeZone:
+        cls._build_table()
+
+        # Direct match
+        found = cls._timezone_map.get(timezone_name)
+        if found is not None:
+            return found
+
+        # Equivalence match (same offsets + DST pattern)
+        for entry in cls._timezone_map.values():
+            if cls._is_equivalent(entry.zone_name, timezone_name):
+                return entry
+
+        # Fallback: synthetic entry from the timezone name itself
+        name = timezone_name.split("/")[-1].upper()
+        return cls.CasioTimeZone(name, timezone_name, 0x00)

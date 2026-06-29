@@ -61,11 +61,11 @@ class AlarmsIOFunctional:
         """
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]])
             ),
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
             )
         ]
@@ -87,8 +87,8 @@ class AlarmsIOFunctional:
         alarm_casio = alarms_inst_typed.from_json_alarm_secondary_alarms(alarms_json_arr)
 
         return [
-            Write(handle=0x000E, data=bytes(alarm_casio0)),
-            Write(handle=0x000E, data=bytes(alarm_casio))
+            Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=bytes(alarm_casio0)),
+            Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=bytes(alarm_casio))
         ]
 
     @staticmethod
@@ -116,18 +116,10 @@ class AlarmsIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult:
-        """Initializes the alarm fetch sequence."""
+    async def request(connection: ConnectionProtocol) -> list[dict[str, object]]:
+        """Sends the trigger message and waits for the full alarm set to arrive."""
         AlarmsIO.connection = connection
         alarms_inst_typed.clear()
-        await AlarmsIO._get_alarms(connection)
-        if AlarmsIO.result is None:
-            raise RuntimeError("AlarmsIO.result must not be None after _get_alarms")
-        return AlarmsIO.result
-
-    @staticmethod
-    async def _get_alarms(connection: ConnectionProtocol) -> CancelableResult[list[dict[str, object]]]:
-        """Sends the trigger message to start the alarm retrieval process."""
         await connection.send_message('{ "action": "GET_ALARMS"}')
         AlarmsIO.result = CancelableResult[list[dict[str, object]]]()
         # Register the pending request

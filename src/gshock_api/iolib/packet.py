@@ -17,11 +17,9 @@ class Protocol(IntEnum):
     VERSION_INFORMATION = 0x20
     DST_WATCH_STATE = 0x1D
     DST_SETTING = 0x1E
-    SERVICE_DISCOVERY_MANAGER = 0x47
     CURRENT_TIME = 0x09
     SETTING_FOR_USER_PROFILE = 0x45
     SETTING_FOR_TARGET_VALUE = 0x43
-    ALERT_LEVEL = 0x0A
     SETTING_FOR_ALM = 0x15
     SETTING_FOR_ALM2 = 0x16
     SETTING_FOR_BASIC = 0x13
@@ -30,10 +28,20 @@ class Protocol(IntEnum):
     REMINDER_TITLE = 0x30
     REMINDER_TIME = 0x31
     TIMER = 0x18
+    HOME_TIME = 0x24
     ERROR = 0xFF
-    UNKNOWN = 0x0A
-    CMD_SET_TIMEMODE = 0x47
-    FIND_PHONE = 0x0A
+
+    # NOTE: The values below are shared aliases. Python's IntEnum will alias them
+    # to the first enum member defined with that numeric value. They are kept for
+    # readability and dispatcher-map lookup purposes; use the CHARACTERISTICS map
+    # (not this enum) when the distinction between aliased names matters.
+    SERVICE_DISCOVERY_MANAGER = 0x47
+    CMD_SET_TIMEMODE = 0x47   # alias → SERVICE_DISCOVERY_MANAGER
+
+    ALERT_LEVEL = 0x0A
+    UNKNOWN = 0x0A            # alias → ALERT_LEVEL
+    FIND_PHONE = 0x0A         # alias → ALERT_LEVEL
+
 
 @dataclass
 class Header:

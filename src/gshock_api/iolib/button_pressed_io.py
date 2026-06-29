@@ -1,6 +1,7 @@
 from enum import IntEnum
 
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol
@@ -60,7 +61,7 @@ class ButtonPressedIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.BLE_FEATURES.value])
             )
         ]
@@ -68,7 +69,7 @@ class ButtonPressedIOFunctional:
     @staticmethod
     def prepare_watch_commands_set(data: bytes | str) -> list[BLEAction]:
         data_bytes = data if isinstance(data, bytes) else data.encode("utf-8")
-        return [Write(handle=0x000E, data=data_bytes)]
+        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=data_bytes)]
 
 
 class ButtonPressedIO:
@@ -80,7 +81,7 @@ class ButtonPressedIO:
     connection: ConnectionProtocol | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[WatchButton]:
+    async def request(connection: ConnectionProtocol) -> WatchButton:
         ButtonPressedIO.connection = connection
         await connection.request(f"{Protocol.BLE_FEATURES.value:02X}")
         ButtonPressedIO.result = CancelableResult[WatchButton]()
@@ -93,11 +94,14 @@ class ButtonPressedIO:
             PendingRequestsRegistry.unregister("ButtonPressedIO")
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if ButtonPressedIO.connection is None:
+            raise RuntimeError("ButtonPressedIO.connection is not set")
+
         commands = ButtonPressedIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await ButtonPressedIO.connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(data: bytes | str) -> None:

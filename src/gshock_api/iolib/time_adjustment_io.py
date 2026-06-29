@@ -1,6 +1,7 @@
 import json
 
 from gshock_api.cancelable_result import CancelableResult
+from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.error_io import ErrorIO
@@ -8,6 +9,9 @@ from gshock_api.iolib.packet import Protocol
 from gshock_api.logger import logger
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.pending_requests_registry import PendingRequestsRegistry
+
+CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
 
 class TimeAdjustmentIOFunctional:
     """
@@ -26,7 +30,7 @@ class TimeAdjustmentIOFunctional:
         time_adjusted = int(data_bytes[12]) == 0x00
         minutes_after_hour = int(data_bytes[13])
         return {
-            "timeAdjusment": str(time_adjusted),
+            "timeAdjustment": str(time_adjusted),
             "minutesAfterHour": str(minutes_after_hour),
         }
 
@@ -34,7 +38,7 @@ class TimeAdjustmentIOFunctional:
     def prepare_watch_commands() -> list[BLEAction]:
         return [
             Write(
-                handle=0x000C,
+                handle=CasioConstants.HANDLE_READ_ALL_FEATURES,
                 data=bytes([Protocol.SETTING_FOR_BLE.value])
             )
         ]
@@ -46,7 +50,7 @@ class TimeAdjustmentIOFunctional:
         minutes_after_hour: int = int(parsed_message.get("minutesAfterHour", "0"))
 
         encoded = TimeAdjustmentIOFunctional.encode(original_hex, time_adjustment, minutes_after_hour)
-        return [Write(handle=0x000E, data=encoded)]
+        return [Write(handle=CasioConstants.HANDLE_ALL_FEATURES_WRITE, data=encoded)]
 
 
 class TimeAdjustmentIO:
@@ -59,7 +63,7 @@ class TimeAdjustmentIO:
     original_value: str | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> CancelableResult[dict[str, object]]:
+    async def request(connection: ConnectionProtocol) -> dict[str, object]:
         TimeAdjustmentIO.connection = connection
         await connection.request(f"{Protocol.SETTING_FOR_BLE.value:02X}")
         TimeAdjustmentIO.result = CancelableResult[dict[str, object]]()
@@ -72,14 +76,14 @@ class TimeAdjustmentIO:
             PendingRequestsRegistry.unregister("TimeAdjustmentIO")
 
     @staticmethod
-    def send_to_watch(_message: str) -> None:
+    async def send_to_watch(_message: str = "") -> None:
         if TimeAdjustmentIO.connection is None:
             raise RuntimeError("TimeAdjustmentIO.connection is not set")
 
         commands = TimeAdjustmentIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                TimeAdjustmentIO.connection.write(command.handle, command.data)
+                await TimeAdjustmentIO.connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(message: str) -> dict[str, str] | None:
@@ -95,7 +99,9 @@ class TimeAdjustmentIO:
         for command in commands:
             if isinstance(command, Write):
                 write_cmd = to_compact_string(to_hex_string(command.data))
-                await TimeAdjustmentIO.connection.write(0x000E, write_cmd)
+                await TimeAdjustmentIO.connection.write(
+                    CasioConstants.HANDLE_ALL_FEATURES_WRITE, write_cmd
+                )
         return None
 
     @staticmethod

@@ -25,7 +25,6 @@ class GwBx5600TimeIO:
     result: ClassVar[CancelableResult[bytes] | None] = None
 
     # ── Request / on_received (used by set_time_dynamic) ─────────────────────
-
     @staticmethod
     async def request(
         connection: ConnectionProtocol, step: int, req_payload: str
@@ -49,7 +48,6 @@ class GwBx5600TimeIO:
             GwBx5600TimeIO.result.set_result(data)
 
     # ── Hardcoded set_time (reliable — values from btsnoop_hci_bx.log) ───────
-
     @staticmethod
     async def set_time_hardcoded(
         connection: ConnectionProtocol, now: datetime | None = None

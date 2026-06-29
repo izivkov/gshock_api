@@ -1,12 +1,12 @@
 from collections.abc import Callable, Coroutine, Mapping
 import json
 import logging
+import asyncio
 from typing import Final, TypeVar
 
 from gshock_api import message_dispatcher
 from gshock_api.alarms import alarms_inst
 
-# Assuming the Connection class from before is available, we define the type here
 from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
@@ -47,6 +47,23 @@ class GshockAPI:
         # Assuming WatchNameIO.request returns a string
         result: str = await message_dispatcher.WatchNameIO.request(self.connection)
         return result
+
+    async def get_home_time(self, slot: int = 0) -> bytes:
+        """Get the HomeTime (0x24) characteristic data for the given slot.
+
+        Slot 0 returns the main (home) city data; slot 1 returns the secondary
+        city data (used by watches with a second dial, e.g. MTG-B1000).
+        Raw bytes are returned unchanged — the watch is the authoritative source
+        for city configuration.
+
+        Args:
+            slot: City slot to read (0 = home/main city, 1 = secondary city).
+                  Defaults to 0.
+
+        Returns:
+            Raw bytes for the requested HomeTime slot.
+        """
+        return await message_dispatcher.HomeTimeIO.request(self.connection, slot)
 
     async def get_pressed_button(self) -> WatchButton:
         """This function tells us which button was pressed on the watch to initiate the connection."""
@@ -92,9 +109,17 @@ class GshockAPI:
 
         await self.read_write_dst_watch_states()
         await self.read_write_dst_for_world_cities()
-
         if watch_info.hasWorldCities:
             await self.read_write_world_cities()
+
+        # Watches with a secondary dial (e.g. MTG-B1000) need an extra pass
+        # to sync the second dial city after the main time is set.
+        # ResetSequence slot 0 is also required for these watches.
+        if watch_info.hasSecondDial:
+            self.logger.info("Watch has a secondary dial — running second-dial sync.")
+            from gshock_api.iolib.second_dial_io import SecondDialIO
+            await SecondDialIO.write_reset_sequence(self.connection, slot=0)
+            await SecondDialIO.request(self.connection)
 
     async def _initialize_gw_bx5600_time(self) -> None:
         from datetime import datetime
@@ -105,23 +130,15 @@ class GshockAPI:
         # Switch between approaches here:
         # await GwBx5600TimeIO.set_time_hardcoded(self.connection, now)   # ← reliable
         await GwBx5600TimeIO.set_time_dynamic(self.connection, now)   # ← when fragmentation is fixed
-        
-    # Define a Callable type for the function that will be read
-    RequestFunction = Callable[[object], Coroutine[object, object, object]]
 
-    # Replaced Any with object, and made function parameter specific
-    async def read_and_write(
-        self, function: RequestFunction, param: object
-    ) -> None:
-        # The return type of the function is unknown, hence object
-        ret: object = await function(param)
-        
-        # Assuming ret is convertible to bytes/bytearray by to_hex_string
-        hex_data: bytes = to_hex_string(ret)
-        short_str: bytes = to_compact_string(hex_data)
-        
-        # Replaced 0xE with HANDLE_ALL_FEATURES
-        await self.connection.write(HANDLE_ALL_FEATURES, short_str)
+    async def _write_reset_sequence(self, slot: int) -> None:
+        """
+        Sends ResetSequence command (0x21) to apply DST/HomeTime changes.
+        slot=0 applies main time, slot=1 applies secondary dial.
+        Observed in MTG-B1000 HCI log: 210001 (slot 0) and 210101 (slot 1).
+        """
+        cmd = bytes([0x21, 0x00 if slot == 0 else 0x01, 0x01])
+        await self.connection.write(0x000E, cmd.hex())
 
     async def read_write_dst_watch_states(self) -> None:
         # Use dict instead of generic Map/Any
@@ -136,6 +153,20 @@ class GshockAPI:
             function: RequestFunction = item["function"] # type: ignore[assignment] noqa: F821 # type: ignore  # noqa: F821
             state: DtsState = item["state"] # type: ignore[assignment]
             await self.read_and_write(function, state)
+
+    # Replaced Any with object, and made function parameter specific
+    async def read_and_write(
+        self, function: RequestFunction, param: object
+    ) -> None:
+        # The return type of the function is unknown, hence object
+        ret: object = await function(param)
+        
+        # Assuming ret is convertible to bytes/bytearray by to_hex_string
+        hex_data: bytes = to_hex_string(ret)
+        short_str: bytes = to_compact_string(hex_data)
+        
+        # Replaced 0xE with HANDLE_ALL_FEATURES
+        await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
     async def read_write_dst_for_world_cities(self) -> None:
         fn = self.get_dst_for_world_cities
@@ -159,7 +190,6 @@ class GshockAPI:
         # current_time = None is redundant as it's a local variable/parameter
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
-        import asyncio
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
         if watch_info.hasNewTimeProtocol:
             await asyncio.sleep(1.0)
