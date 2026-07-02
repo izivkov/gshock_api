@@ -6,7 +6,10 @@ from pprint import pformat
 import sys
 import time
 
-import pytz
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover
+    ZoneInfo = None
 
 from gshock_api.always_connected_watch_filter import (
     always_connected_watch_filter as watch_filter,
@@ -58,6 +61,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         watch_name = await api.get_watch_name()
         logger.info(f"got watch name: {watch_name}")
 
+        step_count = await api.get_step_counter()
+        logger.info(f"step count: {step_count}")
+
         await api.set_time(time.time() + 10 * 60)
 
         alarms = await api.get_alarms()
@@ -93,7 +99,10 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         await app_notifications(api)
 
         # Create a single event
-        tz = pytz.timezone("America/Toronto")
+        if ZoneInfo is not None:
+            tz = ZoneInfo("America/Toronto")
+        else:
+            tz = None
         dt = datetime.now()
         utc_timestamp = dt.timestamp()
         event_date = create_event_date(utc_timestamp, tz)
