@@ -19,6 +19,7 @@ from gshock_api.iolib.unknown_io import UnknownIO
 from gshock_api.iolib.watch_condition_io import WatchConditionIO
 from gshock_api.iolib.watch_name_io import WatchNameIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.home_time_io import HomeTimeIO
 
@@ -83,6 +84,7 @@ class MessageDispatcher:
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_03"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,
+        CHARACTERISTICS["CASIO_ACTIVITY_RECORD"]: StepCounterIO.on_received,
 
         CHARACTERISTICS["CASIO_HOME_TIME"]: HomeTimeIO.on_received,
     }

@@ -33,8 +33,11 @@ class Logger:
     def info(self, *args: object) -> None:
         _logger.info(self._join(*args))
 
-    def debug(self, *args: object) -> None:
-        _logger.debug(self._join(*args))
+    def debug(self, *args: object, **kwargs) -> None:
+        _logger.debug(self._join(*args), **kwargs)
+
+    def exception(self, *args: object) -> None:
+        _logger.exception(self._join(*args))
 
     def warn(self, *args: object) -> None:
         _logger.warning(self._join(*args))

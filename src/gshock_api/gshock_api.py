@@ -16,6 +16,7 @@ from gshock_api.utils import (
     to_hex_string,
 )
 from gshock_api.watch_info import watch_info, WatchModel
+from gshock_api.iolib.step_counter_io import StepCounterIO
 
 # Type variable for unknown request/message objects (e.g., Alarm, Event)
 T = TypeVar("T") 
@@ -259,6 +260,20 @@ class GshockAPI:
         # This prevents the TypeError in the test script!
         return json.loads(result_str)
 
+    async def get_step_counter(self) -> int:
+        """Get the current daily step total from ABL-100WE life log notifications."""
+        # Only request step counter on watches that advertise the capability
+        try:
+            if not watch_info.hasStepCounter:
+                self.logger.info("Watch does not support step counter")
+                return 0
+        except Exception:
+            # Be conservative if watch_info is not set or missing attribute
+            self.logger.debug("watch_info.hasStepCounter not available, skipping step counter request")
+            return 0
+
+        return await StepCounterIO.request(self.connection)
+
     # settings is an unknown settings object (T)
     async def set_settings(self, settings: T) -> None:
         """Set settings to the watch."""
@@ -312,6 +327,11 @@ class GshockAPI:
         return result
 
     async def send_app_notification(self, notification: dict[str, object]) -> None:
+        # Only send app notifications if the watch supports the notification characteristic.
+        if not self.connection.is_service_supported(HANDLE_NOTIFICATION):
+            self.logger.info("Watch does not support app notifications")
+            return
+
         # Assuming AppNotificationIO methods handle the conversion of the dict values
         encoded_buffer: bytes = AppNotificationIO.encode_notification_packet(notification)
         encrypted_buffer: bytes = AppNotificationIO.xor_encode_buffer(encoded_buffer)

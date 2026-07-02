@@ -121,6 +121,18 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(decoded["timeAdjusment"], "True")
         self.assertEqual(decoded["minutesAfterHour"], "25")
 
+    # --- StepCounterIO Tests ---
+    def test_step_counter_parse_payload(self):
+        # Build a notification payload that matches the ABL activity record structure.
+        payload = bytes([0x26]) + bytes([0x20, 0x07, 0x01, 0x18, 0x40])
+        payload += b"\xfe\xff" * 4
+        payload += (6769).to_bytes(4, "little")
+
+        from gshock_api.iolib.step_counter_io import StepCounterIO
+
+        result = StepCounterIO.parse_step_counter(payload)
+        self.assertEqual(result, 6769)
+
     # --- DstForWorldCitiesIO Tests ---
     def test_dst_for_world_cities_commands(self):
         commands = DstForWorldCitiesIOFunctional.prepare_watch_commands()

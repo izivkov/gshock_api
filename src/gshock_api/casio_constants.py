@@ -32,6 +32,8 @@ class CasioConstants:
     HANDLE_READ_ALL_FEATURES: Final[int] = 0x0C
     HANDLE_ALL_FEATURES_NOTIFICATION: Final[int] = 0x0D
     HANDLE_ALL_FEATURES_WRITE: Final[int] = 0x0E
+    HANDLE_DATA_REQUEST_SP: Final[int] = 0x11
+    HANDLE_CONVOY_NOTIFICATION: Final[int] = 0x14
     HANDLE_CONFIG_WRITE: Final[int] = 0x17
     HANDLE_CONFIG_NOTIFY: Final[int] = 0x19
     HANDLE_SERIAL_NUMBER: Final[int] = 0xFF
@@ -76,4 +78,5 @@ class CasioConstants:
 
         # HomeTime (dual time zone) characteristic
         "CASIO_HOME_TIME": 0x24,
+        "CASIO_ACTIVITY_RECORD": 0x26,
     }
