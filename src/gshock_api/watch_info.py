@@ -171,6 +171,7 @@ class WatchInfo:
             "findButtonUserDefined": True,
             "hasPowerSavingMode": False,
             "hasDnD": True,
+            "hasStepCounter": True,
         },
     ])
 

@@ -1,7 +1,9 @@
 from collections.abc import Callable
 from typing import Any, TypeVar
+import asyncio
+import subprocess
 
-from bleak import BleakClient
+from bleak import BleakClient, BLEDevice
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.exc import BleakDBusError
 
@@ -12,10 +14,8 @@ from gshock_api.logger import logger
 from gshock_api.scanner import scanner
 from gshock_api.utils import to_casio_cmd
 
-# Define a Type Variable T for generic request/message objects
 T = TypeVar("T")
 
-# Define a type for the watch filter function.
 WatchFilter = Callable[[Any], bool] | None
 Device = Any | None
 
@@ -25,13 +25,22 @@ class Connection:
 
     HandleMap = dict[int, str]
 
+    # Only subscribe to notifications for known Casio UUIDs.
+    # Subscribing to health-module or unknown UUIDs (e.g. DW-H5600 activity
+    # service) causes the watch to drop the connection during setup.
+    NOTIFY_WHITELIST: frozenset[str] = frozenset({
+        CasioConstants.CASIO_NOTIFICATION_CHARACTERISTIC_UUID,
+        CasioConstants.CASIO_ALL_FEATURES_CHARACTERISTIC_UUID,
+        CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID,
+        CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID,
+    })
+
     def __init__(self, address: str | None = None) -> None:
         self.handles_map: Connection.HandleMap = self.init_handles_map()
         self.address: str | None = address
+        self.device: BLEDevice | None = None
         self.client: BleakClient | None = None
-        # Map UUID -> BleakGATTCharacteristic for discovered characteristics
         self.characteristics_map: dict[str, BleakGATTCharacteristic] = {}
-        # Track which handles we've enabled notifications for to avoid duplicates
         self._notified_handles: set[int] = set()
 
     def notification_handler(
@@ -40,59 +49,91 @@ class Connection:
         message_dispatcher.MessageDispatcher.on_received(data)
 
     async def init_characteristics_map(self) -> None:
-        """Populate `characteristics_map` with discovered Bleak characteristics."""
+        """Populate characteristics_map with discovered Bleak characteristics."""
         if self.client is None:
             return
 
         services = self.client.services
         for service in services:
+            logger.info(f"Service: {service.uuid}")
             for char in service.characteristics:
-                logger.info(f"Characteristics: {char.uuid}")
-                # Store the full BleakGATTCharacteristic so callers can inspect properties
-                self.characteristics_map[char.uuid] = char
+                uuid_str = str(char.uuid).lower()
+                logger.info(f"  Characteristic: {uuid_str} properties={getattr(char, 'properties', None)}")
+                self.characteristics_map[uuid_str] = char
+
+        # Diagnostic: log discovered vs expected UUIDs to help identify
+        # watch-specific GATT layouts (e.g. DW-H5600 health service UUIDs)
+        mapped_uuids = set(self.handles_map.values())
+        discovered_uuids = set(self.characteristics_map.keys())
+        missing = mapped_uuids - discovered_uuids
+        extra = discovered_uuids - mapped_uuids
+        if missing:
+            logger.warning(f"Expected UUIDs not found on watch: {missing}")
+        if extra:
+            logger.info(f"Watch advertises additional UUIDs not in handles_map: {extra}")
 
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
-        """Connect to the watch and subscribe to any characteristics that support notifications."""
         try:
             if self.address is None:
                 device: Device = await scanner.scan(
                     device_address=self.address, watch_filter=watch_filter
                 )
                 if device is None:
-                    logger.info("No G-Shock device found or name matches excluded watches.")
+                    logger.info("No G-Shock device found.")
                     return False
-
+                self.device = device
                 self.address = device.address
 
             if self.address is None:
                 return False
 
-            self.client = BleakClient(self.address)
-            await self.client.connect()
+            client_target = self.device if self.device is not None else self.address
+            self.client = BleakClient(client_target, timeout=30)
 
-            if not self.client.is_connected:
+            # Attempt standard connect first (works for most watches)
+            connected = False
+            try:
+                await self.client.connect(dangerous_use_bleak_cache=False)
+                connected = self.client.is_connected
+            except Exception as e:
+                logger.warning(f"Standard connect failed ({e}), trying bluetoothctl handoff...")
+
+            # Fallback for watches like DW-H5600 that drop during service discovery:
+            # Keep bluetoothctl holding the connection open while Bleak attaches.
+            if not connected:
+                btctl_proc = await self._bluez_start_connection(self.address)
+                if btctl_proc is None:
+                    return False
+                try:
+                    # Bleak attaches to the already-connected device.
+                    # Cache=True so it reads services BlueZ already resolved
+                    # rather than triggering a second discovery round.
+                    self.client = BleakClient(client_target, timeout=30)
+                    await self.client.connect(dangerous_use_bleak_cache=True)
+                    connected = self.client.is_connected
+                finally:
+                    # Now safe to let bluetoothctl go — Bleak owns the connection
+                    await self._bluez_stop_connection(btctl_proc)
+
+            if not connected:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
 
-            # Some Bleak backends require an explicit service discovery call
-            try:
-                await self.client.get_services()
-            except Exception as e:
-                logger.debug("client.get_services() failed or unnecessary on this backend", exc_info=True)
+            await asyncio.sleep(0.5)
 
             try:
                 await self.init_characteristics_map()
             except Exception:
-                # Let outer except log full traceback and return False
                 raise
 
-            # Subscribe only to characteristics that advertise notify/indicate
             for uuid, char in self.characteristics_map.items():
+                if uuid not in self.NOTIFY_WHITELIST:
+                    logger.debug(f"Skipping notify for non-whitelisted UUID: {uuid}")
+                    continue
                 props = getattr(char, "properties", []) or []
                 if "notify" in props or "indicate" in props:
                     try:
                         await self.client.start_notify(uuid, self.notification_handler)
-                        # mark any mapped handle(s) for this uuid as notified
                         for h, u in self.handles_map.items():
                             if u == uuid:
                                 self._notified_handles.add(h)
@@ -104,6 +145,65 @@ class Connection:
         except Exception as e:
             logger.exception(f"[GShock Connect] Connection failed: {e}")
             return False
+
+
+    async def _bluez_start_connection(self, address: str) -> asyncio.subprocess.Process | None:
+        """
+        Start bluetoothctl and hold the BLE connection open.
+        Returns the live process — caller must call _bluez_stop_connection()
+        after Bleak has successfully connected.
+        """
+        logger.info(f"bluetoothctl handoff connect: {address}")
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "bluetoothctl",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            proc.stdin.write(f"connect {address}\n".encode())
+            await proc.stdin.drain()
+
+            # Wait for confirmed connection
+            deadline = asyncio.get_event_loop().time() + 15
+            connected = False
+            while asyncio.get_event_loop().time() < deadline:
+                try:
+                    line = await asyncio.wait_for(proc.stdout.readline(), timeout=1.0)
+                    text = line.decode()
+                    logger.debug(f"bluetoothctl: {text.strip()}")
+                    if "Connection successful" in text or "Connected: yes" in text:
+                        connected = True
+                        break
+                except asyncio.TimeoutError:
+                    continue
+
+            if not connected:
+                logger.warning("bluetoothctl did not confirm connection")
+                await self._bluez_stop_connection(proc)
+                return None
+
+            # Give BlueZ a moment to resolve the service table
+            await asyncio.sleep(1.0)
+            logger.info("bluetoothctl holding connection — Bleak handoff starting")
+            return proc  # caller keeps this alive until Bleak connects
+
+        except Exception as e:
+            logger.warning(f"bluetoothctl start failed: {e}")
+            return None
+
+
+    async def _bluez_stop_connection(self, proc: asyncio.subprocess.Process) -> None:
+        """Cleanly exit bluetoothctl after Bleak has taken over the connection."""
+        try:
+            proc.stdin.write(b"quit\n")
+            await proc.stdin.drain()
+            await asyncio.wait_for(proc.wait(), timeout=3.0)
+            logger.debug("bluetoothctl exited cleanly")
+        except Exception as e:
+            logger.debug(f"bluetoothctl exit: {e}")
+            proc.kill()
 
     async def disconnect(self) -> None:
         if self.client and self.client.is_connected:
