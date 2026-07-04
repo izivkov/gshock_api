@@ -11,6 +11,7 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
@@ -211,6 +212,13 @@ class GshockAPI:
         # 2. Automatically deserialize to a dict
         # This prevents the TypeError in the test script!
         return json.loads(result_str)
+
+    async def get_step_count(self) -> int:
+        if not watch_info.hasStepCounter:
+            print("Watch does not support step counter")
+            self.logger.debug("Watch does not support step counter")
+            return 0
+        return await StepCounterIO.request(self.connection)
 
     # settings is an unknown settings object (T)
     async def set_settings(self, settings: T) -> None:

@@ -56,6 +56,7 @@ class WatchInfo:
         "hasDnD": False,
         "hasBatteryLevel": False,
         "hasWorldCities": True,
+        "hasStepCounter": False,
     })
 
     # The per-model overrides
@@ -107,6 +108,7 @@ class WatchInfo:
             "hasWorldCities": False,
             "shortLightDuration": "1.5s",
             "longLightDuration": "3s",
+            "hasStepCounter": True,
         },
         {
             "model": WatchModel.GB001,

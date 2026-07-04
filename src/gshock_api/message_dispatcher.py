@@ -12,6 +12,7 @@ from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
 from gshock_api.iolib.settings_io import SettingsIO
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
 from gshock_api.iolib.time_io import TimeIO
 from gshock_api.iolib.timer_io import TimerIO
@@ -74,6 +75,8 @@ class MessageDispatcher:
         # ECB-30
         CHARACTERISTICS["CMD_SET_TIMEMODE"]: UnknownIO.on_received,
         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
+
+        CHARACTERISTICS["CASIO_ACTIVITY_RECORD"]: StepCounterIO.on_received,
     }
 
     @staticmethod
