@@ -1,7 +1,7 @@
-from collections.abc import Callable
-from typing import Any, TypeVar
 import asyncio
+from collections.abc import Callable
 import subprocess
+from typing import Any, TypeVar
 
 from bleak import BleakClient, BLEDevice
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -224,11 +224,7 @@ class Connection:
                 return
 
             response_type: bool = handle == CasioConstants.HANDLE_ALL_FEATURES_WRITE
-
-            if isinstance(data, bytes):
-                cmd_data = data
-            else:
-                cmd_data = to_casio_cmd(data)
+            cmd_data = data if isinstance(data, bytes) else to_casio_cmd(data)
 
             if self.client:
                 await self.client.write_gatt_char(uuid, cmd_data, response=response_type)

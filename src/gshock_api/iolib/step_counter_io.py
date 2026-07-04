@@ -45,28 +45,33 @@ class StepCounterIO:
         if len(payload) < 10 or payload[0] != 0x26:
             return None
 
-        # The ABL-100WE life-log response is a large notification starting with
-        # record type 0x26. The step total is the first uint32 immediately after
-        # the tail sentinel block (0xFFFFFFFE repeated as little-endian u32).
         sentinel4: Final[bytes] = b"\xfe\xff\xff\xff"
+
         found_indices: list[int] = [
-            i for i in range(6, len(payload) - 3) if payload[i : i + 4] == sentinel4
+            i for i in range(6, len(payload) - 3)
+            if payload[i : i + 4] == sentinel4
         ]
 
         if found_indices:
-            tail_index = found_indices[-1] + 4
-            if tail_index + 4 <= len(payload):
-                return int.from_bytes(payload[tail_index : tail_index + 4], "little")
+            # Last 4-byte sentinel ends at tail_index.
+            # Skip the 4-byte sub-record header (fe 1a 00 00) that follows
+            # the sentinel block — the step uint32 is 4 bytes further in.
+            tail_index = found_indices[-1] + 4  # end of last sentinel
+            step_offset = tail_index + 4        # skip fe + 1a 00 00 sub-header
+            if step_offset + 4 <= len(payload):
+                return int.from_bytes(
+                    payload[step_offset : step_offset + 4], "little"
+                )
 
-        # Fallback path: skip the BCD-ish date/time header and any repeated
-        # empty interval or zero-value blocks to locate the first daily total.
+        # Fallback: scan past 2-byte feff sentinels and zeros
         cursor = 6
         while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\xfe\xff":
             cursor += 2
-
         while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\x00\x00":
             cursor += 2
-
+        # Also skip the sub-record header byte (0xfe) and 3-byte marker
+        if cursor < len(payload) and payload[cursor] == 0xfe:
+            cursor += 4  # skip fe 1a 00 00
         if cursor + 4 <= len(payload):
             return int.from_bytes(payload[cursor : cursor + 4], "little")
 
