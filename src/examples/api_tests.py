@@ -18,6 +18,7 @@ from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
 
+destructive = False  # Set to True to enable destructive tests (time change, alarms, etc.)
 
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
@@ -59,71 +60,72 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         watch_name = await api.get_watch_name()
         logger.info(f"got watch name: {watch_name}")
 
-        await api.set_time(time.time() + 10 * 60)
-
-        alarms = await api.get_alarms()
-        logger.info(f"alarms: {pformat(alarms)}")
-
-        alarms[3]["enabled"] = True
-        alarms[3]["hour"] = 7
-        alarms[3]["minute"] = 25
-        alarms[3]["enabled"] = False
-        await api.set_alarms(alarms)
-
-        seconds = await api.get_timer()
-        logger.info(f"timer: {seconds} seconds")
-
-        await api.set_timer(seconds + 10)
-        time_adjstment = await api.get_time_adjustment()
-        logger.info(f"time_adjstment: {time_adjstment}")
-
-        await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
-
         condition = await api.get_watch_condition()
         logger.info(f"condition: {condition}")
 
-        settings_local = await api.get_basic_settings()
-        logger.info(f"settings: {pformat(settings_local)}")
+        if destructive:
+            await api.set_time(time.time() + 10 * 60)
 
-        settings_local["button_tone"] = True
-        settings_local["language"] = "Russian"
-        settings_local["time_format"] = "24h"
+            alarms = await api.get_alarms()
+            logger.info(f"alarms: {pformat(alarms)}")
 
-        await api.set_settings(settings_local)
-        settings_local = await api.get_basic_settings()
-        await app_notifications(api)
+            alarms[3]["enabled"] = True
+            alarms[3]["hour"] = 7
+            alarms[3]["minute"] = 25
+            alarms[3]["enabled"] = False
+            await api.set_alarms(alarms)
 
-        # Create a single event
-        tz = pytz.timezone("America/Toronto")
-        dt = datetime.now()
-        utc_timestamp = dt.timestamp()
-        event_date = create_event_date(utc_timestamp, tz)
-        event_date_str = json.dumps(event_date.__dict__)
-        event_json_str = (
-            """{"title":"Test Event", "time":{"selected":\""""
-            + str(False)
-            + """\", "enabled":\""""
-            + str(True)
-            + """\", "repeat_period":\""""
-            + str(RepeatPeriod.WEEKLY)
-            + """\","days_of_week":\""""
-            + "MONDAY"
-            + """\", "start_date":"""
-            + event_date_str
-            + """, "end_date":"""
-            + event_date_str
-            + """}}"""
-        )
-        Event().create_event(json.loads(event_json_str))
-        logger.info(f"Created event: {pformat(json.loads(event_json_str))}")
+            seconds = await api.get_timer()
+            logger.info(f"timer: {seconds} seconds")
 
-        reminders = await api.get_reminders()
-        for reminder in reminders:
-            logger.info (f"reminder: {pformat(reminder)}")
+            await api.set_timer(seconds + 10)
+            time_adjstment = await api.get_time_adjustment()
+            logger.info(f"time_adjstment: {time_adjstment}")
 
-        reminders[3]["title"] = "Test Event"
+            await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
 
-        await api.set_reminders(reminders)
+            settings_local = await api.get_basic_settings()
+            logger.info(f"settings: {pformat(settings_local)}")
+
+            settings_local["button_tone"] = True
+            settings_local["language"] = "Russian"
+            settings_local["time_format"] = "24h"
+
+            await api.set_settings(settings_local)
+            settings_local = await api.get_basic_settings()
+            await app_notifications(api)
+
+            # Create a single event
+            tz = pytz.timezone("America/Toronto")
+            dt = datetime.now()
+            utc_timestamp = dt.timestamp()
+            event_date = create_event_date(utc_timestamp, tz)
+            event_date_str = json.dumps(event_date.__dict__)
+            event_json_str = (
+                """{"title":"Test Event", "time":{"selected":\""""
+                + str(False)
+                + """\", "enabled":\""""
+                + str(True)
+                + """\", "repeat_period":\""""
+                + str(RepeatPeriod.WEEKLY)
+                + """\","days_of_week":\""""
+                + "MONDAY"
+                + """\", "start_date":"""
+                + event_date_str
+                + """, "end_date":"""
+                + event_date_str
+                + """}}"""
+            )
+            Event().create_event(json.loads(event_json_str))
+            logger.info(f"Created event: {pformat(json.loads(event_json_str))}")
+
+            reminders = await api.get_reminders()
+            for reminder in reminders:
+                logger.info (f"reminder: {pformat(reminder)}")
+
+            reminders[3]["title"] = "Test Event"
+
+            await api.set_reminders(reminders)
 
     except GShockConnectionError as e:
         logger.info(f"Connection problem: {e}")
