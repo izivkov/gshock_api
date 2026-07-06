@@ -24,6 +24,7 @@ class WatchModel(IntEnum):
     GM = 14
     ABL = 15
     DW_H = 16
+    GW_BX = 17
     UNKNOWN = 20
 
 
@@ -35,6 +36,7 @@ class WatchInfo:
     short_name: str = ""
     address: str = ""
     model: WatchModel = WatchModel.UNKNOWN
+    hasNewTimeFormat: bool = False
 
     # Default capabilities
     default_cap: Final[ModelCapability] = field(default_factory=lambda: {
@@ -57,6 +59,7 @@ class WatchInfo:
         "hasBatteryLevel": False,
         "hasWorldCities": True,
         "hasStepCounter": False,
+        "hasNewTimeFormat": False,
     })
 
     # The per-model overrides
@@ -69,6 +72,16 @@ class WatchInfo:
             "longLightDuration": "4s",
             "batteryLevelLowerLimit": 9,
             "batteryLevelUpperLimit": 19,
+        },
+        {
+            "model": WatchModel.GW_BX,
+            "worldCitiesCount": 6,
+            "hasReminders": True,
+            "shortLightDuration": "2s",
+            "longLightDuration": "4s",
+            "batteryLevelLowerLimit": 9,
+            "batteryLevelUpperLimit": 19,
+            "hasNewTimeFormat": True,
         },
         {
             "model": WatchModel.MRG,
@@ -210,6 +223,7 @@ class WatchInfo:
                 ("GA", WatchModel.GA),
                 ("GB", WatchModel.GB),
                 ("GM", WatchModel.GM),
+                ("GW-BX", WatchModel.GW_BX),  # must precede "GW"
                 ("GW", WatchModel.GW),
                 ("MRG", WatchModel.MRG),
                 ("ABL", WatchModel.ABL),
@@ -246,5 +260,6 @@ class WatchInfo:
         self.name = ""
         self.short_name = ""
         self.model = WatchModel.UNKNOWN
+        self.hasNewTimeFormat = False
 
 watch_info: WatchInfo = WatchInfo()

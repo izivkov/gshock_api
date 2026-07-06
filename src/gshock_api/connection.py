@@ -95,8 +95,16 @@ class Connection:
         if self.client and self.client.is_connected:
             await self.client.disconnect()
 
-    async def write(self, handle: int, data: bytes) -> None:
-        """Writes data to a characteristic identified by its handle."""
+    # Handles that require write-without-response
+    NO_RESPONSE_HANDLES: frozenset[int] = frozenset({
+        0x0C,  # READ_ALL_FEATURES    — WRITE_NO_RESP
+        0x0D,  # ALL_FEATURES_NOTIFY  — WRITE_NO_RESP  
+        0x11,  # DATA_REQUEST_SP      — actually WRITE (has response) but used as GET
+        0x14,  # CONVOY               — WRITE_NO_RESP
+        0x17,  # SP_REQUEST           — WRITE_NO_RESP confirmed from log
+    })
+
+    async def write(self, handle: int, data: bytes | str) -> None:
         try:
             uuid: str | None = self.handles_map.get(handle)
 
@@ -106,10 +114,8 @@ class Connection:
                     logger.info("Your watch does not support notifications...")
                 return
 
-            # 0x0E is CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (requires response)
-            response_type: bool = handle == 0x0E
-
-            cmd_data: bytes = to_casio_cmd(data)
+            response_type: bool = handle not in self.NO_RESPONSE_HANDLES
+            cmd_data: bytes = to_casio_cmd(data) if isinstance(data, str) else bytes(data)
 
             if self.client:
                 await self.client.write_gatt_char(uuid, cmd_data, response=response_type)
@@ -138,6 +144,11 @@ class Connection:
         handles_map[0x14] = CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID
         handles_map[0xFF] = CasioConstants.SERIAL_NUMBER_STRING
 
+        # GW-BX5600: SP_REQUEST (0x17) and SP_DATA (0x19)
+        # Confirmed from btsnoop_hci_bx.log GATT discovery:
+        handles_map[0x17] = CasioConstants.CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID
+        handles_map[0x19] = CasioConstants.CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID
+        
         return handles_map
 
     async def send_message(self, message: T) -> None:

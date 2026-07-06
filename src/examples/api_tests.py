@@ -18,7 +18,7 @@ from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
 
-destructive = False  # Set to True to enable destructive tests (time change, alarms, etc.)
+destructive = True  # Set to True to enable destructive tests (time change, alarms, etc.)
 
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)

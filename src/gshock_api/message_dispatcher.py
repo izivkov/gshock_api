@@ -11,6 +11,7 @@ from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
 from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
+from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.settings_io import SettingsIO
 from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
@@ -77,6 +78,11 @@ class MessageDispatcher:
         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
 
         CHARACTERISTICS["CASIO_ACTIVITY_RECORD"]: StepCounterIO.on_received,
+
+        # in data_received_messages:
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_03"]: GwBx5600TimeIO.on_received,
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,
     }
 
     @staticmethod

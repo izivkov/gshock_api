@@ -140,10 +140,18 @@ class GshockAPI:
     async def set_time(
         self, current_time: object | None = None, offset: int = 0
     ) -> None:
-        """Sets the current time on the watch from the time on the device."""
+        """Sets the current time on the watch from the time on the device.
+
+        For watches with hasNewTimeFormat=True (GW-BX5600, GMW-BZ5000),
+        uses the SP read-modify-write protocol via GwBx5600TimeIO.
+        All other watches use the standard ALL_FEATURES time command.
+        """
+        if watch_info.hasNewTimeFormat:
+            await message_dispatcher.GwBx5600TimeIO.request(self.connection, current_time, offset)
+            return
+
         await self.initialize_for_setting_time()
         await self._set_time(current_time, offset)
-        # current_time = None is redundant as it's a local variable/parameter
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
