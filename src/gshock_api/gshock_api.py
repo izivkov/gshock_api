@@ -10,7 +10,9 @@ from gshock_api.alarms import alarms_inst
 from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
+from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.iolib.mtg_b1000_time_io import set_second_dial
 from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.utils import (
     to_compact_string,
@@ -152,6 +154,10 @@ class GshockAPI:
 
         await self.initialize_for_setting_time()
         await self._set_time(current_time, offset)
+
+        if watch_info.hasSecondDial:
+            await set_second_dial(self.connection)
+
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)

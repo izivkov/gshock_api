@@ -1,0 +1,63 @@
+# Kotlin Migration Guide: GW-BX5600 Support
+
+This guide outlines the files and architectural changes needed to port the GW-BX5600 bulk-data time setting protocol to the Kotlin version of the library.
+
+## 1. `CasioConstants.kt`
+You must add the new `SP_REQUEST` (0x17) and `SP_DATA` (0x19) handles, UUIDs, and response header keys.
+
+**Additions:**
+* `CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID` = "26eb002e-b012-49a8-b1f8-394fb2032b0f"
+* `CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID` = "26eb002f-b012-49a8-b1f8-394fb2032b0f"
+* `HANDLE_SP_REQUEST` = `0x17`
+* `HANDLE_SP_DATA` = `0x19`
+* Add to Characteristics map: `"GW_BX5600_SP_DATA_HEADER_03": 0x03`, `"GW_BX5600_SP_DATA_HEADER_05": 0x05`, `"GW_BX5600_SP_DATA_HEADER_06": 0x06`
+
+## 2. `Connection.kt`
+Configure the BLE GATT map to register the new characteristics and handle the write types.
+
+**Modifications:**
+* Map handle `0x17` to `CASIO_SET_CONFIGURATION_CHARACTERISTIC_UUID`.
+* Map handle `0x19` to `CASIO_GET_CONFIGURATION_CHARACTERISTIC_UUID`.
+* Ensure handle `0x17` is added to the `NO_RESPONSE_HANDLES` (or uses `BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE` in Android BLE).
+* **Crucial:** Ensure the `write` function in Kotlin can accept raw `ByteArray` operations safely, as the old logic may have assumed String-to-Hex conversions exclusively (like Python's `to_casio_cmd`).
+
+## 3. `WatchInfo.kt` / `WatchModel.kt`
+Add the capability flags and model identification so the library knows when to use the new protocol.
+
+**Modifications:**
+* Add `GW_BX` to the `WatchModel` enum.
+* In the `prefix_map` / resolution logic, add `"GW-BX"` mapping to `GW_BX`. **Note**: This must be checked *before* `"GW"` to prevent overlapping.
+* Add `var hasNewTimeFormat: Boolean = false` to the model state properties.
+* In the model overrides/capabilities map, set `hasNewTimeFormat = true` for the `GW_BX` model.
+* Ensure that the `reset()` or `clear()` function explicitly sets `hasNewTimeFormat = false` so state doesn't leak between connections.
+
+## 4. `MessageDispatcher.kt`
+Wire up the incoming BLE notification fragments so they route to the new IO class.
+
+**Modifications:**
+* Map `0x03`, `0x05`, and `0x06` (from `CasioConstants`) to the `GwBx5600TimeIO.onReceived` method in the data dispatch table.
+
+## 5. `GshockAPI.kt`
+Update the high-level `setTime` facade to transparently route to the new protocol when the flag is present.
+
+**Modifications:**
+* Inside `setTime(timeMs: Long, offset: Int)`, add a conditional branch at the very beginning:
+  ```kotlin
+  if (watchInfo.hasNewTimeFormat) {
+      MessageDispatcher.GwBx5600TimeIO.request(connection, timeMs, offset)
+      return
+  }
+  ```
+* Do not modify the legacy `initializeForSettingTime()` or `_setTime()` paths. 
+
+## 6. Create `GwBx5600TimeIO.kt`
+This is the only new file required. It must mirror the read-modify-write workflow using Kotlin Coroutines and the SP bulk protocol.
+
+**Key Implementation Details:**
+1. **The Entry Point:** `fun request(connection, timeMs, offset)` that delegates to a `setTime` coroutine.
+2. **The Fragment Accumulator:** Create an `onReceived(data: ByteArray)` function that appends incoming BLE chunks to a local `ByteArray` accumulator. It must dynamically compute the expected size based on capabilities (e.g., `1 + (ceil(worldCitiesCount / 2) * 9)` for step 2) and resume the suspending coroutine once the expected length is reached.
+3. **The Protocol Steps:**
+   * **Step 1:** Construct `0x05` request dynamically (Appending `1D 00` and `24 XX`). Await response -> slice exactly `35` bytes -> mutate `byte[0] = 0x02` -> fill trailing indices `27..34` with `0xFF` -> `connection.write(0x19, bytes)`.
+   * **Step 2:** Construct `0x03` request dynamically (Appending `ceil(worldCitiesCount/2)` copies of `1E 00`). Await response -> mutate `byte[0] = 0x06` -> write back.
+   * **Step 3:** Construct `0x06` request dynamically (Loop `0` to `worldCitiesCount`, appending `1F` and the interleaved index `(i / 2) + if (i % 2 != 0) 6 else 0`). Await response -> write back unchanged.
+   * **Step 4:** Construct the 11-byte `0x09` time command payload (same as legacy) and write it to the standard `ALL_FEATURES` handle (`0x0E`).
