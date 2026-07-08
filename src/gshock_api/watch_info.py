@@ -25,6 +25,7 @@ class WatchModel(IntEnum):
     ABL = 15
     DW_H = 16
     GW_BX = 17
+    MTG_B1000 = 18
     UNKNOWN = 20
 
 
@@ -37,6 +38,7 @@ class WatchInfo:
     address: str = ""
     model: WatchModel = WatchModel.UNKNOWN
     hasNewTimeFormat: bool = False
+    hasSecondDial: bool = False
 
     # Default capabilities
     default_cap: Final[ModelCapability] = field(default_factory=lambda: {
@@ -60,6 +62,7 @@ class WatchInfo:
         "hasWorldCities": True,
         "hasStepCounter": False,
         "hasNewTimeFormat": False,
+        "hasSecondDial": False,
     })
 
     # The per-model overrides
@@ -73,6 +76,15 @@ class WatchInfo:
             "batteryLevelLowerLimit": 9,
             "batteryLevelUpperLimit": 19,
         },
+        {
+            "model": WatchModel.MTG_B1000,
+            "worldCitiesCount": 6,
+            "hasReminders": True,
+            "shortLightDuration": "2s",
+            "longLightDuration": "4s",
+            "hasSecondDial": True,
+        },
+
         {
             "model": WatchModel.GW_BX,
             "worldCitiesCount": 6,
@@ -213,6 +225,7 @@ class WatchInfo:
             model = WatchModel.GST
         else:
             prefix_map = [
+                ("MTG_B1000", WatchModel.MTG_B1000),
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),
@@ -261,5 +274,6 @@ class WatchInfo:
         self.short_name = ""
         self.model = WatchModel.UNKNOWN
         self.hasNewTimeFormat = False
+        self.hasSecondDial = False
 
 watch_info: WatchInfo = WatchInfo()

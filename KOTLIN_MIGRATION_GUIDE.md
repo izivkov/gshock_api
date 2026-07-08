@@ -1,6 +1,6 @@
-# Kotlin Migration Guide: GW-BX5600 Support
+# Kotlin Migration Guide: GW-BX5600 & MTG-B1000 Support
 
-This guide outlines the files and architectural changes needed to port the GW-BX5600 bulk-data time setting protocol to the Kotlin version of the library.
+This guide outlines the files and architectural changes needed to port the GW-BX5600 bulk-data time setting protocol and MTG-B1000 dual-dial support to the Kotlin version of the library.
 
 ## 1. `CasioConstants.kt`
 You must add the new `SP_REQUEST` (0x17) and `SP_DATA` (0x19) handles, UUIDs, and response header keys.
@@ -61,3 +61,77 @@ This is the only new file required. It must mirror the read-modify-write workflo
    * **Step 2:** Construct `0x03` request dynamically (Appending `ceil(worldCitiesCount/2)` copies of `1E 00`). Await response -> mutate `byte[0] = 0x06` -> write back.
    * **Step 3:** Construct `0x06` request dynamically (Loop `0` to `worldCitiesCount`, appending `1F` and the interleaved index `(i / 2) + if (i % 2 != 0) 6 else 0`). Await response -> write back unchanged.
    * **Step 4:** Construct the 11-byte `0x09` time command payload (same as legacy) and write it to the standard `ALL_FEATURES` handle (`0x0E`).
+
+---
+
+## MTG-B1000 Support - Dual Analogue Dial Protocol
+
+The MTG-B1000 has two independent analogue dials: the main dial follows the standard G-Shock time protocol, while the second dial requires an additional sequence bracketed by ResetSequence commands after the main time is set.
+
+### 1. `WatchModel.kt` (Enum Addition)
+Add the MTG-B1000 model to the enum.
+
+**Additions:**
+* Add `MTG_B1000` to the `WatchModel` enum.
+
+### 2. `WatchInfo.kt`
+Add capability flags for second dial support.
+
+**Modifications:**
+* Add `var hasSecondDial: Boolean = false` to the model state properties.
+* In the `prefix_map` / model resolution logic, add `"MTG-B1000"` mapping to `MTG_B1000`. **Important:** This mapping must be checked *before* generic prefixes like `"MTG"` to prevent overlapping.
+* In the model overrides/capabilities map, add an entry for `MTG_B1000` with `hasSecondDial = true`:
+  ```kotlin
+  {
+      model: WatchModel.MTG_B1000,
+      worldCitiesCount: 6,
+      hasReminders: true,
+      shortLightDuration: "2s",
+      longLightDuration: "4s",
+      hasSecondDial: true
+  }
+  ```
+* Ensure that the `reset()` or `clear()` function explicitly sets `hasSecondDial = false`.
+
+### 3. `GshockAPI.kt`
+Integrate the MTG-B1000 second dial sequence into the main `setTime` flow.
+
+**Modifications:**
+* At the end of the `setTime(timeMs: Long, offset: Int)` method, **after** the legacy `initializeForSettingTime()` and `_setTime()` calls complete, add:
+  ```kotlin
+  if (watchInfo.hasSecondDial) {
+      MtgB1000TimeIO.setSecondDial(connection)
+  }
+  ```
+
+### 4. Create `MtgB1000TimeIO.kt` (New File)
+This new file implements the MTG-B1000 second dial sequence.
+
+**Key Implementation Details:**
+The protocol consists of ResetSequence commands bracketing a read-modify-write cycle:
+
+1. **Entry Point:** `suspend fun setSecondDial(connection: ConnectionProtocol)` that orchestrates the full sequence.
+2. **ResetSequence Constants:**
+   - `RESET_SEQUENCE_START = byteArrayOf(0x21, 0x00, 0x01)` // dial 0
+   - `RESET_SEQUENCE_END = byteArrayOf(0x21, 0x01, 0x01)` // dial 1
+3. **The Protocol Steps:**
+   - Send `RESET_SEQUENCE_START` via `connection.write(0x000E, ...)` (write-with-response handle).
+   - Call `DstWatchStateIO.request(...)` to fetch current DST state (handle `0x1D`).
+   - Write the DST state back via `connection.write(0x000E, ...)`.
+   - Call `DstForWorldCitiesIO.request(city_number=0)` and `...request(city_number=1)` to fetch DST city data (handle `0x1E`).
+   - Write both DST city entries back.
+   - Call `WorldCitiesIO.request(city_number=0)` and `...request(city_number=1)` to fetch world city coordinates (handle `0x1F`).
+   - Write both world city entries back.
+   - Send `RESET_SEQUENCE_END` via `connection.write(0x000E, ...)`.
+
+4. **Error Handling:** If any step times out or fails, log the error and propagate the exception; the watch's second dial may be out of sync, but the main time remains correct.
+
+---
+
+## Summary of Modified Files
+
+| File | Change Type | Description |
+|------|------------|-------------|
+| `src/gshock_api/watch_info.py` | Modified | Added `MTG_B1000` model enum value and `hasSecondDial` capability flag |
+| `src/gshock_api/gshock_api.py` | Modified | Integrated MTG-B1000 second dial sequence into `set_time()` flow |
+| `src/gshock_api/iolib/mtg_b1000_time_io.py` | **New** | MTG-B1000 dual-dial time-setting protocol implementation |
