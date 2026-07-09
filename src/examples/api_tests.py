@@ -17,8 +17,9 @@ from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
+from remote.remote_connection import RemoteConnection
 
-destructive = False  # Set to True to enable destructive tests (time change, alarms, etc.)
+destructive = True  # Set to True to enable destructive tests (time change, alarms, etc.)
 
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
@@ -41,7 +42,8 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
 
     try:
         logger.info("Waiting for connection...")
-        connection = Connection()
+        # connection = Connection()
+        connection = RemoteConnection(host="0.0.0.0", port=9999)
         await connection.connect(watch_filter.connection_filter)
         logger.info("Connected...")
 
