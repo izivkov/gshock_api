@@ -11,6 +11,7 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.iolib.home_time_io import HomeTimeIO
 from gshock_api.iolib.mtg_b1000_time_io import MtgB1000TimeIO
 from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.utils import (
@@ -62,8 +63,12 @@ class GshockAPI:
 
     async def _get_world_cities(self, city_number: int) -> str:
         # Assuming WorldCitiesIO.request returns a string
-        result: str = await message_dispatcher.WorldCitiesIO.request(self.connection, city_number)
+        result: str = to_hex_string(await message_dispatcher.WorldCitiesIO.request(self.connection, city_number))
         return result
+
+    async def get_home_time(self) -> str:
+        """Return the name of the home city configured on the watch."""
+        return await HomeTimeIO.request(self.connection)
 
     async def get_dst_for_world_cities(self, city_number: int) -> str:
         """Get the **Daylight Saving Time** for a particular World City set on the watch."""
