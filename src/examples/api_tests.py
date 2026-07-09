@@ -18,7 +18,7 @@ from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
 
-destructive = True  # Set to True to enable destructive tests (time change, alarms, etc.)
+destructive = False  # Set to True to enable destructive tests (time change, alarms, etc.)
 
 async def main(argv: Sequence[str]) -> None:
     await run_api_tests(argv)
@@ -49,6 +49,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
 
         app_info = await api.get_app_info()
         logger.info(f"app info: {app_info}")
+
+        home_time = await api.get_home_time()
+        logger.info(f"home time: {home_time}")
 
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
