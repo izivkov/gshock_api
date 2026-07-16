@@ -26,6 +26,7 @@ class WatchModel(IntEnum):
     DW_H = 16
     GW_BX = 17
     MTG_B1000 = 18
+    MTG_B3000 = 19
     UNKNOWN = 20
 
 
@@ -39,6 +40,7 @@ class WatchInfo:
     model: WatchModel = WatchModel.UNKNOWN
     hasNewTimeFormat: bool = False
     hasSecondDial: bool = False
+    hasStepCounter: bool = False
 
     # Default capabilities
     default_cap: Final[ModelCapability] = field(default_factory=lambda: {
@@ -71,6 +73,7 @@ class WatchInfo:
             "model": WatchModel.GW,
             "worldCitiesCount": 6,
             "hasReminders": True,
+            "hasAutoLight": True,
             "shortLightDuration": "2s",
             "longLightDuration": "4s",
             "batteryLevelLowerLimit": 9,
@@ -84,7 +87,16 @@ class WatchInfo:
             "longLightDuration": "4s",
             "hasSecondDial": True,
         },
-
+        {
+            "model": WatchModel.MTG_B3000,
+            "worldCitiesCount": 6,
+            "hasReminders": False,
+            "shortLightDuration": "2s",
+            "longLightDuration": "4s",
+            "hasSecondDial": True,
+            "hasWorldCities": False,
+            "alarmCount": 1
+        },
         {
             "model": WatchModel.GW_BX,
             "worldCitiesCount": 6,
@@ -202,6 +214,7 @@ class WatchInfo:
 
     def set_name_and_model(self, name: str) -> None:
         details = self._resolve_watch_details(name)
+        print(f"Resolved watch details for '{name}': {details}")
         if not details:
             return
         for key, value in details.items():
@@ -225,7 +238,8 @@ class WatchInfo:
             model = WatchModel.GST
         else:
             prefix_map = [
-                ("MTG_B1000", WatchModel.MTG_B1000),
+                ("MTG-B1000", WatchModel.MTG_B1000),
+                ("MTG-B3000", WatchModel.MTG_B3000),
                 ("MSG", WatchModel.MSG),
                 ("GPR", WatchModel.GPR),
                 ("GM-B2100", WatchModel.GA),
@@ -267,6 +281,16 @@ class WatchInfo:
 
     def get_model(self) -> WatchModel:
         return self.model
+
+    def __getattr__(self, item: str) -> Any:
+        # Only invoked when normal attribute lookup fails (i.e. the capability
+        # was never materialized as a real instance attribute via set_name_and_model).
+        model_map = self.__dict__.get("model_map")
+        if model_map is not None:
+            cap = model_map.get(self.model, model_map.get(WatchModel.UNKNOWN))
+            if cap is not None and item in cap:
+                return cap[item]
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{item}'")
 
     def reset(self) -> None:
         self.address = ""
