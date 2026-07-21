@@ -73,4 +73,6 @@ class CasioConstants:
         "GW_BX5600_SP_DATA_HEADER_03": 0x03,
         "GW_BX5600_SP_DATA_HEADER_05": 0x05,
         "GW_BX5600_SP_DATA_HEADER_06": 0x06,
+
+        "CASIO_HOME_TIME": 0x24,
     }

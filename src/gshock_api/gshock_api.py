@@ -92,10 +92,28 @@ class GshockAPI:
         await self.read_write_dst_for_world_cities()
 
         if watch_info.hasWorldCities:
+            print("Reading and writing world cities...")
             await self.read_write_world_cities()
     
     # Define a Callable type for the function that will be read
     RequestFunction = Callable[[object], Coroutine[object, object, object]]
+
+    async def get_home_time(self, slot: int = 0) -> bytes:
+        """Get the HomeTime (0x24) characteristic data for the given slot.
+
+        Slot 0 returns the main (home) city data; slot 1 returns the secondary
+        city data (used by watches with a second dial, e.g. MTG-B1000).
+        Raw bytes are returned unchanged — the watch is the authoritative source
+        for city configuration.
+
+        Args:
+            slot: City slot to read (0 = home/main city, 1 = secondary city).
+                  Defaults to 0.
+
+        Returns:
+            Raw bytes for the requested HomeTime slot.
+        """
+        return await message_dispatcher.HomeTimeIO.request(self.connection, slot)
 
     # Replaced Any with object, and made function parameter specific
     async def read_and_write(

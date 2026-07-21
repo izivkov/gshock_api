@@ -38,9 +38,6 @@ class WatchInfo:
     short_name: str = ""
     address: str = ""
     model: WatchModel = WatchModel.UNKNOWN
-    hasNewTimeFormat: bool = False
-    hasSecondDial: bool = False
-    hasStepCounter: bool = False
 
     # Default capabilities
     default_cap: Final[ModelCapability] = field(default_factory=lambda: {
@@ -52,7 +49,6 @@ class WatchInfo:
         "shortLightDuration": "",
         "longLightDuration": "",
         "weekLanguageSupported": True,
-        "worldCities": True,
         "temperature": True,
         "batteryLevelLowerLimit": 15,
         "batteryLevelUpperLimit": 20,
@@ -89,13 +85,16 @@ class WatchInfo:
         },
         {
             "model": WatchModel.MTG_B3000,
-            "worldCitiesCount": 6,
+            "worldCitiesCount": 2,
             "hasReminders": False,
-            "shortLightDuration": "2s",
-            "longLightDuration": "4s",
+            "shortLightDuration": "1.5s",
+            "longLightDuration": "3s",
             "hasSecondDial": True,
             "hasWorldCities": False,
-            "alarmCount": 1
+            "alarmCount": 1,
+            "hasPowerSavingMode": False,
+            "weekLanguageSupported": False,
+            "hasAutoLight": False,
         },
         {
             "model": WatchModel.GW_BX,
@@ -168,7 +167,6 @@ class WatchInfo:
         {
             "model": WatchModel.GBD,
             "hasAutoLight": True,
-            "worldCities": False,
             "temperature": False,
             "alwaysConnected": True,
         },
