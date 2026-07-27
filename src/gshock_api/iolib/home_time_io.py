@@ -8,6 +8,7 @@ Slot 0 → main (home) city.
 Slot 1 → secondary city (used by watches with a second dial, e.g. MTG-B1000).
 """
 
+from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
 
@@ -31,6 +32,22 @@ class HomeTimeIO:
     Stateful wrapper for HomeTime reads.
     Delegates the actual BLE read to WorldCitiesIO and parses the result.
     """
+    result: CancelableResult[bytes] | None = None
+    connection: ConnectionProtocol | None = None
+
+    @staticmethod
+    async def request_raw(connection: ConnectionProtocol, slot: int = 0) -> bytes:
+        from gshock_api.watch_info import watch_info, WatchModel
+        from gshock_api.casio_constants import CasioConstants
+
+        if watch_info.model == WatchModel.MTG_B3000:
+            HomeTimeIO.connection = connection
+            key = f"{CasioConstants.CHARACTERISTICS['CASIO_HOME_TIME']:02X}0{slot}"
+            await connection.request(key)
+            HomeTimeIO.result = CancelableResult[bytes]()
+            return await HomeTimeIO.result.get_result()
+        else:
+            return await WorldCitiesIO.request(connection, slot)
 
     @staticmethod
     async def send_to_watch(_message: str = "") -> None:
@@ -46,7 +63,10 @@ class HomeTimeIO:
         Forward to WorldCitiesIO — HomeTime data arrives on a separate
         characteristic but is structurally identical to world cities data.
         """
-        WorldCitiesIO.on_received(data)
+        if HomeTimeIO.result is not None:
+            HomeTimeIO.result.set_result(data)
+        else:
+            WorldCitiesIO.on_received(data)
 
     @staticmethod
     async def request(connection: ConnectionProtocol, slot: int = 0) -> str:
@@ -60,5 +80,5 @@ class HomeTimeIO:
         Returns:
             ASCII city name string.
         """
-        raw = await WorldCitiesIO.request(connection, slot)
+        raw = await HomeTimeIO.request_raw(connection, slot)
         return HomeTimeIOFunctional.parse_home_city(raw)

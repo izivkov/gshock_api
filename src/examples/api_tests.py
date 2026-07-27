@@ -72,10 +72,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             alarms = await api.get_alarms()
             logger.info(f"alarms: {pformat(alarms)}")
 
-            alarms[3]["enabled"] = True
-            alarms[3]["hour"] = 7
-            alarms[3]["minute"] = 25
-            alarms[3]["enabled"] = False
+            alarms[0]["hour"] = 7
+            alarms[0]["minute"] = 25
+            alarms[0]["enabled"] = True
             await api.set_alarms(alarms)
 
             seconds = await api.get_timer()

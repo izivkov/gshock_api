@@ -7,6 +7,7 @@ from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.watch_info import WatchModel, watch_info
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 
@@ -70,6 +71,15 @@ class AlarmsIOFunctional:
         ]
 
     @staticmethod
+    def prepare_watch_commands_mtg_b3000() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]])
+            )
+        ]
+
+    @staticmethod
     def prepare_watch_commands_set(message_json: str) -> list[BLEAction]:
         """
         Pure Data Mapper.
@@ -88,6 +98,17 @@ class AlarmsIOFunctional:
         return [
             Write(handle=0x000E, data=bytes(alarm_casio0)),
             Write(handle=0x000E, data=bytes(alarm_casio))
+        ]
+
+    @staticmethod
+    def prepare_watch_commands_set_mtg_b3000(message_json: str) -> list[BLEAction]:
+        parsed: dict[str, object] = json.loads(message_json)
+        alarms_json_arr: list[dict[str, object]] = parsed.get("value", [])  # type: ignore
+
+        alarm_casio0 = alarms_inst_typed.from_json_alarm_first_alarm(alarms_json_arr[0])
+
+        return [
+            Write(handle=0x000E, data=bytes(alarm_casio0))
         ]
 
     @staticmethod
@@ -137,7 +158,11 @@ class AlarmsIO:
         if AlarmsIO.connection is None:
             raise RuntimeError("AlarmsIO.connection is not set")
 
-        commands = AlarmsIOFunctional.prepare_watch_commands()
+        if watch_info.model == WatchModel.MTG_B3000:
+            commands = AlarmsIOFunctional.prepare_watch_commands_mtg_b3000()
+        else:
+            commands = AlarmsIOFunctional.prepare_watch_commands()
+
         for command in commands:
             if isinstance(command, Write):
                 alarm_command: str = to_compact_string(to_hex_string(command.data))
@@ -149,7 +174,11 @@ class AlarmsIO:
         if AlarmsIO.connection is None:
             raise RuntimeError("AlarmsIO.connection is not set")
 
-        commands = AlarmsIOFunctional.prepare_watch_commands_set(message)
+        if watch_info.model == WatchModel.MTG_B3000:
+            commands = AlarmsIOFunctional.prepare_watch_commands_set_mtg_b3000(message)
+        else:
+            commands = AlarmsIOFunctional.prepare_watch_commands_set(message)
+
         for command in commands:
             if isinstance(command, Write):
                 alarm_command: str = to_compact_string(to_hex_string(command.data))
@@ -164,8 +193,8 @@ class AlarmsIO:
         decoded_alarms = AlarmsIOFunctional.parse_packet(data)
         alarms_inst_typed.add_alarms(decoded_alarms)
 
-        ALARM_COUNT_THRESHOLD = 5
+        alarm_count_threshold = watch_info.alarmCount
 
         # Once all alarms are collected, resolve the async result
-        if len(alarms_inst_typed.alarms) == ALARM_COUNT_THRESHOLD and AlarmsIO.result is not None:
+        if len(alarms_inst_typed.alarms) == alarm_count_threshold and AlarmsIO.result is not None:
             AlarmsIO.result.set_result(alarms_inst_typed.alarms)

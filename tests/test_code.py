@@ -177,6 +177,61 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         name = WatchNameIOFunctional.decode(payload)
         self.assertEqual(name, "G-SHOCK")
 
+    # --- MTG-B3000 Tests ---
+    def test_mtg_b3000_alarms_commands(self):
+        commands = AlarmsIOFunctional.prepare_watch_commands_mtg_b3000()
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0].handle, 0x000C)
+        self.assertEqual(commands[0].data, b"\x15")
+
+        alarm_msg = '{"value": [{"enabled": true, "hasHourlyChime": false, "hour": 7, "minute": 25}]}'
+        set_commands = AlarmsIOFunctional.prepare_watch_commands_set_mtg_b3000(alarm_msg)
+        self.assertEqual(len(set_commands), 1)
+        self.assertEqual(set_commands[0].handle, 0x000E)
+        self.assertEqual(set_commands[0].data, bytes([0x15, 0x40, 0x40, 7, 25]))
+
+    def test_mtg_b3000_timer_encode(self):
+        seconds = 600  # 10 minutes
+        encoded = TimerIOFunctional.encode_mtg_b3000(seconds)
+        self.assertEqual(len(encoded), 15)
+        self.assertEqual(encoded[0], 0x18)  # Protocol.TIMER = 0x18
+        self.assertEqual(encoded[1], 0)     # Hours
+        self.assertEqual(encoded[2], 10)    # Minutes
+        self.assertEqual(encoded[3], 0)     # Seconds
+        self.assertEqual(encoded[4:], bytes([0]*11))  # Padding
+
+        timer_msg = '{"value": 600}'
+        set_commands = TimerIOFunctional.prepare_watch_commands_set_mtg_b3000(timer_msg)
+        self.assertEqual(len(set_commands), 1)
+        self.assertEqual(set_commands[0].handle, 0x000E)
+        self.assertEqual(set_commands[0].data, encoded)
+
+    def test_mtg_b3000_settings_encode_decode(self):
+        from gshock_api.watch_info import watch_info, WatchModel
+        watch_info.model = WatchModel.MTG_B3000
+
+        settings_dict = {
+            "time_format": "24h",
+            "button_tone": True,
+            "auto_light": False,
+            "power_saving_mode": True,
+            "light_duration": "3s",
+            "date_format": "DD:MM",
+            "language": "French"
+        }
+        encoded = SettingsIOFunctional.encode(settings_dict)
+        self.assertEqual(encoded[2], 1)
+        decoded = SettingsIOFunctional.decode(encoded)
+        self.assertEqual(decoded["light_duration"], "3s")
+
+        settings_dict["light_duration"] = "1.5s"
+        encoded = SettingsIOFunctional.encode(settings_dict)
+        self.assertEqual(encoded[2], 0)
+        decoded = SettingsIOFunctional.decode(encoded)
+        self.assertEqual(decoded["light_duration"], "1.5s")
+
+        watch_info.reset()
+
 
 if __name__ == "__main__":
     unittest.main()

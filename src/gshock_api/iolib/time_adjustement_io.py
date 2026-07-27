@@ -66,14 +66,14 @@ class TimeAdjustmentIO:
         return await TimeAdjustmentIO.result.get_result()
 
     @staticmethod
-    def send_to_watch(_message: str) -> None:
+    async def send_to_watch(_message: str) -> None:
         if TimeAdjustmentIO.connection is None:
             raise RuntimeError("TimeAdjustmentIO.connection is not set")
 
         commands = TimeAdjustmentIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                TimeAdjustmentIO.connection.write(command.handle, command.data)
+                await TimeAdjustmentIO.connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(message: str) -> dict[str, str] | None:

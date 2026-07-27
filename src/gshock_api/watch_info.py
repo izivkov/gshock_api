@@ -61,6 +61,8 @@ class WatchInfo:
         "hasStepCounter": False,
         "hasNewTimeFormat": False,
         "hasSecondDial": False,
+        "hasTimeFormat": True,
+        "hasDateFormat": True,
     })
 
     # The per-model overrides
@@ -85,15 +87,18 @@ class WatchInfo:
         },
         {
             "model": WatchModel.MTG_B3000,
+            "hasTimeFormat": False,
+            "hasDateFormat": False,
+            "weekLanguageSupported": False,
             "worldCitiesCount": 2,
+            "dstCount": 1,
             "hasReminders": False,
             "shortLightDuration": "1.5s",
             "longLightDuration": "3s",
-            "hasSecondDial": True,
+            "hasSecondDial": False,
             "hasWorldCities": False,
             "alarmCount": 1,
             "hasPowerSavingMode": False,
-            "weekLanguageSupported": False,
             "hasAutoLight": False,
         },
         {

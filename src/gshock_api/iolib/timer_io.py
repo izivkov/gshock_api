@@ -5,6 +5,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.watch_info import watch_info, WatchModel
 
 
 class TimerIOFunctional:
@@ -50,6 +51,23 @@ class TimerIOFunctional:
         encoded = TimerIOFunctional.encode(seconds)
         return [Write(handle=0x000E, data=encoded)]
 
+    @staticmethod
+    def encode_mtg_b3000(seconds: int) -> bytes:
+        hours = seconds // 3600
+        minutes_and_seconds = seconds % 3600
+        minutes = minutes_and_seconds // 60
+        secs = minutes_and_seconds % 60
+
+        # Protocol.TIMER.value = 0x18, then 3 bytes for HMS, then 11 bytes padding
+        return bytes([Protocol.TIMER.value, hours, minutes, secs] + [0] * 11)
+
+    @staticmethod
+    def prepare_watch_commands_set_mtg_b3000(message_json: str) -> list[BLEAction]:
+        data_obj = json.loads(message_json)
+        seconds = int(data_obj.get("value", 0))
+        encoded = TimerIOFunctional.encode_mtg_b3000(seconds)
+        return [Write(handle=0x000E, data=encoded)]
+
 
 class TimerIO:
     """
@@ -78,7 +96,11 @@ class TimerIO:
         if TimerIO.connection is None:
             raise RuntimeError("TimerIO.connection is not set")
 
-        commands = TimerIOFunctional.prepare_watch_commands_set(data)
+        if watch_info.model == WatchModel.MTG_B3000:
+            commands = TimerIOFunctional.prepare_watch_commands_set_mtg_b3000(data)
+        else:
+            commands = TimerIOFunctional.prepare_watch_commands_set(data)
+
         for command in commands:
             if isinstance(command, Write):
                 seconds_as_compact_str = to_compact_string(to_hex_string(command.data))

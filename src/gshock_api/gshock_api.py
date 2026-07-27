@@ -11,13 +11,13 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.iolib.mtg_b1000_time_io import MtgB1000TimeIO
+from gshock_api.iolib.second_dial_io import SecondDialIO
 from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
 )
-from gshock_api.watch_info import watch_info
+from gshock_api.watch_info import WatchModel, watch_info
 
 # Type variable for unknown request/message objects (e.g., Alarm, Event)
 T = TypeVar("T") 
@@ -94,6 +94,9 @@ class GshockAPI:
         if watch_info.hasWorldCities:
             print("Reading and writing world cities...")
             await self.read_write_world_cities()
+        elif watch_info.model == WatchModel.MTG_B3000:
+            print("Reading and writing home times...")
+            await self.read_write_home_times()
     
     # Define a Callable type for the function that will be read
     RequestFunction = Callable[[object], Coroutine[object, object, object]]
@@ -113,7 +116,14 @@ class GshockAPI:
         Returns:
             Raw bytes for the requested HomeTime slot.
         """
-        return await message_dispatcher.HomeTimeIO.request(self.connection, slot)
+        return await message_dispatcher.HomeTimeIO.request_raw(self.connection, slot)
+
+    async def read_write_home_times(self) -> None:
+        for city_number in range(watch_info.worldCitiesCount):
+            raw_bytes = await message_dispatcher.HomeTimeIO.request_raw(self.connection, city_number)
+            hex_data: bytes = to_hex_string(raw_bytes)
+            short_str: bytes = to_compact_string(hex_data)
+            await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
     # Replaced Any with object, and made function parameter specific
     async def read_and_write(
@@ -173,7 +183,7 @@ class GshockAPI:
         await self._set_time(current_time, offset)
 
         if watch_info.hasSecondDial:
-            await MtgB1000TimeIO.set_second_dial(self.connection)
+            await SecondDialIO.set_second_dial(self.connection)
 
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
