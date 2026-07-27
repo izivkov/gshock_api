@@ -26,6 +26,8 @@ dependencies = [
     "python-dotenv",
     "typing-extensions>=4.12",
     "twine>=6.2.0",
+    "pytz>=2026.3.post1",
+    "bleak>=3.0.2",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
