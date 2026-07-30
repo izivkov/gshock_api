@@ -47,6 +47,11 @@ dev = [
     "radon",
     "vulture"
 ]
+testing = [
+    "setuptools",
+    "pytest",
+    "pytest-cov"
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -73,6 +78,10 @@ check = [
 # Run with: poe lint or uv run poe lint
 # Only linting, no type checking
 lint = {cmd = "ruff check . --fix"}
+
+# Run with: poe test or uv run poe test
+# Run the test suite (requires the `testing` extra)
+test = {cmd = "pytest"}
 
 # Run with: poe lint-unsafe or uv run poe lint-unsafe
 # Lint with unsafe fixes enabled (more aggressive)
