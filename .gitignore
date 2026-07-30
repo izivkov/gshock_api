@@ -7,7 +7,7 @@
 !.isort.cfg
 !setup.cfg
 *.orig
-*.log
+# *.log
 *.pot
 __pycache__/*
 .cache/*
