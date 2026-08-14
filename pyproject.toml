@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gshock_api"  # Change to your project name
-version = "2.0.36"
+version = "2.0.39"
 description = "Python API for GShock Watches using BLE"
 authors = [{ name = "Ivo Zivkov", email = "izivkov@gmail.com" }]
 
@@ -26,6 +26,8 @@ dependencies = [
     "python-dotenv",
     "typing-extensions>=4.12",
     "twine>=6.2.0",
+    "pytz>=2026.3.post1",
+    "bleak>=3.0.2",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -44,6 +46,11 @@ dev = [
     "poethepoet",
     "radon",
     "vulture"
+]
+testing = [
+    "setuptools",
+    "pytest",
+    "pytest-cov"
 ]
 
 [tool.setuptools.packages.find]
@@ -71,6 +78,10 @@ check = [
 # Run with: poe lint or uv run poe lint
 # Only linting, no type checking
 lint = {cmd = "ruff check . --fix"}
+
+# Run with: poe test or uv run poe test
+# Run the test suite (requires the `testing` extra)
+test = {cmd = "pytest"}
 
 # Run with: poe lint-unsafe or uv run poe lint-unsafe
 # Lint with unsafe fixes enabled (more aggressive)

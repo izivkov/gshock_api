@@ -11,7 +11,9 @@ from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
 from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
+from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.settings_io import SettingsIO
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
 from gshock_api.iolib.time_io import TimeIO
 from gshock_api.iolib.timer_io import TimerIO
@@ -21,6 +23,7 @@ from gshock_api.iolib.watch_name_io import WatchNameIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
 from gshock_api.iolib.lifelog_io import LifelogIO
 from gshock_api.logger import logger
+from gshock_api.iolib.home_time_io import HomeTimeIO
 
 CHARACTERISTICS: Final[Mapping[str, int]] = CasioConstants.CHARACTERISTICS
 
@@ -51,6 +54,7 @@ class MessageDispatcher:
         "GET_TIMER": TimerIO.send_to_watch,
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
+        "GET_HOME_TIME": HomeTimeIO.send_to_watch,
     }
 
     # Map of Characteristic keys (integers from CHARACTERISTICS) to their synchronous handler functions.
@@ -75,6 +79,15 @@ class MessageDispatcher:
         # ECB-30
         CHARACTERISTICS["CMD_SET_TIMEMODE"]: UnknownIO.on_received,
         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
+
+        CHARACTERISTICS["CASIO_ACTIVITY_RECORD"]: StepCounterIO.on_received,
+
+        # in data_received_messages:
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_03"]: GwBx5600TimeIO.on_received,
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
+        CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,
+
+        CHARACTERISTICS["CASIO_HOME_TIME"]: HomeTimeIO.on_received,
     }
 
     @staticmethod

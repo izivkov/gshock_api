@@ -1,12 +1,29 @@
 from gshock_api.cancelable_result import CancelableResult
-from gshock_api.casio_constants import CasioConstants
+from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-from gshock_api.iolib.packet import Header, Protocol
+from gshock_api.iolib.packet import Protocol
 
-CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
+
+class WorldCitiesIOFunctional:
+    """
+    Pure functional world cities modules implementing Monoids.
+    """
+
+    @staticmethod
+    def prepare_watch_commands() -> list[BLEAction]:
+        return [
+            Write(
+                handle=0x000C,
+                data=bytes([Protocol.WORLD_CITIES.value])
+            )
+        ]
 
 
 class WorldCitiesIO:
+    """
+    Stateful backward-compatible wrapper.
+    Acts as the interpreter for WorldCitiesIOFunctional commands.
+    """
     result: CancelableResult[bytes] | None = None
     connection: ConnectionProtocol | None = None
 
@@ -21,8 +38,10 @@ class WorldCitiesIO:
 
     @staticmethod
     async def send_to_watch(connection: ConnectionProtocol) -> None:
-        header = Header(Protocol.WORLD_CITIES, size=1)
-        await connection.write(0x000C, bytearray([header.protocol.value]))
+        commands = WorldCitiesIOFunctional.prepare_watch_commands()
+        for command in commands:
+            if isinstance(command, Write):
+                await connection.write(command.handle, command.data)
 
     @staticmethod
     def on_received(data: bytes) -> None:

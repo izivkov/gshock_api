@@ -11,12 +11,13 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.iolib.lifelog_io import LifelogIO
+from gshock_api.iolib.second_dial_io import SecondDialIO
+from gshock_api.iolib.step_counter_io import StepCounterIO
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
 )
-from gshock_api.watch_info import watch_info
+from gshock_api.watch_info import WatchModel, watch_info
 
 # Type variable for unknown request/message objects (e.g., Alarm, Event)
 T = TypeVar("T") 
@@ -91,10 +92,38 @@ class GshockAPI:
         await self.read_write_dst_for_world_cities()
 
         if watch_info.hasWorldCities:
+            print("Reading and writing world cities...")
             await self.read_write_world_cities()
+        elif watch_info.model == WatchModel.MTG_B3000:
+            print("Reading and writing home times...")
+            await self.read_write_home_times()
     
     # Define a Callable type for the function that will be read
     RequestFunction = Callable[[object], Coroutine[object, object, object]]
+
+    async def get_home_time(self, slot: int = 0) -> bytes:
+        """Get the HomeTime (0x24) characteristic data for the given slot.
+
+        Slot 0 returns the main (home) city data; slot 1 returns the secondary
+        city data (used by watches with a second dial, e.g. MTG-B1000).
+        Raw bytes are returned unchanged — the watch is the authoritative source
+        for city configuration.
+
+        Args:
+            slot: City slot to read (0 = home/main city, 1 = secondary city).
+                  Defaults to 0.
+
+        Returns:
+            Raw bytes for the requested HomeTime slot.
+        """
+        return await message_dispatcher.HomeTimeIO.request_raw(self.connection, slot)
+
+    async def read_write_home_times(self) -> None:
+        for city_number in range(watch_info.worldCitiesCount):
+            raw_bytes = await message_dispatcher.HomeTimeIO.request_raw(self.connection, city_number)
+            hex_data: bytes = to_hex_string(raw_bytes)
+            short_str: bytes = to_compact_string(hex_data)
+            await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
     # Replaced Any with object, and made function parameter specific
     async def read_and_write(
@@ -140,10 +169,22 @@ class GshockAPI:
     async def set_time(
         self, current_time: object | None = None, offset: int = 0
     ) -> None:
-        """Sets the current time on the watch from the time on the device."""
+        """Sets the current time on the watch from the time on the device.
+
+        For watches with hasNewTimeFormat=True (GW-BX5600, GMW-BZ5000),
+        uses the SP read-modify-write protocol via GwBx5600TimeIO.
+        All other watches use the standard ALL_FEATURES time command.
+        """
+        if watch_info.hasNewTimeFormat:
+            await message_dispatcher.GwBx5600TimeIO.request(self.connection, current_time, offset)
+            return
+
         await self.initialize_for_setting_time()
         await self._set_time(current_time, offset)
-        # current_time = None is redundant as it's a local variable/parameter
+
+        if watch_info.hasSecondDial:
+            await SecondDialIO.set_second_dial(self.connection)
+
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
@@ -209,11 +250,20 @@ class GshockAPI:
         message: str = f"""{{"action": "SET_TIME_ADJUSTMENT", "timeAdjustment": "{time_adjustement}", "minutesAfterHour": "{minutes_after_hour}" }}"""
         await self.connection.send_message(message)
 
-    # SettingsIO returns a list of unknown Setting objects (list[T])
-    async def get_basic_settings(self) -> list[T]:
-        """Get settings from the watch."""
-        result: list[T] = await message_dispatcher.SettingsIO.request(self.connection) # type: ignore[assignment]
-        return result
+    async def get_basic_settings(self) -> dict:
+        # 1. Request the result (which returns the JSON string from SettingsIO)
+        result_str = await message_dispatcher.SettingsIO.request(self.connection)
+        
+        # 2. Automatically deserialize to a dict
+        # This prevents the TypeError in the test script!
+        return json.loads(result_str)
+
+    async def get_step_count(self) -> int:
+        if not watch_info.hasStepCounter:
+            print("Watch does not support step counter")
+            self.logger.debug("Watch does not support step counter")
+            return 0
+        return await StepCounterIO.request(self.connection)
 
     # settings is an unknown settings object (T)
     async def set_settings(self, settings: T) -> None:
