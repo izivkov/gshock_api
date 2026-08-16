@@ -233,6 +233,10 @@ class GshockAPI:
         result: object = await message_dispatcher.WatchConditionIO.request(self.connection)
         return result
 
+    async def get_lifelog_steps(self) -> int:
+        """Get lifelog steps count."""
+        return await LifelogIO.request(self.connection)
+
     async def get_time_adjustment(self) -> bool:
         """Determine if auto-tame adjustment is set or not"""
         # Assuming TimeAdjustmentIO.request returns a boolean

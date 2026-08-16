@@ -1,8 +1,10 @@
+import asyncio
+import contextlib
 from typing import Final
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-
+from gshock_api.logger import logger
 
 class StepCounterIO:
     """Reads the daily step total from the ABL-100WE life-log notification.
@@ -25,6 +27,8 @@ class StepCounterIO:
       [tail]   4-byte sub-record header (skip entirely)
       [tail+4] uint32 LE daily step total
     """
+    STEPS_OFFSET: Final[int] = 374
+    RECORD_TYPE_LIFELOG: Final[int] = 0x26
 
     result: CancelableResult[int] | None = None
     connection: ConnectionProtocol | None = None
@@ -43,47 +47,46 @@ class StepCounterIO:
     def on_received(data: bytes) -> None:
         if StepCounterIO.result is None:
             return
+
+        # The watch expects the transaction to be closed even if we fail to
+        # parse; leaving it open makes every subsequent request time out.
+        StepCounterIO._end_transaction()
+
         step_count = StepCounterIO.parse_step_counter(data)
-        if step_count is not None:
-            StepCounterIO.result.set_result(step_count)
+        if step_count is None:
+            logger.warning(
+                f"Could not parse step count from {len(data)}-byte life-log "
+                f"payload (expected 400). Head: {data[:16].hex()}"
+            )
+            return
+        StepCounterIO.result.set_result(step_count)
+
+    @staticmethod
+    def _end_transaction() -> None:
+        """Send the DRSP end command [04 11 00 00 00], as the official app does."""
+        connection = StepCounterIO.connection
+        if connection is None:
+            return
+        with contextlib.suppress(RuntimeError):
+            asyncio.get_running_loop()
+            asyncio.create_task(  # noqa: RUF006
+                connection.write(0x0011, bytes([0x04, 0x11, 0x00, 0x00, 0x00]))
+            )
 
     @staticmethod
     def parse_step_counter(payload: bytes) -> int | None:
         """Extract the daily step total from an ABL-100WE life-log payload.
 
-        Confirmed from HCI log: 398-byte payload, daily step total = 2485
-        located at byte offset 378 (last 4-byte sentinel ends at 374,
-        4-byte sub-record header follows, step uint32 at 378).
+        Returns None rather than guessing if the record is truncated or is
+        not a life-log record — a wrong number is worse than no number.
         """
-        if len(payload) < 10 or payload[0] != 0x26:
+        offset = StepCounterIO.STEPS_OFFSET
+        # Check if the first byte is 0x26
+        if payload[:1] != bytes([StepCounterIO.RECORD_TYPE_LIFELOG]):
+            return None
+        if len(payload) < offset + 4:
             return None
 
-        # Locate the last 4-byte sentinel and skip the sub-record header
-        # (4 bytes) that immediately follows — the step uint32 is next.
-        sentinel4: Final[bytes] = b"\xfe\xff\xff\xff"
-        found_indices: list[int] = [
-            i for i in range(6, len(payload) - 3)
-            if payload[i : i + 4] == sentinel4
-        ]
+        return int.from_bytes(payload[offset : offset + 4], "little")
 
-        if found_indices:
-            tail_index = found_indices[-1] + 4  # byte after last sentinel
-            step_offset = tail_index + 4        # skip 4-byte sub-record header
-            if step_offset + 4 <= len(payload):
-                return int.from_bytes(
-                    payload[step_offset : step_offset + 4], "little"
-                )
-
-        # Fallback: scan past 2-byte feff pairs and zero padding,
-        # skip sub-record header, then read the uint32.
-        cursor = 6
-        while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\xfe\xff":
-            cursor += 2
-        while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\x00\x00":
-            cursor += 2
-        cursor += 4  # skip sub-record header
-        if cursor + 4 <= len(payload):
-            return int.from_bytes(payload[cursor : cursor + 4], "little")
-
-        return None
     
