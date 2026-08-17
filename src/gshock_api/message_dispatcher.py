@@ -112,5 +112,28 @@ class MessageDispatcher:
         if key not in handlers:
             logger.info(f"Unknown characteristic key received: {key}")
         else:
+<<<<<<< HEAD
             unwrapped_data = prot.unwrap_payload(data, key)
             handlers[key](unwrapped_data)
+=======
+            MessageDispatcher.data_received_messages[key](data)
+
+# Usage example (unchanged logic)
+if __name__ == "__main__":
+    # Simulated messages
+    # NOTE: The original example had sample_message as a dict, but send_to_watch expects a string.
+    sample_message: str = '{"action": "GET_SETTINGS"}'
+    # NOTE: The original example had sample_data as a string, but on_received expects bytes.
+    # Assuming '1' is the key/handle for a characteristic.
+    sample_data: bytes = b"\x01\x02\x03\x04\x05"
+
+    # Simulated message dispatching
+    # Note: send_to_watch is an async function and requires an async context to run properly.
+    # For a real run, this would be `await MessageDispatcher.send_to_watch(sample_message)`
+    # but we keep it synchronous for type-checking context.
+    
+    # This line is just for illustration in the if __name__ == "__main__" block
+    # MessageDispatcher.send_to_watch(sample_message)  # noqa: ERA001
+    # MessageDispatcher.on_received(sample_data)  # noqa: ERA001
+    pass
+>>>>>>> 243ab8491765f541785e228b948fc8007b24f323

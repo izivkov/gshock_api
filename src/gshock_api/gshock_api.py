@@ -167,6 +167,10 @@ class GshockAPI:
         )
         return result
 
+    async def get_lifelog_steps(self) -> int:
+        """Get lifelog steps count."""
+        return await LifelogIO.request(self.connection)
+
     async def get_time_adjustment(self) -> bool:
         """Determine if auto-time adjustment is set or not."""
         return await watch_info.protocol.get_time_adjustment(self)

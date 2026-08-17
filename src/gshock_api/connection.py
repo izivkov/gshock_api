@@ -99,7 +99,6 @@ class Connection:
     NO_RESPONSE_HANDLES: frozenset[int] = frozenset({
         0x0C,  # READ_ALL_FEATURES    — WRITE_NO_RESP
         0x0D,  # ALL_FEATURES_NOTIFY  — WRITE_NO_RESP  
-        0x11,  # DATA_REQUEST_SP      — actually WRITE (has response) but used as GET
         0x14,  # CONVOY               — WRITE_NO_RESP
         0x17,  # SP_REQUEST           — WRITE_NO_RESP confirmed from log
     })
