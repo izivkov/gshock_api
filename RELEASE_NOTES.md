@@ -1,26 +1,40 @@
 # G-Shock API Release Notes
 
-## [Unreleased] - GW-BX5600 & MTG-B1000 Support & Protocol Updates
+## [2.0.39] - 2026-08-17 - WatchProtocol Design Pattern, WatchInfo Alignment, GW-BX5600 & ABL-100 Support
 
 ### Added
-- **Full Support for GW-BX5600 Series Watches**: Added native capability and model mappings for the GW-BX5600 and GMW-BZ5000 watch lines.
-- **MTG-B1000 Dual Analogue Dial Support**: Added support for the MTG-B1000 model, including the second analogue dial time-setting sequence with ResetSequence bracketing.
-- **SP Bulk Data Protocol (`0x17` / `0x19`)**: Implemented the Casio "SP_REQUEST" and "SP_DATA" bulk data transfer protocol required by the new BX watches to sync time and configure settings.
-- **Dynamic Watch Capabilities**: Added a robust `hasNewTimeFormat` feature flag to `WatchInfo` that safely dictates whether a watch uses the legacy `ALL_FEATURES` sequential read/write or the new bulk `SP_DATA` protocol.
-- **Second Dial Detection**: Added `hasSecondDial` capability flag to `WatchInfo` for watches with secondary time displays (e.g., MTG-B1000).
+- **`WatchProtocol` Design Pattern**: Introduced abstract `WatchProtocol` interface and concrete implementations (`StandardProtocol`, `MipProtocol`, `AnalogueProtocol`) to decouple watch-specific behavior and reduce conditional branching.
+- **`WatchInfo` Alignment with Kotlin `GShockAPI`**:
+  - Aligned `WatchModel` enum with Kotlin (`GA`, `GW`, `DW_B5600`, `DW`, `GMW`, `GPR`, `GST`, `MSG`, `GB001`, `GBD`, `GBD_800`, `MRG_B5000`, `GCW_B5000`, `EQB`, `ECB`, `ABL_100`, `DW_H5600`, `GMW_BZ5000`, `GW_BX5600`, `MTG_B1000`, `MTG_B3000`, `GENERIC`).
+  - Added `ModelInfo` dataclass containing 35+ per-model capability attributes matching Kotlin `WatchInfo.kt`.
+  - Implemented exact official Casio model lookup table (`EXACT_MODEL_MAP`) supporting over 100 watch models mapped to exact model categories.
+  - Added `WatchInfo.lookup_watch_info()` for scanned watch lookup and `alwaysConnected` filtering.
+- **GW-BX5600 Watch Support & `CasioTimeZoneHelper`**:
+  - Implemented `CasioTimeZoneHelper` with double-precision latitude/longitude coordinate lookups for world cities.
+  - Updated `GwBx5600TimeIO` to construct the exact **94-byte write-back payload** for Step 2 (`0x03` → `0x06`) containing three 22-byte city location records matching the official Casio BLE app.
+- **ABL-100 Step Counter Support**:
+  - Created `StepCounterData` model (day of week, month, day of month, 144 hourly slots, 14 daily history slots, current day steps).
+  - Updated `StepCounterIO` with multi-packet fragment accumulation, DRSP length announcement processing (`0x00`), end-transaction command sending (`0x04, 0x11, 0x00, 0x00, 0x00`), and structured payload parsing via `StepCounterIOFunctional`.
 
 ### Changed
-- **Connection Type Safety**: Hardened `connection.write()` to safely handle both legacy hex-string payloads (`str`) and direct raw `bytearray`/`bytes` payloads natively, preventing type-cast exceptions during complex byte manipulation.
-- **Dynamic Payload Construction**: SP Requests dynamically adjust their chunk sizes and request queries based on the watch's specific `worldCitiesCount` and `dstCount`, preventing buffer truncation or out-of-bounds exceptions on watches with different feature sets.
-- **API Flow Consistency**: Integrated the BX time-setting logic directly into the standard `GshockAPI.set_time(current_time, offset)` flow. Consumer apps require zero logic changes to support the new watches.
-- **Second Dial Time Setting**: The `set_time()` method now automatically invokes the MTG-B1000 secondary dial sequence when applicable, ensuring both analogue dials are synchronized.
+- **`MessageDispatcher` Routing**: Updated `MessageDispatcher.on_received()` to use `WatchProtocol.extract_key()` and `WatchProtocol.unwrap_payload()`.
+- **`GshockAPI` Method Delegation**: `GshockAPI` methods (`set_time`, `get_home_time`, `get_timer`, `set_timer`, `get_alarms`, `set_alarms`, `get_settings`, `set_settings`, `get_watch_condition`, `get_time_adjustment`) now delegate execution directly through `watch_info.protocol`.
 
 ### Fixed
-- Fixed an issue where the `WatchInfo.reset()` method failed to clear dynamic feature flags upon disconnection, which could cause protocol corruption if a user connected a BX watch followed immediately by an older DW watch.
-- Fixed an architectural signature mismatch where alternative timestamps and timezones passed to `set_time(current_time=..., offset=...)` were silently ignored by the new protocol in favor of the system clock.
-- Fixed an issue where the second dial flag was not properly cleared on MTG-B1000 disconnection.
+- Fixed infinite recursion loop in `StandardProtocol.get_time_adjustment()` and `get_basic_settings()`.
+- Fixed missing `lookup_watch_info()` attribute on `WatchInfo` that caused `BLE scan error` warnings during scanner connection filtering.
 
-### Files Modified
-- `src/gshock_api/watch_info.py` - Added `MTG_B1000` model enum and `hasSecondDial` capability flag
-- `src/gshock_api/gshock_api.py` - Integrated MTG-B1000 second dial time-setting sequence into main `set_time()` flow
-- `src/gshock_api/iolib/mtg_b1000_time_io.py` - **New file** - MTG-B1000 dual-dial time-setting protocol implementation
+### Files Modified / Created
+- `src/gshock_api/protocols/watch_protocol.py` - **New file** - Base `WatchProtocol` interface
+- `src/gshock_api/protocols/standard_protocol.py` - **New file** - `StandardProtocol` implementation
+- `src/gshock_api/protocols/mip_protocol.py` - **New file** - `MipProtocol` implementation
+- `src/gshock_api/protocols/analogue_protocol.py` - **New file** - `AnalogueProtocol` implementation
+- `src/gshock_api/protocols/__init__.py` - **New file** - Protocols package exports
+- `src/gshock_api/casio_time_zone_helper.py` - **New file** - Casio timezone & coordinate helper
+- `src/gshock_api/step_counter_data.py` - **New file** - Structured step counter record dataclass
+- `src/gshock_api/watch_info.py` - Updated `WatchModel`, `ModelInfo`, exact model lookup table, and protocol integration
+- `src/gshock_api/iolib/gw_bx5600_time_io.py` - Updated Step 2 payload construction to 94-byte city location records
+- `src/gshock_api/iolib/step_counter_io.py` - Updated multi-packet accumulation, DRSP end-transaction, and structured parsing
+- `src/gshock_api/message_dispatcher.py` - Updated to delegate key extraction and unwrapping to `WatchProtocol`
+- `src/gshock_api/gshock_api.py` - Updated methods to delegate through `watch_info.protocol`
+- `tests/test_code.py` - Expanded test suite to 24 unit tests covering protocols, model resolution, coordinates, and step counter

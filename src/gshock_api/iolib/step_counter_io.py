@@ -1,89 +1,144 @@
+import struct
 from typing import Final
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
+from gshock_api.logger import logger
+from gshock_api.step_counter_data import StepCounterData
+
+FALLBACK_EXPECTED_LENGTH: Final[int] = 400
+DRSP_CATEGORY_EXERCISE: Final[int] = 0x11
+START_TRANSACTION_CMD: Final[bytes] = bytes([0x00, DRSP_CATEGORY_EXERCISE, 0x00, 0x00, 0x00])
+END_TRANSACTION_CMD: Final[bytes] = bytes([0x04, DRSP_CATEGORY_EXERCISE, 0x00, 0x00, 0x00])
+
+
+class StepCounterIOFunctional:
+    """Pure functional core for decoding ABL-100WE step counter (life-log) records."""
+
+    HEADER_SIZE: Final[int] = 6
+    HOURLY_SLOT_COUNT: Final[int] = 144
+    HOURLY_SLOT_SIZE: Final[int] = 2
+    BETWEEN_HISTORY_PADDING_SIZE: Final[int] = 24
+    DAILY_SLOT_COUNT: Final[int] = 14
+    DAILY_SLOT_SIZE: Final[int] = 4
+
+    @staticmethod
+    def parse(payload: bytes) -> StepCounterData | None:
+        daily_history_offset = (
+            StepCounterIOFunctional.HEADER_SIZE
+            + StepCounterIOFunctional.HOURLY_SLOT_COUNT * StepCounterIOFunctional.HOURLY_SLOT_SIZE
+            + StepCounterIOFunctional.BETWEEN_HISTORY_PADDING_SIZE
+        )
+        current_day_offset = (
+            daily_history_offset
+            + StepCounterIOFunctional.DAILY_SLOT_COUNT * StepCounterIOFunctional.DAILY_SLOT_SIZE
+        )
+
+        if len(payload) < current_day_offset + StepCounterIOFunctional.DAILY_SLOT_SIZE or payload[0] != 0x26:
+            return None
+
+        hourly_steps: list[int | None] = []
+        for i in range(StepCounterIOFunctional.HOURLY_SLOT_COUNT):
+            offset = StepCounterIOFunctional.HEADER_SIZE + i * StepCounterIOFunctional.HOURLY_SLOT_SIZE
+            val = struct.unpack_from("<H", payload, offset)[0]
+            hourly_steps.append(None if val == 0xFFFE else val)
+
+        daily_history: list[int | None] = []
+        for i in range(StepCounterIOFunctional.DAILY_SLOT_COUNT):
+            offset = daily_history_offset + i * StepCounterIOFunctional.DAILY_SLOT_SIZE
+            val = struct.unpack_from("<I", payload, offset)[0]
+            daily_history.append(None if val == 0xFFFFFFFE else val)
+
+        cur_val = struct.unpack_from("<I", payload, current_day_offset)[0]
+        current_day_steps = None if cur_val == 0xFFFFFFFE else cur_val
+
+        return StepCounterData(
+            day_of_week=payload[1],
+            month=payload[2],
+            day_of_month=payload[3],
+            hourly_steps=hourly_steps,
+            daily_history=daily_history,
+            current_day_steps=current_day_steps,
+        )
 
 
 class StepCounterIO:
-    """Reads the daily step total from the ABL-100WE life-log notification.
+    """Manages requesting, fragment accumulation, and decoding of ABL-100 step counter notifications."""
 
-    Protocol (confirmed from HCI snoop log):
-      1. Send request bytes [00 11 00 00 00] to handle 0x0011
-         (CASIO_DATA_REQUEST_SP).
-      2. Watch acknowledges on handle 0x0011.
-      3. Watch sends a 398-byte life-log notification on handle 0x0014
-         (CASIO_CONVOY), fragmented across ~15 L2CAP packets.
-      4. on_received() parses the notification and sets the result.
-
-    Payload structure of the 0x0014 notification:
-      [0]      0x26  record type (life-log)
-      [1]      day of week (1=Mon … 7=Sun)
-      [2]      month
-      [3]      0x18 = 24 hourly slot count
-      [4:6]    flags
-      [6..]    hourly slots: 0xFEFF = empty, or actual per-hour count
-      [tail]   4-byte sub-record header (skip entirely)
-      [tail+4] uint32 LE daily step total
-    """
-
-    result: CancelableResult[int] | None = None
+    result: CancelableResult[StepCounterData] | None = None
     connection: ConnectionProtocol | None = None
+    accumulator: bytearray = bytearray()
+    expected_length: int = FALLBACK_EXPECTED_LENGTH
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> int:
+    async def request(connection: ConnectionProtocol) -> StepCounterData:
+        from gshock_api.watch_info import watch_info
+
+        if not watch_info.hasStepCounter:
+            logger.info(f"Step counter not supported on watch model: {watch_info.model}")
+            return StepCounterData.unavailable()
+
         StepCounterIO.connection = connection
-        StepCounterIO.result = CancelableResult[int]()
-        await connection.write(
-            0x0011,
-            bytes([0x00, 0x11, 0x00, 0x00, 0x00]),
-        )
-        return await StepCounterIO.result.get_result()
+        StepCounterIO.accumulator = bytearray()
+        StepCounterIO.expected_length = FALLBACK_EXPECTED_LENGTH
+        StepCounterIO.result = CancelableResult[StepCounterData]()
+
+        # Handle 0x0011 is CASIO_DATA_REQUEST_SP
+        await connection.write(0x0011, START_TRANSACTION_CMD)
+        try:
+            return await StepCounterIO.result.get_result()
+        finally:
+            StepCounterIO.result = None
+            StepCounterIO.accumulator = bytearray()
+
+    @staticmethod
+    def on_drsp_received(data: bytes) -> None:
+        """Handles length announcement or ACK notifications on the DRSP characteristic (handle 0x0011)."""
+        if len(data) < 5:
+            return
+        command = data[0]
+        category = data[1]
+        if category != DRSP_CATEGORY_EXERCISE:
+            return
+
+        if command == 0x00:
+            announced_length = data[2] | (data[3] << 8) | (data[4] << 16)
+            if StepCounterIO.result is not None:
+                StepCounterIO.expected_length = announced_length
+                logger.debug(f"StepCounterIO: expected length announced = {announced_length}B")
 
     @staticmethod
     def on_received(data: bytes) -> None:
+        """Accumulates incoming fragments and parses StepCounterData when full payload is received."""
         if StepCounterIO.result is None:
             return
-        step_count = StepCounterIO.parse_step_counter(data)
-        if step_count is not None:
-            StepCounterIO.result.set_result(step_count)
 
-    @staticmethod
-    def parse_step_counter(payload: bytes) -> int | None:
-        """Extract the daily step total from an ABL-100WE life-log payload.
+        StepCounterIO.accumulator.extend(data)
+        logger.debug(
+            f"StepCounterIO.on_received: accumulated={len(StepCounterIO.accumulator)}B / "
+            f"expected={StepCounterIO.expected_length}B"
+        )
 
-        Confirmed from HCI log: 398-byte payload, daily step total = 2485
-        located at byte offset 378 (last 4-byte sentinel ends at 374,
-        4-byte sub-record header follows, step uint32 at 378).
-        """
-        if len(payload) < 10 or payload[0] != 0x26:
-            return None
+        if len(StepCounterIO.accumulator) < StepCounterIO.expected_length:
+            return
 
-        # Locate the last 4-byte sentinel and skip the sub-record header
-        # (4 bytes) that immediately follows — the step uint32 is next.
-        sentinel4: Final[bytes] = b"\xfe\xff\xff\xff"
-        found_indices: list[int] = [
-            i for i in range(6, len(payload) - 3)
-            if payload[i : i + 4] == sentinel4
-        ]
-
-        if found_indices:
-            tail_index = found_indices[-1] + 4  # byte after last sentinel
-            step_offset = tail_index + 4        # skip 4-byte sub-record header
-            if step_offset + 4 <= len(payload):
-                return int.from_bytes(
-                    payload[step_offset : step_offset + 4], "little"
+        # Acknowledge end of transaction
+        if StepCounterIO.connection is not None:
+            try:
+                # Fire-and-forget end transaction command
+                import asyncio
+                asyncio.create_task(
+                    StepCounterIO.connection.write(0x0011, END_TRANSACTION_CMD)
                 )
+            except Exception as e:
+                logger.warning(f"Failed to send end transaction command: {e}")
 
-        # Fallback: scan past 2-byte feff pairs and zero padding,
-        # skip sub-record header, then read the uint32.
-        cursor = 6
-        while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\xfe\xff":
-            cursor += 2
-        while cursor + 2 <= len(payload) and payload[cursor : cursor + 2] == b"\x00\x00":
-            cursor += 2
-        cursor += 4  # skip sub-record header
-        if cursor + 4 <= len(payload):
-            return int.from_bytes(payload[cursor : cursor + 4], "little")
+        full_payload = bytes(StepCounterIO.accumulator)
+        step_data = StepCounterIOFunctional.parse(full_payload)
 
-        return None
-    
+        if step_data is not None:
+            logger.info(f"Step count parsed: {step_data}")
+            StepCounterIO.result.set_result(step_data)
+        else:
+            logger.warning(f"Failed to parse activity record from {len(full_payload)}B payload")
+            StepCounterIO.result.set_result(StepCounterData.unavailable())

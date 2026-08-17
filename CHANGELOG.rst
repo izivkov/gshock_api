@@ -2,6 +2,18 @@
 Changelog
 =========
 
+Version 2.0.39 (2026-08-17)
+============================
+
+- FEATURE: Introduced ``WatchProtocol`` design pattern (``StandardProtocol``, ``MipProtocol``, ``AnalogueProtocol``) decoupling model-specific execution from core API.
+- FEATURE: Aligned ``WatchInfo`` with Kotlin ``GShockAPI`` reference including full ``WatchModel`` enum, per-model capability attributes (``ModelInfo``), and official Casio model lookup table (``EXACT_MODEL_MAP``).
+- FEATURE: Added full support for GW-BX5600 series watches, including ``CasioTimeZoneHelper`` for world city coordinate lookups and 94-byte Step 2 location record payload construction.
+- FEATURE: Added complete step counter support for ABL-100 series watches, including ``StepCounterData`` model, multi-packet fragment accumulation, DRSP length announcement processing, and end-transaction signaling.
+- REFACTOR: Updated ``MessageDispatcher.on_received`` and ``GshockAPI`` operations to delegate via ``WatchProtocol``.
+- FIX: Resolved infinite recursion loop in ``StandardProtocol.get_time_adjustment()``.
+- FIX: Added ``lookup_watch_info()`` on ``WatchInfo`` preventing BLE scanner attribute errors during device filtering.
+
+
 Version 2.0.38 (2026-05-31)
 ============================
 
@@ -36,4 +48,3 @@ Version 2.0.35 and earlier
 ===========================
 
 - Initial public release and iterative improvements.
-

@@ -65,6 +65,8 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
     # --- SettingsIO Tests ---
     def test_settings_encode_decode(self):
+        from gshock_api.watch_info import watch_info
+        watch_info.set_name_and_model("CASIO GW-B5600")
         settings_dict: SettingsDict = {
             "time_format": "24h",
             "button_tone": True,
@@ -87,6 +89,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(decoded["light_duration"], "4s")
         self.assertEqual(decoded["date_format"], "DD:MM")
         self.assertEqual(decoded["language"], "French")
+        watch_info.reset()
 
     def test_settings_commands(self):
         commands = SettingsIOFunctional.prepare_watch_commands()
@@ -231,6 +234,95 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(decoded["light_duration"], "1.5s")
 
         watch_info.reset()
+
+    # --- WatchInfo & Protocol Tests ---
+    def test_watch_info_exact_lookup_and_protocols(self):
+        from gshock_api.watch_info import watch_info, WatchModel
+        from gshock_api.protocols.mip_protocol import MipProtocol
+        from gshock_api.protocols.analogue_protocol import AnalogueProtocol
+        from gshock_api.protocols.standard_protocol import StandardProtocol
+
+        watch_info.set_name_and_model("CASIO GW-BX5600")
+        self.assertEqual(watch_info.model, WatchModel.GW_BX5600)
+        self.assertTrue(watch_info.hasNewTimeFormat)
+        self.assertIsInstance(watch_info.protocol, MipProtocol)
+
+        watch_info.set_name_and_model("CASIO MTG-B1000")
+        self.assertEqual(watch_info.model, WatchModel.MTG_B1000)
+        self.assertTrue(watch_info.hasSecondDial)
+        self.assertIsInstance(watch_info.protocol, AnalogueProtocol)
+
+        watch_info.set_name_and_model("CASIO ABL-100WE")
+        self.assertEqual(watch_info.model, WatchModel.ABL_100)
+        self.assertTrue(watch_info.hasStepCounter)
+        self.assertIsInstance(watch_info.protocol, StandardProtocol)
+
+        watch_info.set_name_and_model("CASIO GW-B5600")
+        self.assertEqual(watch_info.model, WatchModel.GW)
+        self.assertEqual(watch_info.worldCitiesCount, 6)
+        self.assertIsInstance(watch_info.protocol, StandardProtocol)
+        watch_info.reset()
+
+    # --- Step Counter Tests ---
+    def test_step_counter_data_and_parse(self):
+        from gshock_api.step_counter_data import StepCounterData
+        from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
+
+        unavail = StepCounterData.unavailable()
+        self.assertEqual(unavail.current_day_steps, None)
+        self.assertEqual(unavail.hourly_steps, [])
+
+        payload = bytearray(400)
+        payload[0] = 0x26  # Header
+        payload[1] = 1     # Mon
+        payload[2] = 8     # Aug
+        payload[3] = 17    # 17th
+
+        for i in range(144):
+            struct_offset = 6 + i * 2
+            payload[struct_offset:struct_offset + 2] = (10 + i).to_bytes(2, "little")
+
+        for i in range(14):
+            struct_offset = 318 + i * 4
+            payload[struct_offset:struct_offset + 4] = (5000 + i).to_bytes(4, "little")
+
+        payload[374:378] = (12345).to_bytes(4, "little")
+
+        parsed = StepCounterIOFunctional.parse(bytes(payload))
+        self.assertIsNotNone(parsed)
+        self.assertEqual(parsed.day_of_week, 1)
+        self.assertEqual(parsed.month, 8)
+        self.assertEqual(parsed.day_of_month, 17)
+        self.assertEqual(parsed.current_day_steps, 12345)
+        self.assertEqual(len(parsed.hourly_steps), 144)
+        self.assertEqual(parsed.hourly_steps[0], 10)
+        self.assertEqual(len(parsed.daily_history), 14)
+        self.assertEqual(parsed.daily_history[0], 5000)
+
+    # --- CasioTimeZoneHelper Tests ---
+    def test_casio_time_zone_helper(self):
+        from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
+
+        lat, lon, exact = CasioTimeZoneHelper.get_world_city_coordinates("Europe/Madrid")
+        self.assertTrue(exact)
+        self.assertAlmostEqual(lat, 41.4548, places=4)
+        self.assertAlmostEqual(lon, 2.2502, places=4)
+
+        tz = CasioTimeZoneHelper.find_time_zone("Europe/London")
+        self.assertEqual(tz.name, "LONDON")
+        self.assertEqual(tz.zone_name, "Europe/London")
+
+    # --- GwBx5600 Time IO City Records Test ---
+    def test_gw_bx5600_city_records(self):
+        from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
+
+        city_records = GwBx5600TimeIO._build_world_city_records()
+        self.assertEqual(len(city_records), 66)  # 3 x 22 bytes
+        self.assertEqual(city_records[0], 0x14)
+        self.assertEqual(city_records[1], 0x00)
+        self.assertEqual(city_records[2], 0x24)
+        self.assertEqual(city_records[3], 0x00)  # Slot 0
+        self.assertEqual(city_records[4], 0x01)  # Flag
 
 
 if __name__ == "__main__":

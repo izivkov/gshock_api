@@ -5,40 +5,30 @@ from typing import Final, TypeVar
 
 from gshock_api import message_dispatcher
 from gshock_api.alarms import alarms_inst
-
-# Assuming the Connection class from before is available, we define the type here
 from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.iolib.second_dial_io import SecondDialIO
 from gshock_api.iolib.step_counter_io import StepCounterIO
+from gshock_api.step_counter_data import StepCounterData
 from gshock_api.utils import (
     to_compact_string,
     to_hex_string,
 )
 from gshock_api.watch_info import WatchModel, watch_info
 
-# Type variable for unknown request/message objects (e.g., Alarm, Event)
-T = TypeVar("T") 
+T = TypeVar("T")
 
-# Define constants for write handles based on previous context (Connection class)
-# 0xE is the CASIO_ALL_FEATURES_CHARACTERISTIC_UUID (used for writing response back)
 HANDLE_ALL_FEATURES: Final[int] = 0x0E
-# 0xD is the CASIO_NOTIFICATION_CHARACTERISTIC_UUID (used for sending notifications)
 HANDLE_NOTIFICATION: Final[int] = 0x0D
 
 
 class GshockAPI:
-    """
-    This class contains all the API functions. This should the the main interface to the
-    library.
-    """
+    """Main interface for interacting with Casio G-Shock watches."""
 
     logger = logging.getLogger("GshockAPI")
 
     def __init__(self, connection: Connection) -> None:
-        # Assuming connection is the Connection class we typed previously
         self.connection: Connection = connection
 
     async def get_watch_name(self) -> str:
@@ -46,13 +36,11 @@ class GshockAPI:
         return await self._get_watch_name()
 
     async def _get_watch_name(self) -> str:
-        # Assuming WatchNameIO.request returns a string
         result: str = await message_dispatcher.WatchNameIO.request(self.connection)
         return result
 
     async def get_pressed_button(self) -> WatchButton:
-        """This function tells us which button was pressed on the watch to initiate the connection."""
-        # Assuming ButtonPressedIO.request returns a WatchButton enum/object
+        """Tells which button was pressed on the watch to initiate the connection."""
         result: WatchButton = await message_dispatcher.ButtonPressedIO.request(self.connection)
         return result
 
@@ -61,16 +49,14 @@ class GshockAPI:
         return await self._get_world_cities(city_number)
 
     async def _get_world_cities(self, city_number: int) -> str:
-        # Assuming WorldCitiesIO.request returns a string
         result: str = await message_dispatcher.WorldCitiesIO.request(self.connection, city_number)
         return result
 
     async def get_dst_for_world_cities(self, city_number: int) -> str:
-        """Get the **Daylight Saving Time** for a particular World City set on the watch."""
+        """Get the Daylight Saving Time for a particular World City set on the watch."""
         return await self._get_dst_for_world_cities(city_number)
 
     async def _get_dst_for_world_cities(self, city_number: int) -> str:
-        # Assuming DstForWorldCitiesIO.request returns a string
         result: str = await message_dispatcher.DstForWorldCitiesIO.request(
             self.connection, city_number
         )
@@ -81,7 +67,6 @@ class GshockAPI:
         return await self._get_dst_watch_state(state)
 
     async def _get_dst_watch_state(self, state: DtsState) -> str:
-        # Assuming DstWatchStateIO.request returns a string
         result: str = await message_dispatcher.DstWatchStateIO.request(
             self.connection, state
         )
@@ -97,26 +82,12 @@ class GshockAPI:
         elif watch_info.model == WatchModel.MTG_B3000:
             print("Reading and writing home times...")
             await self.read_write_home_times()
-    
-    # Define a Callable type for the function that will be read
+
     RequestFunction = Callable[[object], Coroutine[object, object, object]]
 
-    async def get_home_time(self, slot: int = 0) -> bytes:
-        """Get the HomeTime (0x24) characteristic data for the given slot.
-
-        Slot 0 returns the main (home) city data; slot 1 returns the secondary
-        city data (used by watches with a second dial, e.g. MTG-B1000).
-        Raw bytes are returned unchanged — the watch is the authoritative source
-        for city configuration.
-
-        Args:
-            slot: City slot to read (0 = home/main city, 1 = secondary city).
-                  Defaults to 0.
-
-        Returns:
-            Raw bytes for the requested HomeTime slot.
-        """
-        return await message_dispatcher.HomeTimeIO.request_raw(self.connection, slot)
+    async def get_home_time(self, slot: int = 0) -> str:
+        """Get HomeTime for the watch via current watch protocol."""
+        return await watch_info.protocol.get_home_time(self)
 
     async def read_write_home_times(self) -> None:
         for city_number in range(watch_info.worldCitiesCount):
@@ -125,182 +96,136 @@ class GshockAPI:
             short_str: bytes = to_compact_string(hex_data)
             await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
-    # Replaced Any with object, and made function parameter specific
     async def read_and_write(
         self, function: RequestFunction, param: object
     ) -> None:
-        # The return type of the function is unknown, hence object
         ret: object = await function(param)
-        
-        # Assuming ret is convertible to bytes/bytearray by to_hex_string
         hex_data: bytes = to_hex_string(ret)
         short_str: bytes = to_compact_string(hex_data)
-        
-        # Replaced 0xE with HANDLE_ALL_FEATURES
         await self.connection.write(HANDLE_ALL_FEATURES, short_str)
 
     async def read_write_dst_watch_states(self) -> None:
-        # Use dict instead of generic Map/Any
-        array_of_dst_watch_state: list[dict[str, RequestFunction | DtsState]] = [  # noqa: F821 # type: ignore
+        array_of_dst_watch_state: list[dict[str, RequestFunction | DtsState]] = [
             {"function": self.get_dst_watch_state, "state": DtsState.ZERO},
             {"function": self.get_dst_watch_state, "state": DtsState.TWO},
             {"function": self.get_dst_watch_state, "state": DtsState.FOUR},
         ]
-        
-        # Type inference for item and its keys
         for item in array_of_dst_watch_state[: watch_info.dstCount]:
-            function: RequestFunction = item["function"] # type: ignore[assignment] noqa: F821 # type: ignore  # noqa: F821
-            state: DtsState = item["state"] # type: ignore[assignment]
+            function: RequestFunction = item["function"]  # type: ignore[assignment]
+            state: DtsState = item["state"]  # type: ignore[assignment]
             await self.read_and_write(function, state)
 
     async def read_write_dst_for_world_cities(self) -> None:
         fn = self.get_dst_for_world_cities
-
         for city_number in range(watch_info.worldCitiesCount):
             await self.read_and_write(fn, city_number)
 
     async def read_write_world_cities(self) -> None:
         fn = self.get_world_cities
-
         for city_number in range(watch_info.worldCitiesCount):
             await self.read_and_write(fn, city_number)
 
-    # current_time is unknown type, using object | None
     async def set_time(
         self, current_time: object | None = None, offset: int = 0
     ) -> None:
-        """Sets the current time on the watch from the time on the device.
-
-        For watches with hasNewTimeFormat=True (GW-BX5600, GMW-BZ5000),
-        uses the SP read-modify-write protocol via GwBx5600TimeIO.
-        All other watches use the standard ALL_FEATURES time command.
-        """
-        if watch_info.hasNewTimeFormat:
-            await message_dispatcher.GwBx5600TimeIO.request(self.connection, current_time, offset)
-            return
-
-        await self.initialize_for_setting_time()
-        await self._set_time(current_time, offset)
-
-        if watch_info.hasSecondDial:
-            await SecondDialIO.set_second_dial(self.connection)
-
+        """Sets current time on the watch via current WatchProtocol."""
+        await watch_info.protocol.set_time(self, current_time, offset)
 
     async def _set_time(self, current_time: object | None, offset: int = 0) -> None:
         await message_dispatcher.TimeIO.request(self.connection, current_time, offset)
 
-    # Assuming Alarm is a specific class, using TypeVar T
     async def get_alarms(self) -> list[T]:
-        """Gets the current alarms from the watch."""
+        """Gets alarms from the watch via current WatchProtocol."""
+        return await watch_info.protocol.get_alarms(self)
+
+    async def _get_alarms(self) -> list[T]:
         alarms_inst.clear()
-        await self._get_alarms()
-        # Assuming alarms_inst.alarms returns list[T]
+        await message_dispatcher.AlarmsIO.request(self.connection)
         return alarms_inst.alarms
 
-    # Assuming AlarmsIO.request returns a complex object (object)
-    async def _get_alarms(self) -> object:
-        return await message_dispatcher.AlarmsIO.request(self.connection)
-
-    # alarms is a list of unknown alarm objects (TypeVar T)
     async def set_alarms(self, alarms: list[T]) -> None:
-        """Sets alarms to the watch."""
-        if not alarms:
-            self.logger.debug("Alarm model not initialised! Cannot set alarm")
-            return
-
-        # Assuming T objects are JSON serializable
-        alarms_str: str = json.dumps(alarms)
-        set_action_cmd: str = f'{{"action":"SET_ALARMS", "value":{alarms_str} }}'
-        # connection.send_message expects T, which must be convertible to a watch message
-        await self.connection.send_message(set_action_cmd)
+        """Sets alarms on the watch via current WatchProtocol."""
+        await watch_info.protocol.set_alarms(self, alarms)
 
     async def get_timer(self) -> int:
-        """Get Timer value in seconds."""
-        return await self._get_timer()
+        """Get Timer value in seconds via current WatchProtocol."""
+        return await watch_info.protocol.get_timer(self)
 
     async def _get_timer(self) -> int:
-        # Assuming TimerIO.request returns an integer
         result: int = await message_dispatcher.TimerIO.request(self.connection)
         return result
 
     async def set_timer(self, timer_value: int) -> None:
-        """Set Timer value in seconds."""
-        message: str = f'{{"action": "SET_TIMER", "value": {timer_value} }}'
-        await self.connection.send_message(message)
+        """Set Timer value in seconds via current WatchProtocol."""
+        await watch_info.protocol.set_timer(self, timer_value)
 
-    # Watch condition request returns an unknown object (object)
     async def get_watch_condition(self) -> object:
-        result: object = await message_dispatcher.WatchConditionIO.request(self.connection)
+        """Gets watch condition from the watch."""
+        req_cmd = watch_info.protocol.get_watch_condition_request()
+        result: object = await message_dispatcher.WatchConditionIO.request(
+            self.connection, request_cmd=req_cmd
+        )
         return result
 
     async def get_time_adjustment(self) -> bool:
-        """Determine if auto-tame adjustment is set or not"""
-        # Assuming TimeAdjustmentIO.request returns a boolean
-        result: bool = await message_dispatcher.TimeAdjustmentIO.request(self.connection)
-        return result
+        """Determine if auto-time adjustment is set or not."""
+        return await watch_info.protocol.get_time_adjustment(self)
 
     async def set_time_adjustment(
         self, time_adjustement: bool, minutes_after_hour: int
     ) -> None:
-        """Sets auto-tame adjustment for the watch"""
+        """Sets auto-time adjustment for the watch."""
         message: str = f"""{{"action": "SET_TIME_ADJUSTMENT", "timeAdjustment": "{time_adjustement}", "minutesAfterHour": "{minutes_after_hour}" }}"""
         await self.connection.send_message(message)
 
     async def get_basic_settings(self) -> dict:
-        # 1. Request the result (which returns the JSON string from SettingsIO)
-        result_str = await message_dispatcher.SettingsIO.request(self.connection)
-        
-        # 2. Automatically deserialize to a dict
-        # This prevents the TypeError in the test script!
-        return json.loads(result_str)
+        """Get basic settings from watch via current WatchProtocol."""
+        return await watch_info.protocol.get_basic_settings(self)
+
+    async def get_settings(self) -> dict:
+        """Gets settings from the watch via current WatchProtocol."""
+        return await watch_info.protocol.get_settings(self)
+
+    async def set_settings(self, settings: T) -> None:
+        """Set settings to the watch via current WatchProtocol."""
+        await watch_info.protocol.set_settings(self, settings)
 
     async def get_step_count(self) -> int:
+        """Gets the daily step count total for step counter supported watches."""
         if not watch_info.hasStepCounter:
-            print("Watch does not support step counter")
             self.logger.debug("Watch does not support step counter")
             return 0
+        data = await StepCounterIO.request(self.connection)
+        return data.current_day_steps if data.current_day_steps is not None else 0
+
+    async def get_step_counter_data(self) -> StepCounterData:
+        """Gets complete step counter data (hourly and daily history)."""
+        if not watch_info.hasStepCounter:
+            return StepCounterData.unavailable()
         return await StepCounterIO.request(self.connection)
 
-    # settings is an unknown settings object (T)
-    async def set_settings(self, settings: T) -> None:
-        """Set settings to the watch."""
-        setting_json: str = json.dumps(settings)
-        message: str = f'{{"action": "SET_SETTINGS", "value": {setting_json} }}'
-        await self.connection.send_message(message)
-
-    # get_reminders returns a list of unknown Event objects (list[T])
     async def get_reminders(self) -> list[T]:
         return [await self.get_event_from_watch(i) for i in range(1, 6)]
 
-    # get_event_from_watch returns an unknown Event object (T)
     async def get_event_from_watch(self, event_number: int) -> T:
-        """Gets a single event (reminder) from the watch."""
-        result: T = await message_dispatcher.EventsIO.request( # type: ignore[assignment]
+        result: T = await message_dispatcher.EventsIO.request(  # type: ignore[assignment]
             self.connection, event_number
         )
         return result
 
-    # events is a list of unknown Event objects (list[T])
     async def set_reminders(self, events: list[T]) -> None:
-        """Sets events (reminders) to the watch."""
         if not events:
             return
 
-        # Assuming T objects are dicts or have a .toJson() method that returns a dict[str, object]
-        # Since json.loads("[]") is used, the intent is likely to convert the list of T to a list of JSON-compatible dicts.
         def to_json(events_list: list[T]) -> list[Mapping[str, object]]:
-            events_json: list[Mapping[str, object]] = [] # type: ignore[assignment]
+            events_json: list[Mapping[str, object]] = []  # type: ignore[assignment]
             for event in events_list:
-                # Assuming event is already a dictionary, or convertible to one.
-                # If T is the dataclass Event, the list needs to be converted before this.
-                events_json.append(event) # type: ignore[arg-type]  # noqa: PERF402
+                events_json.append(event)  # type: ignore[arg-type]
             return events_json
 
-        # Assuming event is a dict[str, object] structure
         def get_enabled_events(events_list: list[Mapping[str, object]]) -> list[Mapping[str, object]]:
-            return [event for event in events_list if event.get("time", {}).get("enabled")] # type: ignore[misc]
+            return [event for event in events_list if event.get("time", {}).get("enabled")]  # type: ignore[misc]
 
-        # We first convert the list of T to a list of dicts (Mapping[str, object])
         events_as_json: list[Mapping[str, object]] = to_json(events)
         enabled: list[Mapping[str, object]] = get_enabled_events(events_as_json)
 
@@ -309,13 +234,10 @@ class GshockAPI:
         )
 
     async def get_app_info(self) -> str:
-        """Gets and internally sets app info to the watch."""
         result: str = await message_dispatcher.AppInfoIO.request(self.connection)
         return result
 
     async def send_app_notification(self, notification: dict[str, object]) -> None:
-        # Assuming AppNotificationIO methods handle the conversion of the dict values
         encoded_buffer: bytes = AppNotificationIO.encode_notification_packet(notification)
         encrypted_buffer: bytes = AppNotificationIO.xor_encode_buffer(encoded_buffer)
-        
         await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)
