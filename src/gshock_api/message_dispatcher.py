@@ -15,7 +15,7 @@ from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.home_time_io import HomeTimeIO
 from gshock_api.iolib.settings_io import SettingsIO
 from gshock_api.iolib.step_counter_io import StepCounterIO
-from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIO
+from gshock_api.iolib.time_adjustment_io import TimeAdjustmentIO
 from gshock_api.iolib.time_io import TimeIO
 from gshock_api.iolib.timer_io import TimerIO
 from gshock_api.iolib.unknown_io import UnknownIO

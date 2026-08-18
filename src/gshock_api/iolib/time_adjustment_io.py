@@ -26,7 +26,7 @@ class TimeAdjustmentIOFunctional:
         time_adjusted = int(data_bytes[12]) == 0x00
         minutes_after_hour = int(data_bytes[13])
         return {
-            "timeAdjusment": str(time_adjusted),
+            "timeAdjustment": str(time_adjusted),
             "minutesAfterHour": str(minutes_after_hour),
         }
 

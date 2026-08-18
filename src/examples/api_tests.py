@@ -56,8 +56,8 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
 
-        logger.info("Getting step count...")
-        steps = await api.get_step_count()
+        logger.info("Getting step count today...")
+        steps = await api.get_step_count_today()
         logger.info(f"steps: {steps}")
 
         watch_name = await api.get_watch_name()
@@ -84,7 +84,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             time_adjstment = await api.get_time_adjustment()
             logger.info(f"time_adjstment: {time_adjstment}")
 
-            await api.set_time_adjustment(time_adjustement=True, minutes_after_hour=10)
+            await api.set_time_adjustment(time_adjustment=True, minutes_after_hour=10)
 
             settings_local = await api.get_basic_settings()
             logger.info(f"settings: {pformat(settings_local)}")

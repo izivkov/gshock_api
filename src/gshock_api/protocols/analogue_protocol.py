@@ -33,17 +33,18 @@ class AnalogueProtocol(StandardProtocol):
     def get_watch_condition_request(self) -> str:
         return "280000"
 
-    async def set_time(self, api_inst: Any, current_time: Any = None, offset: int = 0) -> None:
+    async def set_time(self, connection: Any, current_time: Any = None, offset: int = 0) -> None:
         from gshock_api.iolib.second_dial_io import SecondDialIO
         from gshock_api.watch_info import watch_info
+        from gshock_api import message_dispatcher
 
-        await api_inst.read_write_dst_watch_states()
-        await api_inst.read_write_dst_for_world_cities()
-        await api_inst.read_write_home_times()
-        await api_inst._set_time(current_time, offset)
+        await self.read_write_dst_watch_states(connection)
+        await self.read_write_dst_for_world_cities(connection)
+        await self.read_write_home_times(connection)
+        await message_dispatcher.TimeIO.request(connection, current_time, offset)
 
         if watch_info.hasSecondDial:
-            await SecondDialIO.set_second_dial(api_inst.connection)
+            await SecondDialIO.set_second_dial(connection)
 
     def get_timer_request(self) -> str:
         return "182000"
@@ -51,7 +52,7 @@ class AnalogueProtocol(StandardProtocol):
     def get_timer_size(self) -> int:
         return 15
 
-    async def get_home_time(self, api_inst: Any) -> str:
+    async def get_home_time(self, connection: Any) -> str:
         from gshock_api import message_dispatcher
-        raw_bytes = await message_dispatcher.HomeTimeIO.request_raw(api_inst.connection, 0)
+        raw_bytes = await message_dispatcher.HomeTimeIO.request_raw(connection, 0)
         return raw_bytes.hex() if isinstance(raw_bytes, bytes) else str(raw_bytes)

@@ -11,7 +11,7 @@ from gshock_api.iolib.dst_watch_state_io import DstWatchStateIOFunctional
 if TYPE_CHECKING:
     from gshock_api.iolib.settings_io import SettingsDict
 from gshock_api.iolib.settings_io import SettingsIOFunctional
-from gshock_api.iolib.time_adjustement_io import TimeAdjustmentIOFunctional
+from gshock_api.iolib.time_adjustment_io import TimeAdjustmentIOFunctional
 from gshock_api.iolib.time_io import TimeEncoder, TimeEncoderPure, TimeIOFunctional
 from gshock_api.iolib.timer_io import TimerIOFunctional
 from gshock_api.iolib.watch_condition_io import WatchConditionIOFunctional
@@ -121,7 +121,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         encoded = TimeAdjustmentIOFunctional.encode(original_hex, True, 25)
         
         decoded = TimeAdjustmentIOFunctional.decode(encoded)
-        self.assertEqual(decoded["timeAdjusment"], "True")
+        self.assertEqual(decoded["timeAdjustment"], "True")
         self.assertEqual(decoded["minutesAfterHour"], "25")
 
     # --- DstForWorldCitiesIO Tests ---
