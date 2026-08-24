@@ -17,6 +17,7 @@ from gshock_api.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
+from gshock_api.watch_info import watch_info
 
 destructive = True  # Set to True to enable destructive tests (time change, alarms, etc.)
 
@@ -47,11 +48,13 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
 
         api = GshockAPI(connection)
 
-        app_info = await api.get_app_info()
-        logger.info(f"app info: {app_info}")
+        if watch_info.hasAppInfo:
+            app_info = await api.get_app_info()
+            logger.info(f"app info: {app_info}")
 
-        home_time = await api.get_home_time()
-        logger.info(f"home time: {home_time}")
+        if watch_info.hasHomeTime:
+            home_time = await api.get_home_time()
+            logger.info(f"home time: {home_time}")  
 
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")

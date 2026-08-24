@@ -51,7 +51,6 @@ class ModelInfo:
     shortLightDuration: str = "1.5s"
     longLightDuration: str = "3s"
     weekLanguageSupported: bool = True
-    worldCities: bool = True
     hasBatteryLevel: bool = True
     hasTemperature: bool = True
     batteryLevelLowerLimit: int = 9
@@ -77,8 +76,8 @@ class ModelInfo:
     hasHourlyChime: bool = True
     hasLongTimerKey: bool = False
     settingsSize: int = 17
+    hasAppInfo: bool = True
     protocol: WatchProtocol = field(default_factory=lambda: STANDARD_PROTOCOL)
-
 
 _MODEL_LIST: list[ModelInfo] = [
     ModelInfo(
@@ -167,10 +166,11 @@ _MODEL_LIST: list[ModelInfo] = [
         model=WatchModel.ABL_100,
         hasAutoLight=False, hasReminders=False,
         hasTemperature=False, hasBatteryLevel=False,
-        worldCities=False, hasWorldCities=False, hasHomeTime=False,
+        hasWorldCities=False, hasHomeTime=False,
         hasStepCounter=True,
         hasDateFormat=False,
         weekLanguageSupported=False,
+        hasAppInfo=False,
     ),
     ModelInfo(model=WatchModel.GA, hasAutoLight=False, hasReminders=True),
     ModelInfo(model=WatchModel.GB001, hasAutoLight=True, hasReminders=False),
@@ -194,18 +194,18 @@ _MODEL_LIST: list[ModelInfo] = [
     ModelInfo(
         model=WatchModel.GBD,
         hasAutoLight=True, hasReminders=False,
-        worldCities=False, hasWorldCities=False, hasTemperature=False,
+        hasWorldCities=False, hasTemperature=False,
     ),
     ModelInfo(
         model=WatchModel.GBD_800,
         hasAutoLight=True, hasReminders=False,
         hasTemperature=False, hasBatteryLevel=False,
-        worldCities=False, hasWorldCities=False, hasHomeTime=False,
+        hasWorldCities=False, hasHomeTime=False,
     ),
     ModelInfo(
         model=WatchModel.EQB,
         hasAutoLight=True, hasReminders=False,
-        worldCities=False, hasWorldCities=False, hasTemperature=False,
+        hasWorldCities=False, hasTemperature=False,
     ),
     ModelInfo(
         model=WatchModel.ECB,
@@ -490,6 +490,10 @@ class WatchInfo:
         return self.info.dstCount
 
     @property
+    def hasAppInfo(self) -> int:
+        return self.info.hasAppInfo
+
+    @property
     def alarmCount(self) -> int:
         return self.info.alarmCount
 
@@ -512,10 +516,6 @@ class WatchInfo:
     @property
     def weekLanguageSupported(self) -> bool:
         return self.info.weekLanguageSupported
-
-    @property
-    def worldCities(self) -> bool:
-        return self.info.worldCities
 
     @property
     def hasWorldCities(self) -> bool:
