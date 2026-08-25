@@ -59,6 +59,7 @@ class StepCounterIOFunctional:
             hourly_steps=hourly_steps,
             daily_history=daily_history,
             current_day_steps=current_day_steps,
+            payload=payload,
         )
 
 

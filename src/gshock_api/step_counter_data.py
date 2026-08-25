@@ -11,6 +11,7 @@ class StepCounterData:
     hourly_steps: list[int | None] = field(default_factory=list)
     daily_history: list[int | None] = field(default_factory=list)
     current_day_steps: int | None = None
+    payload: bytes = None
 
     @classmethod
     def unavailable(cls) -> "StepCounterData":
