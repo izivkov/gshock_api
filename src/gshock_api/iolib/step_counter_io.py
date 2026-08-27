@@ -69,9 +69,11 @@ class StepCounterIO:
     connection: ConnectionProtocol | None = None
     accumulator: bytearray = bytearray()
     expected_length: int = FALLBACK_EXPECTED_LENGTH
+    reset: bool = True
 
     @staticmethod
-    async def request(connection: ConnectionProtocol) -> StepCounterData:
+    async def request(connection: ConnectionProtocol, reset: bool = False) -> StepCounterData:
+        """Request steps counter data from the watch and optionally reset them"""
         from gshock_api.watch_info import watch_info
 
         if not watch_info.hasStepCounter:
@@ -79,6 +81,7 @@ class StepCounterIO:
             return StepCounterData.unavailable()
 
         StepCounterIO.connection = connection
+        StepCounterIO.reset = reset
         StepCounterIO.accumulator = bytearray()
         StepCounterIO.expected_length = FALLBACK_EXPECTED_LENGTH
         StepCounterIO.result = CancelableResult[StepCounterData]()
@@ -109,7 +112,7 @@ class StepCounterIO:
 
     @staticmethod
     def on_received(data: bytes) -> None:
-        """Accumulates incoming fragments and parses StepCounterData when full payload is received."""
+        """Accumulates incoming fragments and parses StepCounterData when full payload is received. Acknowledge the transaction if `reset` was passed earlier so the watch reset the counters."""
         if StepCounterIO.result is None:
             return
 
@@ -122,8 +125,8 @@ class StepCounterIO:
         if len(StepCounterIO.accumulator) < StepCounterIO.expected_length:
             return
 
-        # Acknowledge end of transaction
-        if StepCounterIO.connection is not None:
+        # Acknowledge end of transaction if reset was requested
+        if StepCounterIO.connection is not None and StepCounterIO.reset:
             try:
                 # Fire-and-forget end transaction command
                 import asyncio

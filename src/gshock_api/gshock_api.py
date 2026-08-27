@@ -97,9 +97,9 @@ class GshockAPI:
         """Gets the daily step count total for step counter supported watches."""
         return await watch_info.protocol.get_step_count_today(self.connection)
 
-    async def get_step_count(self) -> StepCounterData:
+    async def get_step_count(self, reset: bool = True) -> StepCounterData:
         """Gets complete step counter data (hourly and daily history)."""
-        return await watch_info.protocol.get_step_count(self.connection)
+        return await watch_info.protocol.get_step_count(self.connection, reset)
 
     async def get_reminders(self) -> list[Any]:
         """Gets the current events (reminders) from the watch."""

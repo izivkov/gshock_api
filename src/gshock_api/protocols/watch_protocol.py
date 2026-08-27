@@ -144,7 +144,7 @@ class WatchProtocol(ABC):
         pass
 
     @abstractmethod
-    async def get_step_count(self, connection: Any) -> Any:
+    async def get_step_count(self, connection: Any, reset: bool) -> Any:
         """Gets complete step counter data from the watch."""
         pass
 
