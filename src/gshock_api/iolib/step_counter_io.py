@@ -69,11 +69,11 @@ class StepCounterIO:
     connection: ConnectionProtocol | None = None
     accumulator: bytearray = bytearray()
     expected_length: int = FALLBACK_EXPECTED_LENGTH
-    reset: bool = True
+    peek: bool = True
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, reset: bool = False) -> StepCounterData:
-        """Request steps counter data from the watch and optionally reset them"""
+    async def request(connection: ConnectionProtocol, peek: bool = True) -> StepCounterData:
+        """Request steps counter data from the watch. If peek was set, do not end transaction after receiving data, otherwise send end transaction command to watch."""
         from gshock_api.watch_info import watch_info
 
         if not watch_info.hasStepCounter:
@@ -81,7 +81,7 @@ class StepCounterIO:
             return StepCounterData.unavailable()
 
         StepCounterIO.connection = connection
-        StepCounterIO.reset = reset
+        StepCounterIO.peek = peek
         StepCounterIO.accumulator = bytearray()
         StepCounterIO.expected_length = FALLBACK_EXPECTED_LENGTH
         StepCounterIO.result = CancelableResult[StepCounterData]()
@@ -112,7 +112,7 @@ class StepCounterIO:
 
     @staticmethod
     def on_received(data: bytes) -> None:
-        """Accumulates incoming fragments and parses StepCounterData when full payload is received. Acknowledge the transaction if `reset` was passed earlier so the watch reset the counters."""
+        """Accumulates incoming fragments and parses StepCounterData when full payload is received. If peek was set, do not end transaction."""
         if StepCounterIO.result is None:
             return
 
@@ -125,8 +125,8 @@ class StepCounterIO:
         if len(StepCounterIO.accumulator) < StepCounterIO.expected_length:
             return
 
-        # Acknowledge end of transaction if reset was requested
-        if StepCounterIO.connection is not None and StepCounterIO.reset:
+        # StepCounterIO.peek is True means we are peeking at the data, so we don't want to send the end transaction command. If it's False, we want to send the end transaction command to tell the watch we're done.
+        if StepCounterIO.connection is not None and not StepCounterIO.peek:
             try:
                 # Fire-and-forget end transaction command
                 import asyncio

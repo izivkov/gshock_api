@@ -192,7 +192,7 @@ class StandardProtocol(WatchProtocol):
         data = await StepCounterIO.request(connection)
         return data.current_day_steps if data.current_day_steps is not None else 0
 
-    async def get_step_count(self, connection: Any, reset: bool = True) -> Any:
+    async def get_step_count(self, connection: Any, peek: bool = False) -> Any:
         from gshock_api.iolib.step_counter_io import StepCounterIO
         return await StepCounterIO.request(connection, reset)
 
