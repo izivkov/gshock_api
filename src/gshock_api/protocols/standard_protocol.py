@@ -149,7 +149,8 @@ class StandardProtocol(WatchProtocol):
             time_adj_res = await message_dispatcher.TimeAdjustmentIO.request(connection)
             if isinstance(settings, dict) and isinstance(time_adj_res, dict):
                 val = time_adj_res.get("timeAdjustment")
-                settings["timeAdjustment"] = str(val).lower() in ("true", "1")
+                settings["time_adjustment"] = str(val).lower() in ("true", "1")
+                settings["time_adjustment_minutes_after_hour"] = time_adj_res.get("minutesAfterHour")
         except Exception:
             pass
         return settings
