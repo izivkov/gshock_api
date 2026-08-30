@@ -13,6 +13,7 @@ class Settings:
     power_saving_mode: bool = False
     button_tone: bool = True
     time_adjustment: bool = True
+    time_adjustment_minutes_after_hour: int = 30
 
 # Instantiate the settings object using the typed dataclass
 settings: Settings = Settings()
