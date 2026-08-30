@@ -11,6 +11,7 @@ from gshock_api.exceptions import GShockConnectionError, GShockIgnorableExceptio
 from gshock_api.logger import logger
 from gshock_api.scanner import scanner
 from gshock_api.utils import to_casio_cmd
+from gshock_api.watch_info import watch_info
 
 T = TypeVar("T")
 
@@ -68,6 +69,7 @@ class Connection:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
 
+            watch_info.set_name_and_model(self.client.name)
             await self.init_characteristics_map()
 
             # Subscribe to notifications on every characteristic that supports
