@@ -1,4 +1,5 @@
 import struct
+from datetime import datetime
 from typing import Final
 
 from gshock_api.cancelable_result import CancelableResult
@@ -24,6 +25,18 @@ class StepCounterIOFunctional:
 
     @staticmethod
     def parse(payload: bytes) -> StepCounterData | None:
+        def bcd(byte: int) -> int:
+            """Decode one packed-BCD byte."""
+            high, low = divmod(byte, 16)
+            if high > 9 or low > 9:
+                raise ValueError(f"invalid BCD byte 0x{byte:02x}")
+            return high * 10 + low
+
+        def decode_timestamp(data: bytes) -> datetime:
+            """Decode the six-byte timestamp at the start of a record."""
+            values = [bcd(byte) for byte in data[:6]]
+            return datetime(2000 + values[0], *values[1:])
+
         daily_history_offset = (
             StepCounterIOFunctional.HEADER_SIZE
             + StepCounterIOFunctional.HOURLY_SLOT_COUNT * StepCounterIOFunctional.HOURLY_SLOT_SIZE
@@ -52,10 +65,10 @@ class StepCounterIOFunctional:
         cur_val = struct.unpack_from("<I", payload, current_day_offset)[0]
         current_day_steps = None if cur_val == 0xFFFFFFFE else cur_val
 
+        timestamp = decode_timestamp(payload)
+
         return StepCounterData(
-            day_of_week=payload[1],
-            month=payload[2],
-            day_of_month=payload[3],
+            timestamp=timestamp,
             hourly_steps=hourly_steps,
             daily_history=daily_history,
             current_day_steps=current_day_steps,
