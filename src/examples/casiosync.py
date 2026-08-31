@@ -16,7 +16,7 @@ from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
 
 
-async def _fetch_step_counter(api: GshockAPI, *, peek: bool, print_log: bool) -> None:
+async def _fetch_step_counter(api: GshockAPI, *, peek: bool, print_log: bool, raw: bool) -> None:
     """Fetch step counter from the watch, parse it, and optionally emit log lines."""
     from gshock_api.iolib.step_counter_io import StepCounterIO
     from lifelog import Lifelog
@@ -27,11 +27,11 @@ async def _fetch_step_counter(api: GshockAPI, *, peek: bool, print_log: bool) ->
     log = Lifelog.parse(steps.payload)
     logger.info(f"parsed lifelog: {log.total_steps} steps, {log.total_distance}m")
 
+    if raw:
+        print(base64.b64encode(zlib.compress(steps.payload)).decode())
+
     if not print_log:
         return
-
-    raw = base64.b64encode(zlib.compress(steps.payload)).decode()
-    print(f'lifelog buffer="{raw}"')
 
     for entry in log.lifelog_entries():
         parts = [
@@ -53,6 +53,7 @@ async def main() -> None:
     parser.add_argument("--timeout", type=float, default=-1.0, help="Connection timeout in seconds (-1 for infinite)")
     parser.add_argument("--peek", action="store_true", help="Fetch step counter data without clearing the watch's hourly buffer")
     parser.add_argument("--log", action="store_true", help="Print step counter data in a structured log format to stdout")
+    parser.add_argument("--raw", action="store_true", help="Print raw step counter data to stdout")
     parser.add_argument("--quiet", action="store_true", help="Reduce log output on stderr (only print errors)")
     args = parser.parse_args()
 
@@ -91,7 +92,7 @@ async def main() -> None:
         # Lifelog must come before set_time in all modes because
         # set_time → initialize_for_setting_time() kills 0x11 writability.
         try:
-            await _fetch_step_counter(api, peek=args.peek, print_log=args.log)
+            await _fetch_step_counter(api, peek=args.peek, print_log=args.log, raw=args.raw)
         except Exception as e:
             logger.warning(f"Lifelog fetch failed: {e}")
 
