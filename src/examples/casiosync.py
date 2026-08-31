@@ -96,7 +96,7 @@ async def main() -> None:
             logger.warning(f"Lifelog fetch failed: {e}")
 
         logger.info("Syncing time...")
-        await api.set_time(time.time(), adjust_reason=0)
+        await api.set_time()
 
     except GShockConnectionError as e:
         logger.error(f"Connection problem: {e}")
