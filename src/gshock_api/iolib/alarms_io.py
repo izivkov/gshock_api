@@ -1,7 +1,7 @@
 import json
 from typing import Protocol as TypingProtocol
 
-from gshock_api.alarms import alarm_decoder, alarms_inst
+from gshock_api.model.alarms import alarm_decoder, alarms_inst
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write

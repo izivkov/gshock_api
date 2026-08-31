@@ -13,7 +13,7 @@ from gshock_api.always_connected_watch_filter import (
 )
 from gshock_api.app_notification import AppNotification, NotificationType
 from gshock_api.connection import Connection
-from gshock_api.event import Event, RepeatPeriod, create_event_date
+from gshock_api.model.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger

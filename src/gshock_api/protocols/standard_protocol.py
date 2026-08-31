@@ -129,7 +129,7 @@ class StandardProtocol(WatchProtocol):
         return getattr(cond, "temperature", 0)
 
     async def get_alarms(self, connection: Any) -> list[Any]:
-        from gshock_api.alarms import alarms_inst
+        from gshock_api.model.alarms import alarms_inst
         from gshock_api import message_dispatcher
         alarms_inst.clear()
         await message_dispatcher.AlarmsIO.request(connection)

@@ -5,7 +5,7 @@ from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.step_counter_data import StepCounterData
+from gshock_api.model.step_counter_data import StepCounterData
 from gshock_api.watch_info import watch_info
 
 T = TypeVar("T")

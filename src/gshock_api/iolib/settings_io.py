@@ -7,7 +7,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.logger import logger
-from gshock_api.settings import settings
+from gshock_api.model.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.watch_info import watch_info, WatchModel
 

@@ -4,7 +4,7 @@ from typing import Final
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.logger import logger
-from gshock_api.step_counter_data import StepCounterData
+from gshock_api.model.step_counter_data import StepCounterData
 
 FALLBACK_EXPECTED_LENGTH: Final[int] = 400
 DRSP_CATEGORY_EXERCISE: Final[int] = 0x11
