@@ -47,16 +47,15 @@ class Connection:
     async def connect(self, watch_filter: WatchFilter = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
         try:
-            if self.address is None:
-                device: Device = await scanner.scan(
-                    device_address=self.address,
-                    watch_filter=watch_filter
-                )
-                if device is None:
-                    logger.info("No G-Shock device found or name matches excluded watches.")
-                    return False
+            device: Device = await scanner.scan(
+                device_address=self.address,
+                watch_filter=watch_filter
+            )
+            if device is None:
+                logger.info("No G-Shock device found or name matches excluded watches.")
+                return False
 
-                self.address = device.address
+            self.address = device.address
 
             if self.address is None:
                 return False
