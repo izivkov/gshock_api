@@ -8,7 +8,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent / 'gshock_api/src'))
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from gshock_api.connection import Connection
 from gshock_api.exceptions import GShockConnectionError
