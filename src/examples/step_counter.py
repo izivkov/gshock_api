@@ -1,3 +1,32 @@
+"""
+Step counter example CLI
+
+This script reads the G-Shock step-counter lifelog and prints human-friendly
+output for debugging and demonstration purposes. Modes of operation:
+
+- Live BLE: connect to a paired watch using `Connection` + `GshockAPI` and
+    fetch step data via `get_step_summary()` (quick total) or
+    `get_step_history()` / `get_step_count(peek=...)` (full history).
+- HCI / stdin: extract a life-log payload from a BTSnoop HCI text file or
+    read raw/hex bytes from stdin and parse locally with
+    `StepCounterIOFunctional.parse()`.
+
+Key behaviors:
+- Prefers the longest successfully-parsed HCI/stdin candidate to avoid
+    truncated fragments from logs.
+- Outputs a two-column Summary table, an hourly table with optional per-hour
+    calorie allocation, and a detailed 10-minute-slot table for today.
+- Computes a simple calorie estimate using distance (or steps*stride) with
+    CLI-configurable `--weight` and `--stride` (defaults: 70.0 kg, 0.762 m).
+- `--permissive` toggles permissive hourly aggregation (treat missing slots
+    as zero). `--strict` causes the script to fail loudly and dump the raw
+    payload when timestamp decoding is invalid.
+
+This example is for demonstration and debugging — production usage should
+use the IO/parser layers (`StepCounterIOFunctional`) and higher-level APIs
+in `gshock_api` directly.
+"""
+
 import asyncio
 import argparse
 import logging
