@@ -14,6 +14,25 @@
 - The example `src/examples/step_counter.py` was updated to print the new fields and to include the new CLI flags for permissive aggregation and raw payload output.
 
 
+## [2.0.41] - 2026-09-02 - Step counter timestamp parsing, robustness, and example refinements
+
+### Added
+- `GshockAPI.get_step_summary()` and `GshockAPI.get_step_history()` convenience methods to explicitly request a quick daily total or the full step history.
+- Example improvements in `src/examples/step_counter.py`: `--summary`, `--history`, and `--strict` flags; improved stdin/HCI handling; and debug logging for matched HCI candidates.
+
+### Fixed
+- `StepCounterIOFunctional.parse()` now decodes the 6-byte packed-BCD timestamp correctly and tolerates sentinel bytes (0xFE/0xFF) for missing subfields. When year/month/day are present a `timestamp` (`datetime`) is constructed; otherwise the parser emits a warning and leaves `timestamp=None`.
+
+### Changed
+- `StepCounterData` now exposes a single `timestamp: datetime | None` field (replacing separate `day_of_week/month/day_of_month` header fields) so callers get a canonical instant covering year/month/day/hour/minute/second when available.
+- IO-level parsing is more robust: the example now prefers the longest successfully-parsed HCI/STDIN candidate (to avoid picking short/truncated fragments), and warns when payloads are truncated or timestamp bytes are invalid.
+- `src/examples/step_counter.py` strict mode (`--strict`) will dump the raw payload hex to `failed_step_payload_YYYYMMDD_HHMMSS.hex` and fail loudly when timestamp decoding is invalid — useful for deterministic CI or postmortem debugging.
+
+### Notes
+- The timestamp decoding change improves ergonomics for consumers by providing a single, validated `datetime`. The parser remains conservative: invalid or incomplete timestamp bytes produce warnings and do not crash normal (non-strict) workflows.
+- If you rely on legacy `day_of_week/month/day_of_month` fields, update callers to use `timestamp` or access derived properties as needed.
+
+
 ## [2.0.39] - 2026-08-17 - WatchProtocol Design Pattern, WatchInfo Alignment, GW-BX5600 & ABL-100 Support
 
 ### Added

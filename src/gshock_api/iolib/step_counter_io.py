@@ -39,14 +39,38 @@ class StepCounterIOFunctional:
 
         warnings: list[str] = []
 
-        day_of_week = payload[1]
-        month = payload[2]
-        day_of_month = payload[3]
-        if day_of_week not in range(1, 8) or month not in range(1, 13) or day_of_month not in range(1, 32):
-            warnings.append("invalid date metadata in step counter header; watch may have partial/fresh life-log data")
-            day_of_week = 0
-            month = 0
-            day_of_month = 0
+        # Decode a 6-byte BCD timestamp from payload[1:7] (year, month, day, hour, minute, second).
+        timestamp = None
+        try:
+            if len(payload) >= 7:
+                raw_ts = payload[1:7]
+                vals: list[int | None] = []
+                for b in raw_ts:
+                    if b in (0xFE, 0xFF):
+                        vals.append(None)
+                    else:
+                        vals.append(_decode_bcd(b))
+
+                # Require year/month/day to construct a meaningful timestamp.
+                if vals[0] is None or vals[1] is None or vals[2] is None:
+                    warnings.append("incomplete BCD date in step counter header; timestamp unavailable")
+                    timestamp = None
+                else:
+                    year = 2000 + vals[0]
+                    month = vals[1]
+                    day = vals[2]
+                    hour = vals[3] or 0
+                    minute = vals[4] or 0
+                    second = vals[5] or 0
+                    from datetime import datetime as _dt
+
+                    timestamp = _dt(year, month, day, hour, minute, second)
+            else:
+                warnings.append("step record too short to contain timestamp")
+                timestamp = None
+        except ValueError:
+            warnings.append("invalid BCD timestamp in step counter header; watch may have partial/fresh life-log data")
+            timestamp = None
 
         daily_history_offset = (
             StepCounterIOFunctional.HEADER_SIZE
@@ -137,9 +161,7 @@ class StepCounterIOFunctional:
         daily_history_list = [{"days_ago": i + 1, "steps": v} for i, v in enumerate(daily_history)]
 
         return StepCounterData(
-            day_of_week=day_of_week,
-            month=month,
-            day_of_month=day_of_month,
+            timestamp=timestamp,
             hourly_steps=hourly_steps,
             daily_history=daily_history,
             current_day_steps=current_day_steps,

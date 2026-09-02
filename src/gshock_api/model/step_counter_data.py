@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Optional
 
 
 @dataclass
@@ -10,9 +12,8 @@ class StepCounterData:
     not need to parse the raw BLE payload themselves.
     """
 
-    day_of_week: int = 0
-    month: int = 0
-    day_of_month: int = 0
+    # Timestamp covering year/month/day/hour/minute/second when available.
+    timestamp: Optional[datetime] = None
     hourly_steps: list[int | None] = field(default_factory=list)
     daily_history: list[int | None] = field(default_factory=list)
     # Friendly, pre-computed representations filled by the IO layer
@@ -30,9 +31,7 @@ class StepCounterData:
     @classmethod
     def unavailable(cls) -> "StepCounterData":
         return cls(
-            day_of_week=0,
-            month=0,
-            day_of_month=0,
+            timestamp=None,
             hourly_steps=[],
             daily_history=[],
             current_day_steps=None,
