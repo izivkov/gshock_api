@@ -21,10 +21,6 @@ Key behaviors:
 - `--permissive` toggles permissive hourly aggregation (treat missing slots
     as zero). `--strict` causes the script to fail loudly and dump the raw
     payload when timestamp decoding is invalid.
-
-This example is for demonstration and debugging — production usage should
-use the IO/parser layers (`StepCounterIOFunctional`) and higher-level APIs
-in `gshock_api` directly.
 """
 
 import asyncio
