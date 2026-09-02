@@ -170,7 +170,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasStepCounter=True,
         hasDateFormat=False,
         weekLanguageSupported=False,
-        hasAppInfo=False,
+        hasAppInfo=True,
     ),
     ModelInfo(model=WatchModel.GA, hasAutoLight=False, hasReminders=True),
     ModelInfo(model=WatchModel.GB001, hasAutoLight=True, hasReminders=False),

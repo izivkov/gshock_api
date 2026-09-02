@@ -3,15 +3,47 @@ from dataclasses import dataclass, field
 
 @dataclass
 class StepCounterData:
-    """ABL-100WE life-log record representation."""
+    """ABL-100WE life-log record representation.
+
+    The library keeps the lightweight fields required for the public API, while also
+    preserving optional raw/derived values when a watch record is present. Callers do
+    not need to parse the raw BLE payload themselves.
+    """
 
     day_of_week: int = 0
     month: int = 0
     day_of_month: int = 0
     hourly_steps: list[int | None] = field(default_factory=list)
     daily_history: list[int | None] = field(default_factory=list)
+    # Friendly, pre-computed representations filled by the IO layer
+    hourly_intervals: list[dict] = field(default_factory=list)
+    hourly_by_hour: list[int | None] = field(default_factory=list)
+    daily_history_list: list[dict] = field(default_factory=list)
     current_day_steps: int | None = None
+    raw: bytes | None = None
+    warnings: list[str] = field(default_factory=list)
+    distance_meters: int | None = None
+    pending_distance_meters: int | None = None
+    total_distance_meters: int | None = None
+    bcd_total_steps: int | None = None
 
     @classmethod
     def unavailable(cls) -> "StepCounterData":
-        return cls(0, 0, 0, [], [], None)
+        return cls(
+            day_of_week=0,
+            month=0,
+            day_of_month=0,
+            hourly_steps=[],
+            daily_history=[],
+            current_day_steps=None,
+            raw=b"",
+            warnings=["step counter unavailable"],
+            distance_meters=None,
+            pending_distance_meters=None,
+            total_distance_meters=None,
+            bcd_total_steps=None,
+        )
+
+    # NOTE: Friendly representations (hourly_intervals, hourly_by_hour,
+    # daily_history_list) are populated by the IO layer when parsing raw
+    # payloads. This keeps `StepCounterData` a plain data container.

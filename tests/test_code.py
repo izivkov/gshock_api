@@ -20,6 +20,12 @@ from gshock_api.iolib.world_cities_io import WorldCitiesIOFunctional
 
 
 class TestGShockFunctionalAPI(unittest.TestCase):
+    def test_zero_key_is_ignored(self):
+        from gshock_api.protocols.standard_protocol import StandardProtocol
+
+        self.assertIsNone(StandardProtocol().extract_key(b"\x00\x05\x00\x00"))
+        self.assertEqual(StandardProtocol().extract_key(b"\x11\x0f\x0f"), 0x11)
+
     # --- TimeIO Tests ---
     def test_deterministic_time_encoding(self):
         dt = datetime(2026, 5, 30, 8, 45, 30, 123456)
@@ -298,6 +304,60 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(parsed.hourly_steps[0], 10)
         self.assertEqual(len(parsed.daily_history), 14)
         self.assertEqual(parsed.daily_history[0], 5000)
+        self.assertEqual(parsed.raw, bytes(payload))
+        self.assertEqual(parsed.warnings, [])
+        self.assertEqual(parsed.distance_meters, 0)
+        self.assertEqual(parsed.pending_distance_meters, 0)
+
+    def test_step_counter_hci_log_parses_real_data(self):
+        from pathlib import Path
+
+        from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
+        from src.examples.step_counter import _extract_step_payload_from_hci
+
+        hci_path = Path(__file__).resolve().parents[1] / "test_data" / "btsnoop_hci_ABL.txt"
+        payload = _extract_step_payload_from_hci(hci_path)
+
+        self.assertIsNotNone(payload)
+        self.assertTrue(payload.startswith(b"\x26"))
+
+        parsed = StepCounterIOFunctional.parse(payload)
+        self.assertIsNotNone(parsed)
+        self.assertEqual(parsed.day_of_week, 7)
+        self.assertEqual(parsed.month, 1)
+        self.assertEqual(parsed.day_of_month, 24)
+        self.assertIn("step record truncated", " ".join(parsed.warnings))
+        self.assertEqual(len(parsed.hourly_steps), 144)
+        self.assertEqual(len(parsed.daily_history), 14)
+
+    def test_step_counter_rejects_impossible_calendar_metadata(self):
+        from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
+
+        payload = bytearray(400)
+        payload[0] = 0x26
+        payload[1] = 0x09
+        payload[2] = 0x01
+        payload[3] = 0x22
+        payload[4] = 0x16
+        payload[5] = 0x01
+
+        for i in range(144):
+            offset = 6 + i * 2
+            payload[offset:offset + 2] = (0xFFFE).to_bytes(2, "little")
+
+        parsed = StepCounterIOFunctional.parse(bytes(payload))
+        self.assertIsNotNone(parsed)
+        self.assertEqual(parsed.day_of_week, 0)
+        self.assertEqual(parsed.month, 0)
+        self.assertEqual(parsed.day_of_month, 0)
+        self.assertTrue(any("invalid date" in warning for warning in parsed.warnings))
+
+    def test_step_counter_request_closes_transaction_by_default(self):
+        import inspect
+
+        from gshock_api.iolib.step_counter_io import StepCounterIO
+
+        self.assertFalse(inspect.signature(StepCounterIO.request).parameters["peek"].default)
 
     # --- CasioTimeZoneHelper Tests ---
     def test_casio_time_zone_helper(self):

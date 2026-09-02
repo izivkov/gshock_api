@@ -67,6 +67,7 @@ class AppInfoIO:
 
     @staticmethod
     def on_received(data: bytes) -> None:
+        print(f"AppInfoIO.on_received: {to_hex_string(data)}")
         async def set_app_info(data_bytes: bytes) -> None:
             commands = AppInfoIOFunctional.prepare_watch_response(data_bytes)
             if commands:

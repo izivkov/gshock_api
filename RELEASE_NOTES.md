@@ -1,5 +1,19 @@
 # G-Shock API Release Notes
 
+## [2.0.40] - 2026-09-02 - Step counter UX and example improvements
+
+### Added
+- `StepCounterData` friendly representations: `hourly_intervals`, `hourly_by_hour`, and `daily_history_list` are now populated by the IO parser for easier consumption by applications.
+- Example CLI flags: `--permissive` (treat missing 10-minute slots as zero for aggregation) and `--raw` (print raw payload hex) added to `src/examples/step_counter.py` for debugging and flexible output.
+
+### Changed
+- Moved formatting/aggregation helpers into `StepCounterIOFunctional.parse()` so the IO layer produces ready-to-use, human-friendly fields. The model remains a plain data container with these friendly fields populated by the parser.
+- Hourly aggregation is now strict by default: if any 10-minute slot in an hour is missing the whole hour is reported as `None`. Use `--permissive` to sum missing slots as zero.
+
+### Notes
+- The example `src/examples/step_counter.py` was updated to print the new fields and to include the new CLI flags for permissive aggregation and raw payload output.
+
+
 ## [2.0.39] - 2026-08-17 - WatchProtocol Design Pattern, WatchInfo Alignment, GW-BX5600 & ABL-100 Support
 
 ### Added

@@ -60,8 +60,11 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         logger.info(f"pressed button: {pressed_button}")
 
         logger.info("Getting step count today...")
-        steps = await api.get_step_count_today()
-        logger.info(f"steps: {steps}")
+        steps_today = await api.get_step_count_today()
+        logger.info(f"steps today: {steps_today}")
+
+        steps_life_log = await api.get_step_count()
+        logger.info(f"steps life log: {steps_life_log}")
 
         watch_name = await api.get_watch_name()
         logger.info(f"got watch name: {watch_name}")
@@ -124,13 +127,14 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             Event().create_event(json.loads(event_json_str))
             logger.info(f"Created event: {pformat(json.loads(event_json_str))}")
 
-            reminders = await api.get_reminders()
-            for reminder in reminders:
-                logger.info (f"reminder: {pformat(reminder)}")
+            if watch_info.hasReminders:
+                reminders = await api.get_reminders()
+                for reminder in reminders:
+                    logger.info (f"reminder: {pformat(reminder)}")
 
-            reminders[3]["title"] = "Test Event"
+                reminders[3]["title"] = "Test Event"
 
-            await api.set_reminders(reminders)
+                await api.set_reminders(reminders)
 
     except GShockConnectionError as e:
         logger.info(f"Connection problem: {e}")

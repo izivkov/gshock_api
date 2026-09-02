@@ -97,8 +97,12 @@ class GshockAPI:
         """Gets the daily step count total for step counter supported watches."""
         return await watch_info.protocol.get_step_count_today(self.connection)
 
-    async def get_step_count(self, peek: bool = True) -> StepCounterData:
-        """Gets complete step counter data (hourly and daily history)."""
+    async def get_step_count(self, peek: bool = False) -> StepCounterData:
+        """Gets complete step counter data (hourly and daily history).
+
+        The default behavior closes the transaction after the read so the connection
+        remains usable for follow-up BLE commands such as time changes.
+        """
         return await watch_info.protocol.get_step_count(self.connection, peek)
 
     async def get_reminders(self) -> list[Any]:

@@ -18,7 +18,10 @@ class StandardProtocol(WatchProtocol):
     def extract_key(self, data: bytes) -> int | None:
         if not data:
             return None
-        return data[0]
+        key = data[0]
+        if key == 0:
+            return None
+        return key
 
     def unwrap_payload(self, data: bytes, key: int) -> bytes:
         return data
