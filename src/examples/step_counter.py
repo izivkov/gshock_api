@@ -149,6 +149,7 @@ async def main() -> None:
     parser.add_argument("--log", action="store_true", help="Print the step summary to stdout")
     parser.add_argument("--quiet", action="store_true", help="Reduce log output on stderr (only print errors)")
     parser.add_argument("--hci", type=str, help="Read steps from a BTSnoop HCI log file instead of a live watch")
+    parser.add_argument("--stdin", action="store_true", help="Read step payload (raw bytes or hex) from stdin")
     args = parser.parse_args()
 
     if args.quiet:
@@ -162,11 +163,57 @@ async def main() -> None:
     logger.info("=======================================================================")
     logger.info("")
 
-    if args.hci:
+    if args.hci or args.stdin:
         logger.info(f"Reading step-counter data from HCI log: {args.hci}")
-        payload = _extract_step_payload_from_hci(args.hci)
-        if payload is None:
-            raise ValueError(f"No readable step payload found in HCI log: {args.hci}")
+        # Support three modes:
+        #  - --hci <path>: extract payload from BTSnoop text file
+        #  - --hci - : read payload bytes or hex from stdin
+        #  - --stdin : read payload bytes or hex from stdin
+        if args.hci and args.hci != "-":
+            payload = _extract_step_payload_from_hci(args.hci)
+            if payload is None:
+                raise ValueError(f"No readable step payload found in HCI log: {args.hci}")
+        else:
+            # read from stdin.buffer; accept raw bytes starting with 0x26 or hex text
+            data = sys.stdin.buffer.read()
+            if not data:
+                raise ValueError("No data provided on stdin")
+            # If the first byte looks like the life-log marker, treat as raw
+            if data and data[0] == 0x26:
+                payload = data
+            else:
+                # decode as text and try to extract ATT 'Value:' hex fields
+                text = data.decode(errors="ignore")
+                # Find hex groups following 'Value:' or plain hex groups per line
+                candidates = []
+                for m in re.finditer(r"Value:\s*([0-9A-Fa-f]+)", text):
+                    candidates.append(m.group(1))
+                if not candidates:
+                    # fallback: any long hex group on its own line
+                    for m in re.finditer(r"\b([0-9A-Fa-f]{6,})\b", text):
+                        candidates.append(m.group(1))
+
+                payload = None
+                for hexstr in candidates:
+                    try:
+                        raw = bytes.fromhex(hexstr)
+                    except Exception:
+                        continue
+                    start = raw.find(b"\x26")
+                    if start == -1:
+                        continue
+                    candidate = raw[start:]
+                    # Try to parse candidate payload; ignore parse-time errors
+                    try:
+                        parsed = StepCounterIOFunctional.parse(candidate)
+                    except Exception:
+                        parsed = None
+                    if parsed is not None:
+                        payload = candidate
+                        break
+
+                if payload is None:
+                    raise ValueError("Stdin did not contain a parsable step payload")
 
         step_data = StepCounterIOFunctional.parse(payload)
         if step_data is None:
