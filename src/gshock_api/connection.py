@@ -11,7 +11,6 @@ from gshock_api.exceptions import GShockConnectionError, GShockIgnorableExceptio
 from gshock_api.logger import logger
 from gshock_api.scanner import scanner
 from gshock_api.utils import to_casio_cmd
-from gshock_api.watch_info import watch_info
 
 T = TypeVar("T")
 
@@ -45,7 +44,7 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid
 
-    async def connect(self, watch_filter: WatchFilter = None, timeout: float = 30) -> bool:
+    async def connect(self, watch_filter: WatchFilter = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
         try:
             if self.address is None:
@@ -62,21 +61,13 @@ class Connection:
             if self.address is None:
                 return False
 
-            self.client = BleakClient(self.address, timeout=timeout)
+            self.client = BleakClient(self.address)
             await self.client.connect()
-
-            # Ensure services are discovered (some backends need an explicit call)
-            try:
-                await self.client.get_services()
-            except Exception:
-                # get_services may not exist or may fail on some backends; fallback to using .services
-                pass
 
             if not self.client.is_connected:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
 
-            watch_info.set_name_and_model(self.client.name)
             await self.init_characteristics_map()
 
             # Subscribe to notifications on every characteristic that supports

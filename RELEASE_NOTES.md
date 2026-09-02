@@ -34,6 +34,25 @@
 - If you rely on legacy `day_of_week/month/day_of_month` fields, update callers to use `timestamp` or access derived properties as needed.
 
 
+## [2.0.42] - 2026-09-02 - Example UX, calorie estimates, and connection robustness
+
+### Added
+- Example `src/examples/step_counter.py` now computes a local calorie estimate and prints `estimated_calories_kcal`. The example accepts `--weight` and `--stride` (defaults: `70.0` kg, `0.762` m) to control the estimate.
+- The example prints a tidy two-column `Summary` table and tabulated `Hourly by hour` and `Today (10-minute slots by hour)` views for easier human consumption.
+
+### Fixed
+- Prevented a fatal formatting error in the example summary output by using safe string padding when rendering fields.
+- Improved BLE connection reliability: ensure GATT services are discovered after connect by invoking `BleakClient.get_services()` where available so characteristics and notifications are reliably found.
+- `src/examples/api_tests.py` now checks the boolean return value of `Connection.connect(...)` and aborts early when service discovery or connect fails to avoid proceeding with an incomplete connection.
+
+### Changed
+- Example stdin/HCI parsing: prefer the longest successfully-parsed HCI/STDIN candidate to avoid selecting truncated fragments; skip parse-time errors and log matched candidate previews for easier debugging.
+- `src/examples/step_counter.py` adds `--weight` and `--stride` CLI flags and displays allocated per-hour calories in the hourly table when an overall calories estimate is available.
+
+### Notes
+- These changes are purely UX and parser-level: the IO parser still populates friendly model fields (`hourly_intervals`, `hourly_by_hour`, `daily_history_list`) and the underlying data model remains backward compatible. The connection/service discovery change improves runtime robustness across Bleak backends and watch models.
+
+
 ## [2.0.39] - 2026-08-17 - WatchProtocol Design Pattern, WatchInfo Alignment, GW-BX5600 & ABL-100 Support
 
 ### Added
