@@ -43,7 +43,9 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
     try:
         logger.info("Waiting for connection...")
         connection = Connection()
-        await connection.connect(watch_filter.connection_filter)
+        connected = await connection.connect(watch_filter.connection_filter)
+        if not connected:
+            raise GShockConnectionError("Failed to find or connect to the watch before timeout.")
         logger.info("Connected...")
 
         api = GshockAPI(connection)

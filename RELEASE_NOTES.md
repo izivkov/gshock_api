@@ -19,6 +19,7 @@
 ### Added
 - `GshockAPI.get_step_summary()` and `GshockAPI.get_step_history()` convenience methods to explicitly request a quick daily total or the full step history.
 - Example improvements in `src/examples/step_counter.py`: `--summary`, `--history`, and `--strict` flags; improved stdin/HCI handling; and debug logging for matched HCI candidates.
+- Example now estimates calories locally and displays an `estimated_calories_kcal` field in `src/examples/step_counter.py`. The example accepts `--weight` (default `70.0` kg) and `--stride` (default `0.762` m) to control the estimate.
 
 ### Fixed
 - `StepCounterIOFunctional.parse()` now decodes the 6-byte packed-BCD timestamp correctly and tolerates sentinel bytes (0xFE/0xFF) for missing subfields. When year/month/day are present a `timestamp` (`datetime`) is constructed; otherwise the parser emits a warning and leaves `timestamp=None`.

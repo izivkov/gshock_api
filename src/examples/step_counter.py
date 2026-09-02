@@ -82,6 +82,8 @@ async def _fetch_steps(
     show_raw: bool = False,
     step_data: StepCounterData | None = None,
     strict: bool = False,
+    weight_kg: float = 70.0,
+    stride_m: float = 0.762,
 ) -> None:
     """Fetch the current step-counter payload and optionally print a summary."""
     if step_data is None:
@@ -140,24 +142,52 @@ async def _fetch_steps(
     if not print_log:
         return
 
-    print(f"current_day_steps={total_steps}")
-    # Print timestamp if the model provides it, else fall back to legacy fields
+    # Estimate calories (distance-based). Use distance if available,
+    # otherwise estimate distance from steps and stride length.
+    est_kcal = None
+    method = None
+    if step_data.distance_meters is not None:
+        dist_km = step_data.distance_meters / 1000.0
+        est_kcal = dist_km * weight_kg * 1.036
+        method = "distance"
+    elif step_data.current_day_steps is not None:
+        dist_m = step_data.current_day_steps * stride_m
+        dist_km = dist_m / 1000.0
+        est_kcal = dist_km * weight_kg * 1.036
+        method = "steps"
+
+    # Build and print a neat two-column summary table
     if hasattr(step_data, "timestamp") and getattr(step_data, "timestamp"):
         ts = getattr(step_data, "timestamp")
         try:
-            print(f"timestamp={ts.isoformat()}")
+            ts_str = ts.isoformat()
         except Exception:
-            print(f"timestamp={ts}")
+            ts_str = str(ts)
     else:
-        print("timestamp=None")
-    print(f"distance_meters={step_data.distance_meters}")
-    print(f"pending_distance_meters={step_data.pending_distance_meters}")
-    print(f"total_distance_meters={step_data.total_distance_meters}")
-    print(f"bcd_total_steps={step_data.bcd_total_steps}")
-    # Print hourly aggregates (24 values) when available
-    print("hourly_by_hour=")
+        ts_str = "None"
+
+    summary = [
+        ("Current day steps", str(total_steps)),
+        ("Timestamp", ts_str),
+        ("Distance (m)", str(step_data.distance_meters)),
+        ("Pending distance (m)", str(step_data.pending_distance_meters)),
+        ("Total distance (m)", str(step_data.total_distance_meters)),
+        ("BCD total steps", str(step_data.bcd_total_steps)),
+    ]
+    if est_kcal is not None:
+        summary.append(("Estimated calories (kcal)", f"{est_kcal:.1f} (method={method}, weight_kg={weight_kg}, stride_m={stride_m})"))
+
+    # column widths
+    key_w = max(len(k) for k, _ in summary)
+    val_w = max(len(v) for _, v in summary)
+    print('\nSummary:')
+    print('Field'.ljust(key_w) + ' | ' + 'Value'.ljust(val_w))
+    print(('-' * key_w) + '-+-' + ('-' * val_w))
+    for k, v in summary:
+        print(k.ljust(key_w) + ' | ' + v.ljust(val_w))
+
+    # Print hourly aggregates neatly as a table
     if permissive:
-        # Compute permissive aggregation (treat None as 0)
         permissive_hours: list[int] = []
         for h in range(24):
             slots = step_data.hourly_steps[h * 6 : h * 6 + 6]
@@ -166,14 +196,48 @@ async def _fetch_steps(
     else:
         hours_to_print = step_data.hourly_by_hour
 
+    print('\nHourly by hour:')
+    print(f"{'Hour':>4} | {'Steps':>6} | {'kcal':>6}")
+    print('------+--------+--------')
     if hours_to_print:
-        for idx in range(0, len(hours_to_print), 6):
-            chunk = hours_to_print[idx:idx + 6]
-            print(f"  [{idx:02d}-{min(idx + 5, 23):02d}] {chunk}")
+        # allocate estimated calories proportionally to steps per hour when available
+        total_for_alloc = sum((v or 0) for v in hours_to_print)
+        for h in range(24):
+            val = hours_to_print[h] if h < len(hours_to_print) else None
+            if est_kcal is not None and total_for_alloc > 0:
+                hour_steps = (val or 0)
+                kcal_hour = est_kcal * (hour_steps / total_for_alloc) if hour_steps else 0.0
+                kcal_str = f"{kcal_hour:.1f}"
+            else:
+                kcal_str = "-"
+            print(f" {h:02d}   | { (val if val is not None else '-') :>6} | {kcal_str:>6}")
     else:
-        # Fallback to raw 10-minute slots grouped for readability
-        for idx in range(0, len(step_data.hourly_steps), 12):
-            print(f"  [{idx:03d}-{min(idx + 11, 143):03d}] {step_data.hourly_steps[idx:idx + 12]}")
+        print('Hourly breakdown unavailable')
+
+    # Detailed today's breakdown: 10-minute slots grouped by hour
+    print('\nToday (10-minute slots by hour):')
+    # Build a 144-slot list if only intervals are present
+    slots_144 = None
+    if getattr(step_data, 'hourly_steps', None):
+        slots_144 = list(step_data.hourly_steps)
+    elif getattr(step_data, 'hourly_intervals', None):
+        slots_144 = [None] * 144
+        for interval in step_data.hourly_intervals:
+            idx = interval.get('index')
+            if idx is None or idx < 0 or idx >= 144:
+                continue
+            slots_144[idx] = interval.get('steps')
+
+    if slots_144:
+        print('Hour | s0  s1  s2  s3  s4  s5  | total')
+        print('-----+------------------------+-------')
+        for h in range(24):
+            hour_slots = slots_144[h * 6 : h * 6 + 6]
+            slot_str = ' '.join(f"{(s if s is not None else '-'):>3}" for s in hour_slots)
+            total_h = sum((s or 0) for s in hour_slots)
+            print(f" {h:02d}  | {slot_str} | {total_h:>5}")
+    else:
+        print('No 10-minute slot data available for today')
 
     # Optional: show first 24 10-minute intervals
     if step_data.hourly_intervals:
@@ -207,6 +271,18 @@ async def main() -> None:
         "--permissive",
         action="store_true",
         help="When set, aggregate hours permissively (treat missing 10-min slots as 0).",
+    )
+    parser.add_argument(
+        "--weight",
+        type=float,
+        default=70.0,
+        help="Weight in kg used to estimate calories when distance is available (default: 70.0)",
+    )
+    parser.add_argument(
+        "--stride",
+        type=float,
+        default=0.762,
+        help="Average stride length in meters used to estimate distance from steps when distance is missing (default: 0.762)",
     )
     parser.add_argument("--raw", action="store_true", help="Print raw payload hex for debugging")
     parser.add_argument("--log", action="store_true", help="Print the step summary to stdout")

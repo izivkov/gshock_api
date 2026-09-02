@@ -65,6 +65,13 @@ class Connection:
             self.client = BleakClient(self.address, timeout=timeout)
             await self.client.connect()
 
+            # Ensure services are discovered (some backends need an explicit call)
+            try:
+                await self.client.get_services()
+            except Exception:
+                # get_services may not exist or may fail on some backends; fallback to using .services
+                pass
+
             if not self.client.is_connected:
                 logger.info(f"Failed to connect to {self.address}")
                 return False
