@@ -1,5 +1,21 @@
 # G-Shock API Release Notes
 
+## [2.0.43] - 2026-09-03 - Lifelog history and BLE transfer fixes
+
+### Added
+- Ported the ABL-100 lifelog record layout used by `taviso/casiosync`: packed-BCD timestamps, variable-length activity records, seven daily step/distance summaries, pending activity, and fixed live-total offsets.
+- Added daily distance values to `StepCounterData`.
+
+### Fixed
+- Routed DRSP and Convoy notifications by characteristic so fragmented lifelog packets and transfer-length announcements are processed correctly.
+- History reads now use non-destructive peek mode, preventing the watch from clearing detailed lifelog data before it is parsed.
+- Made the CLI timeout apply to BLE discovery, connection, history retrieval, and time synchronization.
+
+### Changed
+- The step-counter example now reports variable activity records and daily summaries instead of presenting the lifelog as 144 fixed 10-minute slots.
+- Watch discovery waits indefinitely by default, matching the button-initiated connection workflow; `--timeout` remains available for bounded runs.
+
+
 ## [2.0.40] - 2026-09-02 - Step counter UX and example improvements
 
 ### Added
