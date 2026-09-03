@@ -76,9 +76,10 @@ class TimeAdjustmentIO:
                 await TimeAdjustmentIO.connection.write(command.handle, command.data)
 
     @staticmethod
-    async def send_to_watch_set(message: str) -> dict[str, str] | None:
+    async def send_to_watch_set(message: str) -> None:
         if TimeAdjustmentIO.original_value is None:
-            return await ErrorIO.request("Error: Must call get before set")
+            await ErrorIO.request("Error: Must call get before set")
+            return
 
         if TimeAdjustmentIO.connection is None:
             raise RuntimeError("TimeAdjustmentIO.connection is not set")

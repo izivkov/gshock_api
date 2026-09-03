@@ -85,11 +85,14 @@ class TimerIO:
         return await TimerIO.result.get_result()
 
     @staticmethod
-    async def send_to_watch(connection: ConnectionProtocol) -> None:
+    async def send_to_watch(_message: str = "") -> None:
+        if TimerIO.connection is None:
+            raise RuntimeError("TimerIO.connection is not set")
+
         commands = TimerIOFunctional.prepare_watch_commands()
         for command in commands:
             if isinstance(command, Write):
-                await connection.write(command.handle, command.data)
+                await TimerIO.connection.write(command.handle, command.data)
 
     @staticmethod
     async def send_to_watch_set(data: str) -> None:
