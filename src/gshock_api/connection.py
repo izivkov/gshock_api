@@ -60,7 +60,7 @@ class Connection:
             if self.address is None:
                 return False
 
-            self.client = BleakClient(self.address)
+            self.client = BleakClient(device)
             await self.client.connect()
 
             if not self.client.is_connected:
