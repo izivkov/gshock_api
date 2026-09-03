@@ -51,12 +51,13 @@ class StepCounterIOFunctional:
         day_of_month: int | None = None
         if len(payload) >= 6:
             try:
+                year = 2000 + _decode_bcd(payload[0])
                 month = _decode_bcd(payload[1])
                 day_of_month = _decode_bcd(payload[2])
                 hour = _decode_bcd(payload[3])
                 minute = _decode_bcd(payload[4])
                 second = _decode_bcd(payload[5])
-                timestamp = datetime(datetime.now().year, month, day_of_month, hour, minute, second)
+                timestamp = datetime(year, month, day_of_month, hour, minute, second)
             except ValueError:
                 warnings.append("invalid BCD timestamp in step counter header")
 
