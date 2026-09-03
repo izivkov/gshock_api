@@ -20,6 +20,7 @@ class StepCounterData:
     hourly_steps: list[int | None] = field(default_factory=list)
     daily_history: list[int | None] = field(default_factory=list)
     daily_distances: list[int | None] = field(default_factory=list)
+    
     # Friendly, pre-computed representations filled by the IO layer
     hourly_intervals: list[dict] = field(default_factory=list)
     hourly_by_hour: list[int | None] = field(default_factory=list)
