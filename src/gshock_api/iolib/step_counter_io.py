@@ -1,4 +1,5 @@
 import struct
+from datetime import datetime
 from typing import Final
 
 from gshock_api.cancelable_result import CancelableResult
@@ -39,38 +40,22 @@ class StepCounterIOFunctional:
 
         warnings: list[str] = []
 
-        # Decode a 6-byte BCD timestamp from payload[1:7] (year, month, day, hour, minute, second).
-        timestamp = None
-        try:
-            if len(payload) >= 7:
-                raw_ts = payload[1:7]
-                vals: list[int | None] = []
-                for b in raw_ts:
-                    if b in (0xFE, 0xFF):
-                        vals.append(None)
-                    else:
-                        vals.append(_decode_bcd(b))
-
-                # Require year/month/day to construct a meaningful timestamp.
-                if vals[0] is None or vals[1] is None or vals[2] is None:
-                    warnings.append("incomplete BCD date in step counter header; timestamp unavailable")
-                    timestamp = None
-                else:
-                    year = 2000 + vals[0]
-                    month = vals[1]
-                    day = vals[2]
-                    hour = vals[3] or 0
-                    minute = vals[4] or 0
-                    second = vals[5] or 0
-                    from datetime import datetime as _dt
-
-                    timestamp = _dt(year, month, day, hour, minute, second)
-            else:
-                warnings.append("step record too short to contain timestamp")
-                timestamp = None
-        except ValueError:
-            warnings.append("invalid BCD timestamp in step counter header; watch may have partial/fresh life-log data")
-            timestamp = None
+        # ABL records store month/day/time as packed BCD. The final header byte
+        # is a status/reserved value rather than part of the timestamp.
+        timestamp: datetime | None = None
+        day_of_week: int | None = None
+        month: int | None = None
+        day_of_month: int | None = None
+        if len(payload) >= 6:
+            try:
+                month = _decode_bcd(payload[1])
+                day_of_month = _decode_bcd(payload[2])
+                hour = _decode_bcd(payload[3])
+                minute = _decode_bcd(payload[4])
+                second = _decode_bcd(payload[5])
+                timestamp = datetime(datetime.now().year, month, day_of_month, hour, minute, second)
+            except ValueError:
+                warnings.append("invalid BCD timestamp in step counter header")
 
         daily_history_offset = (
             StepCounterIOFunctional.HEADER_SIZE
@@ -154,7 +139,7 @@ class StepCounterIOFunctional:
             if any(s is None for s in slots):
                 hourly_by_hour.append(None)
             else:
-                total = sum(s for s in slots)  # all slots are ints
+                total = sum(s or 0 for s in slots)
                 hourly_by_hour.append(total)
 
         # Daily history as list of dicts: days_ago=1 is most recent previous day
@@ -162,6 +147,9 @@ class StepCounterIOFunctional:
 
         return StepCounterData(
             timestamp=timestamp,
+            day_of_week=day_of_week,
+            month=month,
+            day_of_month=day_of_month,
             hourly_steps=hourly_steps,
             daily_history=daily_history,
             current_day_steps=current_day_steps,

@@ -1,0 +1,116 @@
+2026-09-03 12:23:18,479 gshock_api.logger INFO: =======================================================================
+2026-09-03 12:23:18,479 gshock_api.logger INFO: Press and hold lower-left button on your watch for 3 seconds to pair...
+2026-09-03 12:23:18,479 gshock_api.logger INFO:             Press lower-right button once if already paired.           
+2026-09-03 12:23:18,479 gshock_api.logger INFO:     At 00:30, 06:30, 12:30, or 18:30, a paired watch may auto sync.    
+2026-09-03 12:23:18,480 gshock_api.logger INFO: =======================================================================
+2026-09-03 12:23:18,480 gshock_api.logger INFO: 
+2026-09-03 12:23:18,480 gshock_api.logger INFO: Waiting for connection...
+2026-09-03 12:23:25,064 gshock_api.logger INFO: ✅ Found: CASIO ABL-100WE (D3:B7:72:20:5F:24)
+2026-09-03 12:23:28,375 gshock_api.logger INFO: Subscribed to notifications: 26eb0023-b012-49a8-b1f8-394fb2032b0f
+2026-09-03 12:23:28,668 gshock_api.logger INFO: Subscribed to notifications: 26eb0024-b012-49a8-b1f8-394fb2032b0f
+2026-09-03 12:23:28,959 gshock_api.logger INFO: Subscribed to notifications: 26eb002f-b012-49a8-b1f8-394fb2032b0f
+2026-09-03 12:23:29,155 gshock_api.logger INFO: Subscribed to notifications: 26eb002d-b012-49a8-b1f8-394fb2032b0f
+2026-09-03 12:23:29,155 gshock_api.logger INFO: Connected...
+2026-09-03 12:23:29,448 gshock_api.logger INFO: got watch name: CASIO ABL-100WE
+2026-09-03 12:23:29,740 gshock_api.logger INFO: Could not extract key from data.
+2026-09-03 12:23:30,132 gshock_api.logger INFO: Total steps: 5120
+2026-09-03 12:23:30,132 gshock_api.logger INFO: Hourly samples: 144 | Daily history samples: 14
+2026-09-03 12:23:30,134 gshock_api.logger INFO: Syncing time...
+2026-09-03 12:23:35,592 gshock_api.logger INFO: disconnected
+
+Summary:
+Field                     | Value                                                  
+--------------------------+--------------------------------------------------------
+Current day steps         | 5120                                                   
+Timestamp                 | 2026-09-03T12:23:01                                    
+Distance (m)              | 1746                                                   
+Pending distance (m)      | 0                                                      
+Total distance (m)        | 1746                                                   
+BCD total steps           | 5120                                                   
+Estimated calories (kcal) | 126.6 (method=distance, weight_kg=70.0, stride_m=0.762)
+
+Hourly by hour:
+Hour |  Steps |   kcal
+------+--------+--------
+ 00   |      - |      -
+ 01   |      - |      -
+ 02   |      - |      -
+ 03   |      - |      -
+ 04   |      - |      -
+ 05   |      - |      -
+ 06   |      - |      -
+ 07   |      - |      -
+ 08   |      - |      -
+ 09   |      - |      -
+ 10   |      - |      -
+ 11   |      - |      -
+ 12   |      - |      -
+ 13   |      - |      -
+ 14   |      - |      -
+ 15   |      - |      -
+ 16   |      - |      -
+ 17   |      - |      -
+ 18   |      - |      -
+ 19   |      - |      -
+ 20   |      - |      -
+ 21   |      - |      -
+ 22   |      - |      -
+ 23   |      - |      -
+
+Today (10-minute slots by hour):
+Hour | s0  s1  s2  s3  s4  s5  | total
+-----+------------------------+-------
+ 00  |   -   -   -   -   -   - |     0
+ 01  |   -   -   -   -   -   - |     0
+ 02  |   -   -   -   -   -   - |     0
+ 03  |   -   -   -   -   -   - |     0
+ 04  |   -   -   -   -   -   - |     0
+ 05  |   -   -   -   -   -   - |     0
+ 06  |   -   -   -   -   -   - |     0
+ 07  |   -   -   -   -   -   - |     0
+ 08  |   -   -   -   -   -   - |     0
+ 09  |   -   -   -   -   -   - |     0
+ 10  |   -   -   -   -   -   - |     0
+ 11  |   -   -   -   -   -   - |     0
+ 12  |   -   -   -   -   -   - |     0
+ 13  |   -   -   -   -   -   - |     0
+ 14  |   -   -   -   -   -   - |     0
+ 15  |   -   -   -   -   -   - |     0
+ 16  |   -   -   -   -   -   - |     0
+ 17  |   -   -   -   -   -   - |     0
+ 18  |   -   -   -   -   -   - |     0
+ 19  |   -   -   -   -   -   - |     0
+ 20  |   -   -   -   -   -   - |     0
+ 21  |   -   -   -   -   -   - |     0
+ 22  |   -   -   -   -   -   - |     0
+ 23  |   -   -   -   -   -   - |     0
+hourly_intervals (first 24):
+  idx=000 000-009 steps=None
+  idx=001 010-019 steps=None
+  idx=002 020-029 steps=None
+  idx=003 030-039 steps=None
+  idx=004 040-049 steps=None
+  idx=005 050-059 steps=None
+  idx=006 060-069 steps=None
+  idx=007 070-079 steps=None
+  idx=008 080-089 steps=None
+  idx=009 090-099 steps=None
+  idx=010 100-109 steps=None
+  idx=011 110-119 steps=None
+  idx=012 120-129 steps=None
+  idx=013 130-139 steps=None
+  idx=014 140-149 steps=None
+  idx=015 150-159 steps=None
+  idx=016 160-169 steps=None
+  idx=017 170-179 steps=None
+  idx=018 180-189 steps=None
+  idx=019 190-199 steps=None
+  idx=020 200-209 steps=None
+  idx=021 210-219 steps=None
+  idx=022 220-229 steps=None
+  idx=023 230-239 steps=None
+raw_payload= 260903122301fefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffefffeff000000000000000000000000000000000000000000000000fefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffefffffffeffffff00140000d2060000000000000000000000000000000020510000
+daily_history=
+  -1:None, -2:None, -3:None, -4:None, -5:None, -6:None, -7:None
+  -8:None, -9:None, -10:None, -11:None, -12:None, -13:None, -14:None
+warnings=[]

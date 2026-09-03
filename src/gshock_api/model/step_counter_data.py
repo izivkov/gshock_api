@@ -14,6 +14,9 @@ class StepCounterData:
 
     # Timestamp covering year/month/day/hour/minute/second when available.
     timestamp: Optional[datetime] = None
+    day_of_week: int | None = None
+    month: int | None = None
+    day_of_month: int | None = None
     hourly_steps: list[int | None] = field(default_factory=list)
     daily_history: list[int | None] = field(default_factory=list)
     # Friendly, pre-computed representations filled by the IO layer

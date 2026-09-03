@@ -356,8 +356,10 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         import inspect
 
         from gshock_api.iolib.step_counter_io import StepCounterIO
+        from gshock_api.protocols.standard_protocol import StandardProtocol
 
         self.assertFalse(inspect.signature(StepCounterIO.request).parameters["peek"].default)
+        self.assertFalse(inspect.signature(StandardProtocol.get_step_count).parameters["peek"].default)
 
     # --- CasioTimeZoneHelper Tests ---
     def test_casio_time_zone_helper(self):

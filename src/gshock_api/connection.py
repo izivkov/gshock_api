@@ -44,13 +44,14 @@ class Connection:
             for char in service.characteristics:
                 self.characteristics_map[char.uuid] = char.uuid
 
-    async def connect(self, watch_filter: WatchFilter = None) -> bool:
+    async def connect(self, watch_filter: WatchFilter = None, timeout: float | None = None) -> bool:
         """Connects to the G-Shock watch, optionally scanning if no address is provided."""
         try:
             if self.address is None:
                 device: Device = await scanner.scan(
                     device_address=self.address,
-                    watch_filter=watch_filter
+                    watch_filter=watch_filter,
+                    timeout=timeout,
                 )
                 if device is None:
                     logger.info("No G-Shock device found or name matches excluded watches.")

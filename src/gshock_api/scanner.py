@@ -18,9 +18,6 @@ from gshock_api.watch_info import watch_info
 # However, we must preserve the literal in the original code as a constant.
 CASIO_SERVICE_UUID: Final[str] = "00001804-0000-1000-8000-00805f9b34fb"
 
-# Constant for the maximum number of scan retries before failing
-MAX_SCAN_RETRIES: Final[int] = 60
-
 # --- Type Aliases ---
 
 # WatchFilter is a function that takes a BLEDevice name (str) and returns a boolean.
@@ -39,7 +36,8 @@ class Scanner:
         self,
         device_address: str | None = None,
         watch_filter: WatchFilter = None,
-        max_retries: int = MAX_SCAN_RETRIES
+        max_retries: int | None = None,
+        timeout: float | None = None,
     ) -> BLEDevice | None:
         
         # Use the class constant
@@ -47,8 +45,15 @@ class Scanner:
         scanner = BleakScanner()
 
         if not device_address:
-            for _ in range(max_retries):
-                await asyncio.sleep(1)
+            deadline = None if timeout is None else asyncio.get_running_loop().time() + timeout
+            attempt = 0
+            while max_retries is None or attempt < max_retries:
+                attempt += 1
+                remaining = None if deadline is None else deadline - asyncio.get_running_loop().time()
+                if remaining is not None and remaining <= 0:
+                    logger.info("BLE scan timeout reached.")
+                    break
+                await asyncio.sleep(1 if remaining is None else min(1, remaining))
                 try:
                     # Define the Bleak device filter function
                     # The second argument to the lambda function is usually AdvertisementData
@@ -67,7 +72,8 @@ class Scanner:
                         return is_casio_service and passes_custom_filter
                     
                     # Call find_device_by_filter with the typed filter function
-                    found = await scanner.find_device_by_filter(uuid_filter, timeout=10)
+                    scan_timeout = 10 if remaining is None else min(10, remaining)
+                    found = await scanner.find_device_by_filter(uuid_filter, timeout=scan_timeout)
                     
                     if found:
                         logger.info(f"✅ Found: {found.name} ({found.address})")
@@ -82,13 +88,16 @@ class Scanner:
                 except Exception as e:
                     logger.warning(f"⚠️ BLE scan error: {e}")
 
-            logger.error("⚠️ Max retries reached. No device found.")
+            if deadline is not None and asyncio.get_running_loop().time() >= deadline:
+                logger.error("⚠️ Scan timeout reached. No device found.")
+            else:
+                logger.error("⚠️ Maximum scan retries reached. No device found.")
         else:
             logger.info(f"⚠️ Waiting for specific device by address: {device_address}...")
             try:
                 # Use sys.float_info.max constant for infinite timeout
                 found = await BleakScanner().find_device_by_address(
-                    device_address, timeout=sys.float_info.max
+                    device_address, timeout=sys.float_info.max if timeout is None else timeout
                 )
             except BleakError as e:
                 logger.error(f"⚠️ Error finding device by address: {e}")

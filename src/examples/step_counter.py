@@ -6,7 +6,8 @@ output for debugging and demonstration purposes. Modes of operation:
 
 - Live BLE: connect to a paired watch using `Connection` + `GshockAPI` and
     fetch step data via `get_step_summary()` (quick total) or
-    `get_step_history()` / `get_step_count(peek=...)` (full history).
+    `get_step_history()` (full history). `get_step_count(peek=True)` is a
+    low-level diagnostic mode that leaves the watch transaction open.
 - HCI / stdin: extract a life-log payload from a BTSnoop HCI text file or
     read raw/hex bytes from stdin and parse locally with
     `StepCounterIOFunctional.parse()`.
@@ -290,7 +291,11 @@ async def _fetch_steps(
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Sync G-Shock lifelog data.")
     parser.add_argument("--timeout", type=float, default=-1.0, help="Connection timeout in seconds (-1 for infinite)")
-    parser.add_argument("--peek", action="store_true", help="Read step data without closing the watch transaction")
+    parser.add_argument(
+        "--peek",
+        action="store_true",
+        help="Diagnostic mode: leave the watch transaction open (may omit history)",
+    )
     parser.add_argument(
         "--permissive",
         action="store_true",
@@ -429,9 +434,11 @@ async def main() -> None:
 
         connection = Connection()
 
-        # Convert -1.0 to sys.float_info.max for infinite timeout
-        timeout = sys.float_info.max if args.timeout == -1.0 else args.timeout
-        connected = await connection.connect(watch_filter=None)
+        scan_timeout = None if args.timeout == -1.0 else args.timeout
+        connected = await asyncio.wait_for(
+            connection.connect(watch_filter=None, timeout=scan_timeout),
+            timeout=scan_timeout,
+        )
         if not connected:
             raise GShockConnectionError("Failed to find or connect to the watch before timeout.")
 
@@ -439,7 +446,7 @@ async def main() -> None:
 
         api = GshockAPI(connection)
 
-        watch_name = await api.get_watch_name()
+        watch_name = await asyncio.wait_for(api.get_watch_name(), timeout=scan_timeout)
         logger.info(f"got watch name: {watch_name}")
 
         # Step counter data should be fetched before time-sync on supported watches.
@@ -450,7 +457,7 @@ async def main() -> None:
             if args.history:
                 use_summary = False
                 args.peek = False
-            await _fetch_steps(
+            fetch_steps = _fetch_steps(
                 api,
                 use_summary=use_summary,
                 peek=args.peek,
@@ -459,14 +466,16 @@ async def main() -> None:
                 show_raw=args.raw,
                 strict=args.strict,
             )
+            await asyncio.wait_for(fetch_steps, timeout=scan_timeout)
         except Exception as e:
             logger.warning(f"Step counter fetch failed: {e}")
 
         logger.info("Syncing time...")
-        await api.set_time(time.time())
+        await asyncio.wait_for(api.set_time(time.time()), timeout=scan_timeout)
 
-    except GShockConnectionError as e:
-        logger.error(f"Connection problem: {e}")
+    except (GShockConnectionError, TimeoutError) as e:
+        message = str(e) or "operation timed out"
+        logger.error(f"Connection problem: {message}")
         sys.exit(1)
 
     await connection.disconnect()
