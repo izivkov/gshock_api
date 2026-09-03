@@ -213,14 +213,7 @@ async def _fetch_steps(
         print(k.ljust(key_w) + ' | ' + v.ljust(val_w))
 
     # Print hourly aggregates neatly as a table
-    if permissive:
-        permissive_hours: list[int] = []
-        for h in range(24):
-            slots = step_data.hourly_steps[h * 6 : h * 6 + 6]
-            permissive_hours.append(sum((s or 0) for s in slots))
-        hours_to_print = permissive_hours
-    else:
-        hours_to_print = step_data.hourly_by_hour
+    hours_to_print = step_data.hourly_by_hour
 
     print('\nHourly by hour:')
     print(f"{'Hour':>4} | {'Steps':>6} | {'kcal':>6}")
@@ -240,36 +233,13 @@ async def _fetch_steps(
     else:
         print('Hourly breakdown unavailable')
 
-    # Detailed today's breakdown: 10-minute slots grouped by hour
-    print('\nToday (10-minute slots by hour):')
-    # Build a 144-slot list if only intervals are present
-    slots_144 = None
-    if getattr(step_data, 'hourly_steps', None):
-        slots_144 = list(step_data.hourly_steps)
-    elif getattr(step_data, 'hourly_intervals', None):
-        slots_144 = [None] * 144
-        for interval in step_data.hourly_intervals:
-            idx = interval.get('index')
-            if idx is None or idx < 0 or idx >= 144:
-                continue
-            slots_144[idx] = interval.get('steps')
-
-    if slots_144:
-        print('Hour | s0  s1  s2  s3  s4  s5  | total')
-        print('-----+------------------------+-------')
-        for h in range(24):
-            hour_slots = slots_144[h * 6 : h * 6 + 6]
-            slot_str = ' '.join(f"{(s if s is not None else '-'):>3}" for s in hour_slots)
-            total_h = sum((s or 0) for s in hour_slots)
-            print(f" {h:02d}  | {slot_str} | {total_h:>5}")
-    else:
-        print('No 10-minute slot data available for today')
-
-    # Optional: show first 24 10-minute intervals
+    print('\nActivity records:')
     if step_data.hourly_intervals:
-        print("hourly_intervals (first 24):")
-        for interval in step_data.hourly_intervals[:24]:
-            print(f"  idx={interval['index']:03d} {interval['start_minute']:03d}-{interval['end_minute']:03d} steps={interval['steps']}")
+        for interval in step_data.hourly_intervals:
+            print(f"  idx={interval['index']:02d} steps={interval['steps']}")
+    else:
+        print('No activity records available')
+
     if show_raw and step_data.raw:
         print("raw_payload=", step_data.raw.hex())
     print("daily_history=")
@@ -415,7 +385,7 @@ async def main() -> None:
         use_summary = args.summary
         if args.history:
             use_summary = False
-            args.peek = False
+            args.peek = True
 
         await _fetch_steps(
             None,
@@ -456,7 +426,7 @@ async def main() -> None:
             use_summary = args.summary
             if args.history:
                 use_summary = False
-                args.peek = False
+                args.peek = True
             fetch_steps = _fetch_steps(
                 api,
                 use_summary=use_summary,

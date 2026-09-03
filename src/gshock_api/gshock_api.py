@@ -116,10 +116,10 @@ class GshockAPI:
     async def get_step_history(self) -> StepCounterData:
         """Request the full step-history from the watch.
 
-        This forces the watch to complete the transaction and return the
-        complete hourly/daily history. Use when you need the full lifelog.
+        The transaction is left open so the watch does not clear its detailed
+        lifelog buffers before they can be inspected.
         """
-        return await watch_info.protocol.get_step_count(self.connection, False)
+        return await watch_info.protocol.get_step_count(self.connection, True)
 
     async def get_reminders(self) -> list[Any]:
         """Gets the current events (reminders) from the watch."""

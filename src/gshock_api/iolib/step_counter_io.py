@@ -24,12 +24,15 @@ class StepCounterIOFunctional:
     """Pure functional core for decoding ABL-100WE step counter (life-log) records."""
 
     HEADER_SIZE: Final[int] = 6
-    HOURLY_SLOT_COUNT: Final[int] = 144
-    HOURLY_SLOT_SIZE: Final[int] = 2
-    BETWEEN_HISTORY_PADDING_SIZE: Final[int] = 24
-    DAILY_SLOT_COUNT: Final[int] = 14
-    DAILY_SLOT_SIZE: Final[int] = 4
+    ACTIVITY_RECORD_SIZE: Final[int] = 10
+    ACTIVITY_BUCKET_COUNT: Final[int] = 5
+    HISTORY_SLOT_COUNT: Final[int] = 24
+    DAILY_SUMMARY_OFFSET: Final[int] = 318
+    DAILY_SUMMARY_COUNT: Final[int] = 7
+    DAILY_SUMMARY_SIZE: Final[int] = 8
+    CURRENT_STEPS_OFFSET: Final[int] = 374
     CURRENT_DISTANCE_OFFSET: Final[int] = 378
+    PENDING_INTENSITY_OFFSET: Final[int] = 382
     PENDING_DISTANCE_OFFSET: Final[int] = 392
     BCD_TOTAL_OFFSET: Final[int] = 396
 
@@ -57,45 +60,73 @@ class StepCounterIOFunctional:
             except ValueError:
                 warnings.append("invalid BCD timestamp in step counter header")
 
-        daily_history_offset = (
-            StepCounterIOFunctional.HEADER_SIZE
-            + StepCounterIOFunctional.HOURLY_SLOT_COUNT * StepCounterIOFunctional.HOURLY_SLOT_SIZE
-            + StepCounterIOFunctional.BETWEEN_HISTORY_PADDING_SIZE
-        )
-        current_day_offset = (
-            daily_history_offset
-            + StepCounterIOFunctional.DAILY_SLOT_COUNT * StepCounterIOFunctional.DAILY_SLOT_SIZE
+        current_day_offset = StepCounterIOFunctional.CURRENT_STEPS_OFFSET
+        current_day_steps = (
+            struct.unpack_from("<I", payload, current_day_offset)[0]
+            if len(payload) >= current_day_offset + 4
+            else None
         )
 
-        hourly_steps: list[int | None] = []
-        for i in range(StepCounterIOFunctional.HOURLY_SLOT_COUNT):
-            offset = StepCounterIOFunctional.HEADER_SIZE + i * StepCounterIOFunctional.HOURLY_SLOT_SIZE
-            if offset + StepCounterIOFunctional.HOURLY_SLOT_SIZE > len(payload):
-                hourly_steps.append(None)
-                continue
-            val = struct.unpack_from("<H", payload, offset)[0]
-            hourly_steps.append(None if val == 0xFFFE else val)
+        pending_steps = 0
+        if len(payload) >= StepCounterIOFunctional.PENDING_INTENSITY_OFFSET + 6:
+            pending_steps = sum(
+                value
+                for value in struct.unpack_from(
+                    "<3H", payload, StepCounterIOFunctional.PENDING_INTENSITY_OFFSET
+                )
+                if value != 0xFFFE
+            )
 
+        # Activity records are variable-length 10-byte records. Find the
+        # boundary by reconciling their bucket sums with today's total.
+        record_end = StepCounterIOFunctional.HEADER_SIZE
+        if current_day_steps is not None:
+            candidates: list[tuple[int, int]] = []
+            for end in range(6, 146, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE):
+                front_total = 0
+                for offset in range(6, end, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE):
+                    buckets = struct.unpack_from("<5H", payload, offset)
+                    front_total += sum(value for value in buckets if value != 0xFFFE)
+                candidates.append((abs(current_day_steps - pending_steps - front_total), end))
+            record_end = min(candidates)[1]
+
+        activity_steps: list[int | None] = []
+        hourly_intervals: list[dict] = []
+        for index, offset in enumerate(
+            range(6, record_end, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE)
+        ):
+            buckets = struct.unpack_from("<5H", payload, offset)
+            steps = sum(value for value in buckets if value != 0xFFFE)
+            activity_steps.append(steps or None)
+            hourly_intervals.append(
+                {"index": index, "start_minute": 0, "end_minute": 59, "steps": steps or None}
+            )
+
+        # Seven daily summaries occupy 8 bytes each: uint32 steps followed by
+        # uint32 distance.  The 0xFFFFFFFE pair means an unused slot.
         daily_history: list[int | None] = []
-        for i in range(StepCounterIOFunctional.DAILY_SLOT_COUNT):
-            offset = daily_history_offset + i * StepCounterIOFunctional.DAILY_SLOT_SIZE
-            if offset + StepCounterIOFunctional.DAILY_SLOT_SIZE > len(payload):
+        daily_distances: list[int | None] = []
+        for index in range(StepCounterIOFunctional.DAILY_SUMMARY_COUNT):
+            offset = StepCounterIOFunctional.DAILY_SUMMARY_OFFSET + index * StepCounterIOFunctional.DAILY_SUMMARY_SIZE
+            if offset + StepCounterIOFunctional.DAILY_SUMMARY_SIZE > len(payload):
+                break
+            steps, distance = struct.unpack_from("<2I", payload, offset)
+            if steps == 0xFFFFFFFE and distance == 0xFFFFFFFE:
                 daily_history.append(None)
-                continue
-            val = struct.unpack_from("<I", payload, offset)[0]
-            daily_history.append(None if val == 0xFFFFFFFE else val)
+                daily_distances.append(None)
+            else:
+                daily_history.append(None if steps == 0xFFFFFFFE else steps)
+                daily_distances.append(None if distance == 0xFFFFFFFE else distance)
 
-        current_day_steps: int | None = None
-        if current_day_offset + StepCounterIOFunctional.DAILY_SLOT_SIZE <= len(payload):
-            cur_val = struct.unpack_from("<I", payload, current_day_offset)[0]
-            current_day_steps = None if cur_val == 0xFFFFFFFE else cur_val
+        if current_day_steps == 0xFFFFFFFE:
+            current_day_steps = None
 
         distance_meters = None
         pending_distance_meters = None
         total_distance_meters = None
         bcd_total_steps = None
 
-        if len(payload) < current_day_offset + StepCounterIOFunctional.DAILY_SLOT_SIZE:
+        if len(payload) < current_day_offset + 4:
             warnings.append("step record truncated; missing trailing history fields")
 
         if len(payload) >= StepCounterIOFunctional.CURRENT_DISTANCE_OFFSET + 4:
@@ -122,25 +153,15 @@ class StepCounterIOFunctional:
             and bcd_total_steps != current_day_steps
         ):
             warnings.append(f"BCD total {bcd_total_steps} differs from current step count {current_day_steps}")
-        # Build friendly representations for callers
-        # 144 slots -> 10-minute intervals
-        hourly_intervals: list[dict] = []
-        for i, steps in enumerate(hourly_steps):
-            start = i * 10
-            end = start + 9
-            hourly_intervals.append({"index": i, "start_minute": start, "end_minute": end, "steps": steps})
-
-        # Aggregate into 24 hourly totals.
-        # If any 10-minute slot for an hour is missing (`None`), report the
-        # whole hour as `None` to reflect incomplete data.
-        hourly_by_hour: list[int | None] = []
-        for h in range(24):
-            slots = hourly_steps[h * 6 : h * 6 + 6]
-            if any(s is None for s in slots):
-                hourly_by_hour.append(None)
-            else:
-                total = sum(s or 0 for s in slots)
-                hourly_by_hour.append(total)
+        hourly_steps = activity_steps
+        hourly_by_hour: list[int | None] = [None] * 24
+        if timestamp is not None:
+            for index, steps in enumerate(activity_steps):
+                if steps is not None:
+                    hour = (timestamp.hour - index - 1) % 24
+                    hourly_by_hour[hour] = steps
+            if pending_steps:
+                hourly_by_hour[timestamp.hour] = pending_steps
 
         # Daily history as list of dicts: days_ago=1 is most recent previous day
         daily_history_list = [{"days_ago": i + 1, "steps": v} for i, v in enumerate(daily_history)]
@@ -152,6 +173,7 @@ class StepCounterIOFunctional:
             day_of_month=day_of_month,
             hourly_steps=hourly_steps,
             daily_history=daily_history,
+            daily_distances=daily_distances,
             current_day_steps=current_day_steps,
             raw=payload,
             warnings=warnings,

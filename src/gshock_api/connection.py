@@ -32,6 +32,19 @@ class Connection:
     def notification_handler(
         self, characteristic: BleakGATTCharacteristic, data: bytearray  # noqa: ARG002
     ) -> None:
+        # Lifelog transfers are fragmented on the DRSP/Convoy characteristics;
+        # continuation packets do not contain a command key and must bypass
+        # the normal first-byte dispatcher.
+        if characteristic.uuid == CasioConstants.CASIO_DATA_REQUEST_SP_CHARACTERISTIC_UUID:
+            from gshock_api.iolib.step_counter_io import StepCounterIO
+
+            StepCounterIO.on_drsp_received(bytes(data))
+            return
+        if characteristic.uuid == CasioConstants.CASIO_CONVOY_CHARACTERISTIC_UUID:
+            from gshock_api.iolib.step_counter_io import StepCounterIO
+
+            StepCounterIO.on_received(bytes(data))
+            return
         message_dispatcher.MessageDispatcher.on_received(data)
 
     async def init_characteristics_map(self) -> None:
