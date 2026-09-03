@@ -289,7 +289,6 @@ async def _fetch_steps(
 
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Sync G-Shock lifelog data.")
-    parser.add_argument("--addr", type=str, help="MAC address of the watch to connect to directly")
     parser.add_argument("--timeout", type=float, default=-1.0, help="Connection timeout in seconds (-1 for infinite)")
     parser.add_argument("--peek", action="store_true", help="Read step data without closing the watch transaction")
     parser.add_argument(
@@ -428,10 +427,7 @@ async def main() -> None:
     try:
         logger.info("Waiting for connection...")
 
-        if args.addr:
-            logger.info(f"Using specific MAC address: {args.addr}")
-
-        connection = Connection(address=args.addr)
+        connection = Connection()
 
         # Convert -1.0 to sys.float_info.max for infinite timeout
         timeout = sys.float_info.max if args.timeout == -1.0 else args.timeout
