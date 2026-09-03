@@ -1,3 +1,4 @@
+import asyncio
 import struct
 from datetime import datetime
 from typing import Final
@@ -12,10 +13,19 @@ DRSP_CATEGORY_EXERCISE: Final[int] = 0x11
 START_TRANSACTION_CMD: Final[bytes] = bytes([0x00, DRSP_CATEGORY_EXERCISE, 0x00, 0x00, 0x00])
 END_TRANSACTION_CMD: Final[bytes] = bytes([0x04, DRSP_CATEGORY_EXERCISE, 0x00, 0x00, 0x00])
 
+PACKET_HEADER_MARKER: Final[int] = 0x26
+BLE_HANDLE_DRSP: Final[int] = 0x0011
+SENTINEL_BUCKET_VALUE: Final[int] = 0xFFFE
+SENTINEL_DAILY_VALUE: Final[int] = 0xFFFFFFFE
+BCD_BASE: Final[int] = 16
+BCD_MAX_DIGIT: Final[int] = 9
+BASE_CENTURY_YEAR: Final[int] = 2000
+ACTIVITY_SCAN_LIMIT: Final[int] = 146
+
 
 def _decode_bcd(byte: int) -> int:
-    high, low = divmod(byte, 16)
-    if high > 9 or low > 9:
+    high, low = divmod(byte, BCD_BASE)
+    if high > BCD_MAX_DIGIT or low > BCD_MAX_DIGIT:
         raise ValueError(f"invalid BCD byte 0x{byte:02x}")
     return high * 10 + low
 
@@ -38,7 +48,7 @@ class StepCounterIOFunctional:
 
     @staticmethod
     def parse(payload: bytes) -> StepCounterData | None:
-        if not payload or payload[0] != 0x26:
+        if not payload or payload[0] != PACKET_HEADER_MARKER:
             return None
 
         warnings: list[str] = []
@@ -51,7 +61,7 @@ class StepCounterIOFunctional:
         day_of_month: int | None = None
         if len(payload) >= 6:
             try:
-                year = 2000 + _decode_bcd(payload[0])
+                year = BASE_CENTURY_YEAR + _decode_bcd(payload[0])
                 month = _decode_bcd(payload[1])
                 day_of_month = _decode_bcd(payload[2])
                 hour = _decode_bcd(payload[3])
@@ -75,7 +85,7 @@ class StepCounterIOFunctional:
                 for value in struct.unpack_from(
                     "<3H", payload, StepCounterIOFunctional.PENDING_INTENSITY_OFFSET
                 )
-                if value != 0xFFFE
+                if value != SENTINEL_BUCKET_VALUE
             )
 
         # Activity records are variable-length 10-byte records. Find the
@@ -83,11 +93,11 @@ class StepCounterIOFunctional:
         record_end = StepCounterIOFunctional.HEADER_SIZE
         if current_day_steps is not None:
             candidates: list[tuple[int, int]] = []
-            for end in range(6, 146, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE):
+            for end in range(6, ACTIVITY_SCAN_LIMIT, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE):
                 front_total = 0
                 for offset in range(6, end, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE):
                     buckets = struct.unpack_from("<5H", payload, offset)
-                    front_total += sum(value for value in buckets if value != 0xFFFE)
+                    front_total += sum(value for value in buckets if value != SENTINEL_BUCKET_VALUE)
                 candidates.append((abs(current_day_steps - pending_steps - front_total), end))
             record_end = min(candidates)[1]
 
@@ -97,7 +107,7 @@ class StepCounterIOFunctional:
             range(6, record_end, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE)
         ):
             buckets = struct.unpack_from("<5H", payload, offset)
-            steps = sum(value for value in buckets if value != 0xFFFE)
+            steps = sum(value for value in buckets if value != SENTINEL_BUCKET_VALUE)
             activity_steps.append(steps or None)
             hourly_intervals.append(
                 {"index": index, "start_minute": 0, "end_minute": 59, "steps": steps or None}
@@ -112,14 +122,14 @@ class StepCounterIOFunctional:
             if offset + StepCounterIOFunctional.DAILY_SUMMARY_SIZE > len(payload):
                 break
             steps, distance = struct.unpack_from("<2I", payload, offset)
-            if steps == 0xFFFFFFFE and distance == 0xFFFFFFFE:
+            if steps == SENTINEL_DAILY_VALUE and distance == SENTINEL_DAILY_VALUE:
                 daily_history.append(None)
                 daily_distances.append(None)
             else:
-                daily_history.append(None if steps == 0xFFFFFFFE else steps)
-                daily_distances.append(None if distance == 0xFFFFFFFE else distance)
+                daily_history.append(None if steps == SENTINEL_DAILY_VALUE else steps)
+                daily_distances.append(None if distance == SENTINEL_DAILY_VALUE else distance)
 
-        if current_day_steps == 0xFFFFFFFE:
+        if current_day_steps == SENTINEL_DAILY_VALUE:
             current_day_steps = None
 
         distance_meters = None
@@ -196,6 +206,7 @@ class StepCounterIO:
     accumulator: bytearray = bytearray()
     expected_length: int = FALLBACK_EXPECTED_LENGTH
     peek: bool = True
+    _end_txn_task: asyncio.Task | None = None
 
     @staticmethod
     async def request(connection: ConnectionProtocol, peek: bool = False) -> StepCounterData:
@@ -217,7 +228,7 @@ class StepCounterIO:
         StepCounterIO.result = CancelableResult[StepCounterData]()
 
         # Handle 0x0011 is CASIO_DATA_REQUEST_SP
-        await connection.write(0x0011, START_TRANSACTION_CMD)
+        await connection.write(BLE_HANDLE_DRSP, START_TRANSACTION_CMD)
         try:
             return await StepCounterIO.result.get_result()
         finally:
@@ -241,6 +252,17 @@ class StepCounterIO:
                 logger.debug(f"StepCounterIO: expected length announced = {announced_length}B")
 
     @staticmethod
+    def _log_end_txn_failure(task: asyncio.Task) -> None:
+        """Done-callback for the end-transaction task. Guards against calling
+        exception() on a cancelled task (which raises CancelledError instead of
+        returning a value) and fetches the exception only once."""
+        if task.cancelled():
+            return
+        exc = task.exception()
+        if exc is not None:
+            logger.warning(f"Failed to send end transaction command: {exc}")
+
+    @staticmethod
     def on_received(data: bytes) -> None:
         """Accumulates incoming fragments and parses StepCounterData when full payload is received. If peek was set, do not end transaction."""
         if StepCounterIO.result is None:
@@ -258,13 +280,12 @@ class StepCounterIO:
         # StepCounterIO.peek is True means we are peeking at the data, so we don't want to send the end transaction command. If it's False, we want to send the end transaction command to tell the watch we're done.
         if StepCounterIO.connection is not None and not StepCounterIO.peek:
             try:
-                # Fire-and-forget end transaction command
-                import asyncio
-                asyncio.create_task(
-                    StepCounterIO.connection.write(0x0011, END_TRANSACTION_CMD)
+                StepCounterIO._end_txn_task = asyncio.create_task(
+                    StepCounterIO.connection.write(BLE_HANDLE_DRSP, END_TRANSACTION_CMD)
                 )
+                StepCounterIO._end_txn_task.add_done_callback(StepCounterIO._log_end_txn_failure)
             except Exception as e:
-                logger.warning(f"Failed to send end transaction command: {e}")
+                logger.warning(f"Failed to schedule end transaction task: {e}")
 
         full_payload = bytes(StepCounterIO.accumulator)
         step_data = StepCounterIOFunctional.parse(full_payload)
