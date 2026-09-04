@@ -16,7 +16,7 @@ Key behaviors:
 - Prefers the longest successfully-parsed HCI/stdin candidate to avoid
     truncated fragments from logs.
 - Outputs a two-column Summary table, an hourly table with optional per-hour
-    calorie allocation, and a detailed 10-minute-slot table for today.
+    calorie allocation, and detailed activity records for today.
 - Computes a simple calorie estimate using distance (or steps*stride) with
     CLI-configurable `--weight` and `--stride` (defaults: 70.0 kg, 0.762 m).
 - `--permissive` toggles permissive hourly aggregation (treat missing slots
@@ -216,29 +216,57 @@ async def _fetch_steps(
     hours_to_print = step_data.hourly_by_hour
 
     print('\nHourly by hour:')
-    print(f"{'Hour':>4} | {'Steps':>6} | {'kcal':>6}")
-    print('------+--------+--------')
+    print(f"{'Hour':>4} | {'Steps':>6} | {'Dist m':>6} | {'kcal':>6}")
+    print('------+--------+----------+--------')
     if hours_to_print:
         # allocate estimated calories proportionally to steps per hour when available
         total_for_alloc = sum((v or 0) for v in hours_to_print)
         for h in range(24):
             val = hours_to_print[h] if h < len(hours_to_print) else None
+            distance = None
+            if step_data.timestamp:
+                distance_index = (step_data.timestamp.hour - h - 1) % 24
+                if distance_index < len(step_data.committed_distances):
+                    distance = step_data.committed_distances[distance_index]
+                if h == step_data.timestamp.hour:
+                    distance = step_data.pending_distance_meters
             if est_kcal is not None and total_for_alloc > 0:
                 hour_steps = (val or 0)
                 kcal_hour = est_kcal * (hour_steps / total_for_alloc) if hour_steps else 0.0
                 kcal_str = f"{kcal_hour:.1f}"
             else:
                 kcal_str = "-"
-            print(f" {h:02d}   | { (val if val is not None else '-') :>6} | {kcal_str:>6}")
+            distance_str = str(distance) if distance is not None else "-"
+            print(
+                f" {h:02d}   | {(val if val is not None else '-'):>6}"
+                f" | {distance_str:>8} | {kcal_str:>6}"
+            )
     else:
         print('Hourly breakdown unavailable')
 
     print('\nActivity records:')
     if step_data.hourly_intervals:
         for interval in step_data.hourly_intervals:
-            print(f"  idx={interval['index']:02d} steps={interval['steps']}")
+            index = interval['index']
+            distance = (
+                step_data.committed_distances[index]
+                if index < len(step_data.committed_distances)
+                else None
+            )
+            intensity = interval.get('intensity', ())
+            print(
+                f"  idx={index:02d} steps={interval['steps']}"
+                f" distance_m={distance if distance is not None else '-'}"
+                f" intensity={intensity}"
+            )
     else:
         print('No activity records available')
+
+    if step_data.pending_intensity or step_data.pending_distance_meters is not None:
+        print(
+            f"  current hour pending_distance_m={step_data.pending_distance_meters}"
+            f" intensity={step_data.pending_intensity}"
+        )
 
     if show_raw and step_data.raw:
         print("raw_payload=", step_data.raw.hex())

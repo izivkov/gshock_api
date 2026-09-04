@@ -40,6 +40,8 @@ class StepCounterIOFunctional:
     DAILY_SUMMARY_OFFSET: Final[int] = 318
     DAILY_SUMMARY_COUNT: Final[int] = 7
     DAILY_SUMMARY_SIZE: Final[int] = 8
+    COMMITTED_DISTANCE_OFFSET: Final[int] = 246
+    COMMITTED_DISTANCE_END: Final[int] = 318
     CURRENT_STEPS_OFFSET: Final[int] = 374
     CURRENT_DISTANCE_OFFSET: Final[int] = 378
     PENDING_INTENSITY_OFFSET: Final[int] = 382
@@ -79,14 +81,12 @@ class StepCounterIOFunctional:
         )
 
         pending_steps = 0
+        pending_intensity: tuple[int, ...] = ()
         if len(payload) >= StepCounterIOFunctional.PENDING_INTENSITY_OFFSET + 6:
-            pending_steps = sum(
-                value
-                for value in struct.unpack_from(
-                    "<3H", payload, StepCounterIOFunctional.PENDING_INTENSITY_OFFSET
-                )
-                if value != SENTINEL_BUCKET_VALUE
+            pending_intensity = struct.unpack_from(
+                "<3H", payload, StepCounterIOFunctional.PENDING_INTENSITY_OFFSET
             )
+            pending_steps = sum(value for value in pending_intensity if value != SENTINEL_BUCKET_VALUE)
 
         # Activity records are variable-length 10-byte records. Find the
         # boundary by reconciling their bucket sums with today's total.
@@ -102,6 +102,7 @@ class StepCounterIOFunctional:
             record_end = min(candidates)[1]
 
         activity_steps: list[int | None] = []
+        hourly_intensities: list[tuple[int, int, int, int, int]] = []
         hourly_intervals: list[dict] = []
         for index, offset in enumerate(
             range(6, record_end, StepCounterIOFunctional.ACTIVITY_RECORD_SIZE)
@@ -109,8 +110,15 @@ class StepCounterIOFunctional:
             buckets = struct.unpack_from("<5H", payload, offset)
             steps = sum(value for value in buckets if value != SENTINEL_BUCKET_VALUE)
             activity_steps.append(steps or None)
+            hourly_intensities.append(buckets)
             hourly_intervals.append(
-                {"index": index, "start_minute": 0, "end_minute": 59, "steps": steps or None}
+                {
+                    "index": index,
+                    "start_minute": 0,
+                    "end_minute": 59,
+                    "steps": steps or None,
+                    "intensity": buckets,
+                }
             )
 
         # Seven daily summaries occupy 8 bytes each: uint32 steps followed by
@@ -136,6 +144,7 @@ class StepCounterIOFunctional:
         pending_distance_meters = None
         total_distance_meters = None
         bcd_total_steps = None
+        committed_distances: list[int] = []
 
         if len(payload) < current_day_offset + 4:
             warnings.append("step record truncated; missing trailing history fields")
@@ -146,6 +155,35 @@ class StepCounterIOFunctional:
 
         if len(payload) >= StepCounterIOFunctional.PENDING_DISTANCE_OFFSET + 4:
             pending_distance_meters = struct.unpack_from("<I", payload, StepCounterIOFunctional.PENDING_DISTANCE_OFFSET)[0]
+
+        if (
+            distance_meters is not None
+            and pending_distance_meters is not None
+            and distance_meters >= pending_distance_meters
+        ):
+            committed_target = distance_meters - pending_distance_meters
+            distance_sum = 0
+            if committed_target:
+                for offset in range(
+                    StepCounterIOFunctional.COMMITTED_DISTANCE_OFFSET,
+                    StepCounterIOFunctional.COMMITTED_DISTANCE_END,
+                    2,
+                ):
+                    value = struct.unpack_from("<H", payload, offset)[0]
+                    if value == SENTINEL_BUCKET_VALUE:
+                        continue
+                    committed_distances.append(value)
+                    distance_sum += value
+                    if distance_sum == committed_target:
+                        break
+                    if distance_sum > committed_target:
+                        committed_distances = []
+                        break
+            if committed_target and distance_sum != committed_target:
+                committed_distances = []
+                warnings.append(
+                    f"distance components do not reconcile to {committed_target:,} m"
+                )
 
         if len(payload) >= StepCounterIOFunctional.BCD_TOTAL_OFFSET + 4:
             raw_bcd_total = payload[StepCounterIOFunctional.BCD_TOTAL_OFFSET:StepCounterIOFunctional.BCD_TOTAL_OFFSET + 4]
@@ -195,6 +233,9 @@ class StepCounterIOFunctional:
             hourly_intervals=hourly_intervals,
             hourly_by_hour=hourly_by_hour,
             daily_history_list=daily_history_list,
+            hourly_intensities=hourly_intensities,
+            pending_intensity=pending_intensity,
+            committed_distances=committed_distances,
         )
 
 

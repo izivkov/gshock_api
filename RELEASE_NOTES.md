@@ -5,6 +5,7 @@
 ### Added
 - Ported the ABL-100 lifelog record layout used by `taviso/casiosync`: packed-BCD timestamps, variable-length activity records, seven daily step/distance summaries, pending activity, and fixed live-total offsets.
 - Added daily distance values to `StepCounterData`.
+- Added lifelog intensity buckets, pending intensity, and committed distance components to `StepCounterData`.
 
 ### Fixed
 - Routed DRSP and Convoy notifications by characteristic so fragmented lifelog packets and transfer-length announcements are processed correctly.
@@ -13,6 +14,7 @@
 
 ### Changed
 - The step-counter example now reports variable activity records and daily summaries instead of presenting the lifelog as 144 fixed 10-minute slots.
+- The step-counter example now displays per-period intensity buckets, committed distance, and current-period pending distance/intensity.
 - Watch discovery waits indefinitely by default, matching the button-initiated connection workflow; `--timeout` remains available for bounded runs.
 
 

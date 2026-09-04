@@ -32,6 +32,11 @@ class StepCounterData:
     pending_distance_meters: int | None = None
     total_distance_meters: int | None = None
     bcd_total_steps: int | None = None
+    # Raw five-bucket intensity values for each committed activity interval.
+    hourly_intensities: list[tuple[int, int, int, int, int]] = field(default_factory=list)
+    # Raw pending buckets and committed distance components from the life-log.
+    pending_intensity: tuple[int, ...] = ()
+    committed_distances: list[int] = field(default_factory=list)
 
     @classmethod
     def unavailable(cls) -> "StepCounterData":
