@@ -406,7 +406,7 @@ EXACT_MODEL_MAP: dict[str, WatchModel] = {
     "PRW-B1000": WatchModel.GENERIC,
     "GMD-B300": WatchModel.GENERIC,
     "WS-B1000": WatchModel.GENERIC,
-    "F-B100W": WatchModel.GENERIC,
+    "F-B100W": WatchModel.ABL_100,  # module 3589, ABL-100 protocol family; advertises as "CASIO F-B100W"
     "OCW-P3000": WatchModel.GENERIC,
 }
 
