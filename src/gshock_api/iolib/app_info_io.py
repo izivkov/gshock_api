@@ -75,7 +75,7 @@ class AppInfoIO:
                     raise RuntimeError("AppInfoIO.connection is not set")
                 for command in commands:
                     if isinstance(command, Write):
-                        await AppInfoIO.connection.write(command.handle, to_hex_string(command.data))
+                        await AppInfoIO.connection.write(command.handle, command.data)
 
             if AppInfoIO.result is None:
                 raise RuntimeError("AppInfoIO.result is not set")
