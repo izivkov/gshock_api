@@ -309,27 +309,6 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(parsed.distance_meters, 0)
         self.assertEqual(parsed.pending_distance_meters, 0)
 
-    def test_step_counter_hci_log_parses_real_data(self):
-        from pathlib import Path
-
-        from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
-        from src.examples.step_counter import _extract_step_payload_from_hci
-
-        hci_path = Path(__file__).resolve().parents[1] / "test_data" / "btsnoop_hci_ABL.txt"
-        payload = _extract_step_payload_from_hci(hci_path)
-
-        self.assertIsNotNone(payload)
-        self.assertTrue(payload.startswith(b"\x26"))
-
-        parsed = StepCounterIOFunctional.parse(payload)
-        self.assertIsNotNone(parsed)
-        self.assertEqual(parsed.day_of_week, 7)
-        self.assertEqual(parsed.month, 1)
-        self.assertEqual(parsed.day_of_month, 24)
-        self.assertIn("step record truncated", " ".join(parsed.warnings))
-        self.assertEqual(len(parsed.hourly_steps), 144)
-        self.assertEqual(len(parsed.daily_history), 14)
-
     def test_step_counter_rejects_impossible_calendar_metadata(self):
         from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
 

@@ -1,33 +1,25 @@
 """
 Step counter example CLI
 
-This script reads the G-Shock step-counter lifelog and prints human-friendly
-output for debugging and demonstration purposes. Modes of operation:
+This script connects to a paired G-Shock watch over BLE using `Connection` +
+`GshockAPI` and prints human-friendly step-counter (lifelog) output for
+debugging and demonstration purposes.
 
-- Live BLE: connect to a paired watch using `Connection` + `GshockAPI` and
-    fetch step data via `get_step_summary()` (quick total) or
-    `get_step_history()` (full history). `get_step_count(peek=True)` is a
-    low-level diagnostic mode that leaves the watch transaction open.
-- HCI / stdin: extract a life-log payload from a BTSnoop HCI text file or
-    read raw/hex bytes from stdin and parse locally with
-    `StepCounterIOFunctional.parse()`.
+Fetch modes:
+- `--summary`: quick total for today via `get_step_summary()`.
+- `--history` (default when neither `--summary` nor `--peek` is given):
+    full history via `get_step_history()`.
+- `--peek`: low-level diagnostic mode via `get_step_count(peek=True)` that
+    leaves the watch transaction open.
 
 Key behaviors:
-- Prefers the longest successfully-parsed HCI/stdin candidate to avoid
-    truncated fragments from logs.
-- Outputs a two-column Summary table, an hourly table with optional per-hour
-    calorie allocation, and detailed activity records for today.
-- Computes a simple calorie estimate using distance (or steps*stride) with
-    CLI-configurable `--weight` and `--stride` (defaults: 70.0 kg, 0.762 m).
-- `--permissive` toggles permissive hourly aggregation (treat missing slots
-    as zero). `--strict` causes the script to fail loudly and dump the raw
-    payload when timestamp decoding is invalid.
+- Outputs a two-column Summary table, an hourly table, and detailed activity
+    records for today.
 """
 
 import asyncio
 import argparse
 import logging
-import re
 import sys
 import time
 from pathlib import Path
@@ -37,124 +29,35 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from gshock_api.connection import Connection
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
-from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
 from gshock_api.logger import logger
 from gshock_api.model.step_counter_data import StepCounterData
 
 
-def _extract_step_payload_from_hci(hci_path: str | Path) -> bytes | None:
-    """Return the parsed step-record payload from a BTSnoop HCI log.
-
-    The watch usually emits one or more notifications on handle 0x0014. We look for the
-    actual step payload, skip leading status bytes, and keep the raw bytes beginning at the
-    0x26 life-log marker so the normal parser can decode them.
-    """
-    path = Path(hci_path)
-    candidates = [path]
-    if not path.is_absolute():
-        candidates.append(Path(__file__).resolve().parents[2] / path)
-        candidates.append(Path.cwd() / path)
-
-    for candidate in candidates:
-        if candidate.exists():
-            path = candidate
-            break
-    else:
-        raise FileNotFoundError(f"HCI log not found: {path}")
-
-    pattern = re.compile(r"Notify Handle: 0x0014 Value:\s*([0-9A-Fa-f]+)")
-    # Collect all parseable payload candidates and return the longest one.
-    # Rationale: BTSnoop logs and pasted HCI text can contain many fragments
-    # (short partial notifications, retransmits, or unrelated handles). Picking
-    # the first parseable candidate risks choosing a truncated fragment. The
-    # longest successfully-parsed payload is most likely the complete record
-    # with full history and a valid timestamp.
-    candidates_found: list[bytes] = []
-    for line in path.read_text(errors="replace").splitlines():
-        match = pattern.search(line)
-        if not match:
-            continue
-
-        raw = bytes.fromhex(match.group(1))
-        if not raw:
-            continue
-
-        start = raw.find(b"\x26")
-        if start == -1:
-            continue
-
-        payload = raw[start:]
-        if StepCounterIOFunctional.parse(payload) is not None:
-            candidates_found.append(payload)
-
-    if not candidates_found:
-        return None
-
-    # Prefer the longest parsed payload
-    candidates_found.sort(key=len, reverse=True)
-    logger.info(f"Selected HCI payload from file: {len(candidates_found[0])}B")
-    return candidates_found[0]
-
-    return None
-
-
 async def _fetch_steps(
-    api: GshockAPI | None,
+    api: GshockAPI,
     *,
     use_summary: bool = False,
     peek: bool = False,
     print_log: bool,
-    permissive: bool = False,
     show_raw: bool = False,
-    step_data: StepCounterData | None = None,
-    strict: bool = False,
-    weight_kg: float = 70.0,
-    stride_m: float = 0.762,
 ) -> None:
-    """Fetch the current step-counter payload and optionally print a summary."""
-    if step_data is None:
-        assert api is not None
-        if use_summary:
-            total_steps = await api.get_step_summary()
-            # Build a minimal StepCounterData instance that works whether the
-            # model exposes `timestamp` or separate `month/day_of_month` fields.
-            step_data = StepCounterData()
-            # populate current_day_steps safely
-            try:
-                step_data.current_day_steps = total_steps
-            except Exception:
-                setattr(step_data, "current_day_steps", total_steps)
-        else:
-            # Prefer explicit history API when requested; otherwise honor peek
-            if not peek:
-                step_data = await api.get_step_history()
-            else:
-                step_data = await api.get_step_count(peek=peek)
+    """Fetch the current step-counter payload from a connected watch and optionally print a summary."""
+    if use_summary:
+        total_steps = await api.get_step_summary()
+        # Build a minimal StepCounterData instance that works whether the
+        # model exposes `timestamp` or separate `month/day_of_month` fields.
+        step_data = StepCounterData()
+        try:
+            step_data.current_day_steps = total_steps
+        except Exception:
+            setattr(step_data, "current_day_steps", total_steps)
+    elif not peek:
+        step_data = await api.get_step_history()
+    else:
+        step_data = await api.get_step_count(peek=peek)
 
     total_steps = step_data.current_day_steps if step_data.current_day_steps is not None else 0
 
-    # Strict mode: if timestamp decoding failed or timestamp-related warnings
-    # are present, fail loudly and dump the raw payload to a .hex file for
-    # postmortem analysis. This makes the behavior deterministic for tests
-    # and debugging workflows.
-    if strict:
-        bad_ts = False
-        if not hasattr(step_data, "timestamp") or getattr(step_data, "timestamp") is None:
-            bad_ts = True
-        if any("timestamp" in (w or "") or "too short" in (w or "") for w in (step_data.warnings or [])):
-            bad_ts = True
-        if bad_ts:
-            # Dump raw payload for inspection
-            try:
-                from datetime import datetime as _dt
-
-                fn = f"failed_step_payload_{_dt.now():%Y%m%d_%H%M%S}.hex"
-                with open(fn, "w") as f:
-                    f.write(step_data.raw.hex() if step_data.raw else "")
-                logger.error(f"Strict mode: timestamp invalid — dumped payload to {fn}")
-            except Exception as e:
-                logger.error(f"Strict mode: failed to dump payload: {e}")
-            raise ValueError("Strict mode: invalid or missing timestamp in parsed step data")
     logger.info(f"Total steps: {total_steps}")
     # Use friendly pre-computed representations when available
     logger.info(
@@ -167,20 +70,6 @@ async def _fetch_steps(
 
     if not print_log:
         return
-
-    # Estimate calories (distance-based). Use distance if available,
-    # otherwise estimate distance from steps and stride length.
-    est_kcal = None
-    method = None
-    if step_data.distance_meters is not None:
-        dist_km = step_data.distance_meters / 1000.0
-        est_kcal = dist_km * weight_kg * 1.036
-        method = "distance"
-    elif step_data.current_day_steps is not None:
-        dist_m = step_data.current_day_steps * stride_m
-        dist_km = dist_m / 1000.0
-        est_kcal = dist_km * weight_kg * 1.036
-        method = "steps"
 
     # Build and print a neat two-column summary table
     if hasattr(step_data, "timestamp") and getattr(step_data, "timestamp"):
@@ -200,8 +89,6 @@ async def _fetch_steps(
         ("Total distance (m)", str(step_data.total_distance_meters)),
         ("BCD total steps", str(step_data.bcd_total_steps)),
     ]
-    if est_kcal is not None:
-        summary.append(("Estimated calories (kcal)", f"{est_kcal:.1f} (method={method}, weight_kg={weight_kg}, stride_m={stride_m})"))
 
     # column widths
     key_w = max(len(k) for k, _ in summary)
@@ -216,11 +103,9 @@ async def _fetch_steps(
     hours_to_print = step_data.hourly_by_hour
 
     print('\nHourly by hour:')
-    print(f"{'Hour':>4} | {'Steps':>6} | {'Dist m':>6} | {'kcal':>6}")
-    print('------+--------+----------+--------')
+    print(f"{'Hour':>4} | {'Steps':>6} | {'Dist m':>6}")
+    print('------+--------+----------')
     if hours_to_print:
-        # allocate estimated calories proportionally to steps per hour when available
-        total_for_alloc = sum((v or 0) for v in hours_to_print)
         for h in range(24):
             val = hours_to_print[h] if h < len(hours_to_print) else None
             distance = None
@@ -230,16 +115,10 @@ async def _fetch_steps(
                     distance = step_data.committed_distances[distance_index]
                 if h == step_data.timestamp.hour:
                     distance = step_data.pending_distance_meters
-            if est_kcal is not None and total_for_alloc > 0:
-                hour_steps = (val or 0)
-                kcal_hour = est_kcal * (hour_steps / total_for_alloc) if hour_steps else 0.0
-                kcal_str = f"{kcal_hour:.1f}"
-            else:
-                kcal_str = "-"
             distance_str = str(distance) if distance is not None else "-"
             print(
                 f" {h:02d}   | {(val if val is not None else '-'):>6}"
-                f" | {distance_str:>8} | {kcal_str:>6}"
+                f" | {distance_str:>8}"
             )
     else:
         print('Hourly breakdown unavailable')
@@ -294,36 +173,15 @@ async def main() -> None:
         action="store_true",
         help="Diagnostic mode: leave the watch transaction open (may omit history)",
     )
-    parser.add_argument(
-        "--permissive",
-        action="store_true",
-        help="When set, aggregate hours permissively (treat missing 10-min slots as 0).",
-    )
-    parser.add_argument(
-        "--weight",
-        type=float,
-        default=70.0,
-        help="Weight in kg used to estimate calories when distance is available (default: 70.0)",
-    )
-    parser.add_argument(
-        "--stride",
-        type=float,
-        default=0.762,
-        help="Average stride length in meters used to estimate distance from steps when distance is missing (default: 0.762)",
-    )
     parser.add_argument("--raw", action="store_true", help="Print raw payload hex for debugging")
     parser.add_argument("--log", action="store_true", help="Print the step summary to stdout")
     parser.add_argument("--quiet", action="store_true", help="Reduce log output on stderr (only print errors)")
-    parser.add_argument("--hci", type=str, help="Read steps from a BTSnoop HCI log file instead of a live watch")
-    parser.add_argument("--stdin", action="store_true", help="Read step payload (raw bytes or hex) from stdin")
     parser.add_argument("--summary", action="store_true", help="Fetch only today's total (fast)")
     parser.add_argument("--history", action="store_true", help="Fetch full step history (forces complete transfer)")
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Fail loudly when timestamp decoding is invalid; dump raw payload to a .hex file for postmortem",
-    )
     args = parser.parse_args()
+
+    if args.summary and args.history:
+        parser.error("--summary and --history are mutually exclusive")
 
     if args.quiet:
         logging.getLogger('gshock_api').setLevel(logging.ERROR)
@@ -335,97 +193,6 @@ async def main() -> None:
     logger.info("    At 00:30, 06:30, 12:30, or 18:30, a paired watch may auto sync.    ")
     logger.info("=======================================================================")
     logger.info("")
-
-    if args.hci or args.stdin:
-        logger.info(f"Reading step-counter data from HCI log: {args.hci}")
-        # Support three modes:
-        #  - --hci <path>: extract payload from BTSnoop text file
-        #  - --hci - : read payload bytes or hex from stdin
-        #  - --stdin : read payload bytes or hex from stdin
-        if args.hci and args.hci != "-":
-            payload = _extract_step_payload_from_hci(args.hci)
-            if payload is None:
-                raise ValueError(f"No readable step payload found in HCI log: {args.hci}")
-        else:
-            # read from stdin.buffer; accept raw bytes starting with 0x26 or hex text
-            data = sys.stdin.buffer.read()
-            if not data:
-                raise ValueError("No data provided on stdin")
-            # If the first byte looks like the life-log marker, treat as raw
-            if data and data[0] == 0x26:
-                payload = data
-            else:
-                # decode as text and try to extract ATT 'Value:' hex fields
-                text = data.decode(errors="ignore")
-                # Find hex groups following 'Value:' or plain hex groups per line
-                candidates = []
-                for m in re.finditer(r"Value:\s*([0-9A-Fa-f]+)", text):
-                    candidates.append(m.group(1))
-                if not candidates:
-                    # fallback: any long hex group on its own line
-                    for m in re.finditer(r"\b([0-9A-Fa-f]{6,})\b", text):
-                        candidates.append(m.group(1))
-
-                payload = None
-                matched_hex = None
-                parsed_candidates: list[tuple[str, bytes]] = []
-                # Build all candidates first (do not stop at first match).
-                for hexstr in candidates:
-                    try:
-                        raw = bytes.fromhex(hexstr)
-                    except Exception:
-                        continue
-                    start = raw.find(b"\x26")
-                    if start == -1:
-                        continue
-                    candidate = raw[start:]
-                    # Try to parse candidate payload; ignore parse-time errors
-                    try:
-                        parsed = StepCounterIOFunctional.parse(candidate)
-                    except Exception:
-                        parsed = None
-                    if parsed is not None:
-                        parsed_candidates.append((hexstr, candidate))
-
-                if not parsed_candidates:
-                    raise ValueError("Stdin did not contain a parsable step payload")
-
-                # Prefer the longest parsed candidate to avoid selecting short/truncated fragments.
-                parsed_candidates.sort(key=lambda t: len(t[1]), reverse=True)
-                matched_hex, payload = parsed_candidates[0]
-
-                if payload is None:
-                    raise ValueError("Stdin did not contain a parsable step payload")
-
-                # Log which candidate matched for debugging truncated payload issues
-                if matched_hex:
-                    try:
-                        preview = matched_hex[:128]
-                        logger.info(f"Matched HCI candidate: len={len(matched_hex)//2}B preview={preview}...")
-                    except Exception:
-                        logger.info("Matched HCI candidate (preview unavailable)")
-
-        step_data = StepCounterIOFunctional.parse(payload)
-        if step_data is None:
-            raise ValueError(f"Failed to parse step payload from HCI log: {args.hci}")
-
-        # If user asked for summary/history explicitly, prefer that (stdin/hci payload still overrides)
-        use_summary = args.summary
-        if args.history:
-            use_summary = False
-            args.peek = True
-
-        await _fetch_steps(
-            None,
-            use_summary=use_summary,
-            peek=args.peek,
-            print_log=args.log,
-            permissive=args.permissive,
-            show_raw=args.raw,
-            step_data=step_data,
-            strict=args.strict,
-        )
-        return
 
     try:
         logger.info("Waiting for connection...")
@@ -449,20 +216,17 @@ async def main() -> None:
 
         # Step counter data should be fetched before time-sync on supported watches.
         try:
-            if args.summary and args.history:
-                raise ValueError("--summary and --history are mutually exclusive")
             use_summary = args.summary
+            peek = args.peek
             if args.history:
                 use_summary = False
-                args.peek = True
+                peek = True
             fetch_steps = _fetch_steps(
                 api,
                 use_summary=use_summary,
-                peek=args.peek,
+                peek=peek,
                 print_log=args.log,
-                permissive=args.permissive,
                 show_raw=args.raw,
-                strict=args.strict,
             )
             await asyncio.wait_for(fetch_steps, timeout=scan_timeout)
         except Exception as e:
