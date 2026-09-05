@@ -264,7 +264,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertIsInstance(watch_info.protocol, StandardProtocol)
 
         watch_info.set_name_and_model("CASIO F-B100W")
-        self.assertEqual(watch_info.model, WatchModel.ABL_100)
+        self.assertEqual(watch_info.model, WatchModel.F_B100)
         self.assertTrue(watch_info.hasStepCounter)
 
         watch_info.set_name_and_model("CASIO GW-B5600")
