@@ -25,6 +25,7 @@ class WatchModel(Enum):
     EQB = auto()
     ECB = auto()
     ABL_100 = auto()
+    F_B100 = auto()
     DW_H5600 = auto()
     GMW_BZ5000 = auto()
     GW_BX5600 = auto()
@@ -164,6 +165,16 @@ _MODEL_LIST: list[ModelInfo] = [
     ModelInfo(model=WatchModel.GST, hasAutoLight=False, hasReminders=True),
     ModelInfo(
         model=WatchModel.ABL_100,
+        hasAutoLight=False, hasReminders=False,
+        hasTemperature=False, hasBatteryLevel=False,
+        hasWorldCities=False, hasHomeTime=False,
+        hasStepCounter=True,
+        hasDateFormat=False,
+        weekLanguageSupported=False,
+        hasAppInfo=True,
+    ),
+    ModelInfo(
+        model=WatchModel.F_B100,
         hasAutoLight=False, hasReminders=False,
         hasTemperature=False, hasBatteryLevel=False,
         hasWorldCities=False, hasHomeTime=False,
@@ -406,7 +417,7 @@ EXACT_MODEL_MAP: dict[str, WatchModel] = {
     "PRW-B1000": WatchModel.GENERIC,
     "GMD-B300": WatchModel.GENERIC,
     "WS-B1000": WatchModel.GENERIC,
-    "F-B100W": WatchModel.GENERIC,
+    "F-B100W": WatchModel.F_B100,  # module 3589; advertises as "CASIO F-B100W"
     "OCW-P3000": WatchModel.GENERIC,
 }
 

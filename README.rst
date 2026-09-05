@@ -35,7 +35,7 @@ Overview
 This is a **Python API library** for G-Shock watches that support Bluetooth Low Energy (BLE) communication.
 
 G(M)W-5600, G(M)W-5000, GA-B2100, GA-B001-1AER, GST-B500, GST-B200, MSG-B100, 
-G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, 
+G-B001, GBD-H1000 (Partial support), MRG-B5000, GCW-B5000, GG-B100, ABL-100WE, F-B100W, 
 Edifice ECB-30, ECB-10, ECB-20, most Edifice watches, most Protrek models.
 
 It can perform the following tasks:
