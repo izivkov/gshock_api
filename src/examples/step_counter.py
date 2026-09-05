@@ -20,6 +20,7 @@ Connects to a paired watch, calls each method in turn, and prints the results.
 
 import asyncio
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -58,9 +59,11 @@ async def main() -> None:
     if step_data.warnings:
         print(f"  warnings: {step_data.warnings}")
 
+    logger.info("Syncing time...")
+    await api.set_time(time.time())
+
     await connection.disconnect()
     logger.info("Disconnected.")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
