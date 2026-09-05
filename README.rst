@@ -84,3 +84,10 @@ Troubleshooting:
 ================
 If your watch cannot connect, and the 
 **`--multi-watch`** parameter is not used, remove the **`config.ini`** file and try again.
+
+Links
+=====
+
+Also check out this project page on GitHub which uses the library to show steps counter for the ABL-100 watches:
+
+https://github.com/taviso/casiosync/tree/main
