@@ -93,18 +93,6 @@ class GshockAPI:
         """Set settings to the watch via current WatchProtocol."""
         await watch_info.protocol.set_settings(self.connection, settings)
 
-    async def get_step_count_today(self) -> int:
-        """Gets the daily step count total for step counter supported watches."""
-        return await watch_info.protocol.get_step_count_today(self.connection)
-
-    async def get_step_summary(self) -> int:
-        """Alias for a quick summary call that returns today's total steps.
-
-        This is a lightweight call intended to return the current-day total
-        without forcing the watch to finish a full history transfer.
-        """
-        return await watch_info.protocol.get_step_count_today(self.connection)
-
     async def get_step_count(self, peek: bool = False) -> StepCounterData:
         """Gets complete step counter data (hourly and daily history).
 
@@ -112,14 +100,6 @@ class GshockAPI:
         remains usable for follow-up BLE commands such as time changes.
         """
         return await watch_info.protocol.get_step_count(self.connection, peek)
-
-    async def get_step_history(self) -> StepCounterData:
-        """Request the full step-history from the watch.
-
-        The transaction is left open so the watch does not clear its detailed
-        lifelog buffers before they can be inspected.
-        """
-        return await watch_info.protocol.get_step_count(self.connection, True)
 
     async def get_reminders(self) -> list[Any]:
         """Gets the current events (reminders) from the watch."""

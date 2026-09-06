@@ -247,10 +247,11 @@ class StepCounterIO:
     accumulator: bytearray = bytearray()
     expected_length: int = FALLBACK_EXPECTED_LENGTH
     peek: bool = True
+    _last_data: StepCounterData | None = None
     _end_txn_task: asyncio.Task | None = None
 
     @staticmethod
-    async def request(connection: ConnectionProtocol, peek: bool = False) -> StepCounterData:
+    async def request(connection: ConnectionProtocol, peek: bool = True) -> StepCounterData:
         """Request step counter data from the watch.
 
         By default we close the transaction after the payload is received so the
@@ -268,8 +269,20 @@ class StepCounterIO:
         StepCounterIO.expected_length = FALLBACK_EXPECTED_LENGTH
         StepCounterIO.result = CancelableResult[StepCounterData]()
 
-        # Handle 0x0011 is CASIO_DATA_REQUEST_SP
-        await connection.write(BLE_HANDLE_DRSP, START_TRANSACTION_CMD)
+        try:
+            # Handle 0x0011 is CASIO_DATA_REQUEST_SP
+            await connection.write(BLE_HANDLE_DRSP, START_TRANSACTION_CMD)
+        except Exception as e:
+            # If the watch is already in a transaction (e.g. from a previous crash or
+            # redundant call), it may reject the START command with a protocol error.
+            if "BleakGATTProtocolError" in str(e):
+                logger.warning("StepCounterIO: Transaction already active on watch.")
+                if StepCounterIO._last_data:
+                    return StepCounterIO._last_data
+                # No cache available, fall through and attempt to wait for notifications
+            else:
+                raise
+
         try:
             return await StepCounterIO.result.get_result()
         finally:
@@ -332,6 +345,7 @@ class StepCounterIO:
         step_data = StepCounterIOFunctional.parse(full_payload)
 
         if step_data is not None:
+            StepCounterIO._last_data = step_data
             StepCounterIO.result.set_result(step_data)
         else:
             logger.warning(f"Failed to parse activity record from {len(full_payload)}B payload")

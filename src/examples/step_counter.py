@@ -46,10 +46,8 @@ async def main() -> None:
     watch_name = await api.get_watch_name()
     logger.info(f"Watch name: {watch_name}")
 
-    total_steps = await api.get_step_summary()
-    print(f"\nget_step_summary() -> {total_steps} steps today")
-
     step_data = await api.get_step_count(peek=True)
+
     print("\nget_step_count(peek=True) ->")
     print(f"  current_day_steps: {step_data.current_day_steps}")
     print(f"  timestamp: {step_data.timestamp}")
