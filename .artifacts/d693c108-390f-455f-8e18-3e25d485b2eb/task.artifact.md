@@ -1,0 +1,7 @@
+- [ ] Update `casio_time_zone_helper.py` with offset calculations and tracking
+- [ ] Add `set_dst` to `dst_watch_state_io.py`
+- [ ] Add `set_dst` (register 0x1E) to `dst_for_world_cities_io.py`
+- [ ] Add city encoding (register 0x1F) to `world_cities_io.py`
+- [ ] Refactor `StandardProtocol.initialize_for_setting_time` to apply settings
+- [ ] Update `GshockAPI.set_time` signature
+- [ ] Verify with tests and manual check

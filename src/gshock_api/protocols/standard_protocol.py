@@ -73,17 +73,54 @@ class StandardProtocol(WatchProtocol):
 
     async def read_write_dst_watch_states(self, connection: Any) -> None:
         from gshock_api.watch_info import watch_info
-        for state in [DtsState.ZERO, DtsState.TWO, DtsState.FOUR][:watch_info.dstCount]:
+
+        async def get_dst_watch_state_with_tz(conn: Any, state: DtsState) -> bytes:
+            from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
+            from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
+
+            orig_dst = await self.get_dst_watch_state(conn, state)
+            casio_tz = CasioTimeZoneHelper.get_casio_time_zone()
+            dst_value = (1 if casio_tz.is_in_dst() else 0) | (2 if casio_tz.has_rules() else 0)
+            return DstWatchStateIO.set_dst(orig_dst, dst_value)
+
+        # Main clock (state 0) gets updated with TZ, others just read/write back
+        await self.read_and_write(connection, get_dst_watch_state_with_tz, DtsState.ZERO)
+
+        for state in [DtsState.TWO, DtsState.FOUR][:watch_info.dstCount - 1]:
             await self.read_and_write(connection, self.get_dst_watch_state, state)
 
     async def read_write_dst_for_world_cities(self, connection: Any) -> None:
         from gshock_api.watch_info import watch_info
-        for city_number in range(watch_info.worldCitiesCount):
+
+        async def get_dst_for_world_cities_with_tz(conn: Any, city_num: int) -> bytes:
+            from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
+            from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
+
+            orig_dst = await self.get_dst_for_world_cities(conn, city_num)
+            casio_tz = CasioTimeZoneHelper.get_casio_time_zone()
+            return DstForWorldCitiesIO.set_dst(orig_dst, casio_tz)
+
+        # City 0 gets updated with TZ, others just read/write back
+        await self.read_and_write(connection, get_dst_for_world_cities_with_tz, 0)
+
+        for city_number in range(1, watch_info.worldCitiesCount):
             await self.read_and_write(connection, self.get_dst_for_world_cities, city_number)
 
     async def read_write_world_cities(self, connection: Any) -> None:
         from gshock_api.watch_info import watch_info
-        for city_number in range(watch_info.worldCitiesCount):
+
+        async def get_world_cities_with_tz(conn: Any, city_num: int) -> bytes:
+            from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
+            from gshock_api.iolib.world_cities_io import WorldCitiesIO
+
+            casio_tz = CasioTimeZoneHelper.get_casio_time_zone()
+            city_name = WorldCitiesIO.parse_city(casio_tz.zone_name)
+            return WorldCitiesIO.encode_and_pad(city_name, city_num)
+
+        # City 0 gets updated with TZ, others just read/write back
+        await self.read_and_write(connection, get_world_cities_with_tz, 0)
+
+        for city_number in range(1, watch_info.worldCitiesCount):
             await self.read_and_write(connection, self.get_world_cities, city_number)
 
     async def read_write_home_times(self, connection: Any) -> None:

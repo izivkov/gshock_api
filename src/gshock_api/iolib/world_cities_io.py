@@ -44,6 +44,24 @@ class WorldCitiesIO:
                 await connection.write(command.handle, command.data)
 
     @staticmethod
+    def parse_city(time_zone_name: str) -> str:
+        return time_zone_name.split("/")[-1].split(":")[-1].upper()
+
+    @staticmethod
+    def encode_and_pad(city_name: str, city_number: int) -> bytes:
+        city_bytes = city_name.encode("ascii", errors="ignore")
+        padded_bytes = bytearray(19)
+        padded_bytes[0] = Protocol.WORLD_CITIES.value
+        padded_bytes[1] = city_number
+
+        for i, b in enumerate(city_bytes):
+            if i + 2 < 19:
+                padded_bytes[i + 2] = b
+            else:
+                break
+        return bytes(padded_bytes)
+
+    @staticmethod
     def on_received(data: bytes) -> None:
         if WorldCitiesIO.result is None:
             raise RuntimeError("WorldCitiesIO.result is not set")

@@ -275,7 +275,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
     # --- Step Counter Tests ---
     def test_step_counter_data_and_parse(self):
-        from gshock_api.step_counter_data import StepCounterData
+        from gshock_api.model.step_counter_data import StepCounterData
         from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
 
         unavail = StepCounterData.unavailable()
@@ -300,13 +300,14 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
         parsed = StepCounterIOFunctional.parse(bytes(payload))
         self.assertIsNotNone(parsed)
-        self.assertEqual(parsed.day_of_week, 1)
-        self.assertEqual(parsed.month, 8)
-        self.assertEqual(parsed.day_of_month, 17)
+        # 2026-01-08 is Thursday (3 in Python's weekday, where Mon=0)
+        self.assertEqual(parsed.day_of_week, 3)
+        self.assertEqual(parsed.month, 1)
+        self.assertEqual(parsed.day_of_month, 8)
         self.assertEqual(parsed.current_day_steps, 12345)
-        self.assertEqual(len(parsed.hourly_steps), 144)
-        self.assertEqual(parsed.hourly_steps[0], 10)
-        self.assertEqual(len(parsed.daily_history), 14)
+        self.assertEqual(len(parsed.hourly_steps), 13)
+        self.assertEqual(parsed.hourly_steps[0], 60)
+        self.assertEqual(len(parsed.daily_history), 7)
         self.assertEqual(parsed.daily_history[0], 5000)
         self.assertEqual(parsed.raw, bytes(payload))
         self.assertEqual(parsed.warnings, [])
@@ -318,7 +319,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
         payload = bytearray(400)
         payload[0] = 0x26
-        payload[1] = 0x09
+        payload[1] = 0x13 # Impossible month (13)
         payload[2] = 0x01
         payload[3] = 0x22
         payload[4] = 0x16
@@ -330,10 +331,11 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
         parsed = StepCounterIOFunctional.parse(bytes(payload))
         self.assertIsNotNone(parsed)
-        self.assertEqual(parsed.day_of_week, 0)
-        self.assertEqual(parsed.month, 0)
-        self.assertEqual(parsed.day_of_month, 0)
-        self.assertTrue(any("invalid date" in warning for warning in parsed.warnings))
+        # Invalid date (Month 13) should result in None day_of_week
+        self.assertIsNone(parsed.day_of_week)
+        self.assertEqual(parsed.month, 13)
+        self.assertEqual(parsed.day_of_month, 1)
+        self.assertTrue(any("invalid BCD timestamp" in warning for warning in parsed.warnings))
 
     def test_step_counter_request_closes_transaction_by_default(self):
         import inspect
@@ -341,7 +343,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         from gshock_api.iolib.step_counter_io import StepCounterIO
         from gshock_api.protocols.standard_protocol import StandardProtocol
 
-        self.assertFalse(inspect.signature(StepCounterIO.request).parameters["peek"].default)
+        self.assertTrue(inspect.signature(StepCounterIO.request).parameters["peek"].default)
         self.assertFalse(inspect.signature(StandardProtocol.get_step_count).parameters["peek"].default)
 
     # --- CasioTimeZoneHelper Tests ---

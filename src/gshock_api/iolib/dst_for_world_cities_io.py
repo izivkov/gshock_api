@@ -1,3 +1,4 @@
+from typing import Any
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
@@ -42,6 +43,15 @@ class DstForWorldCitiesIO:
         for command in commands:
             if isinstance(command, Write):
                 await connection.write(command.handle, command.data)
+
+    @staticmethod
+    def set_dst(original_data: bytes, casio_tz: Any) -> bytes:
+        data_list = list(original_data)
+        if len(data_list) > 6:
+            data_list[4] = casio_tz.offset & 0xFF
+            data_list[5] = casio_tz.dst_offset & 0xFF
+            data_list[6] = casio_tz.dst_rules & 0xFF
+        return bytes(data_list)
 
     @staticmethod
     def on_received(data: bytes) -> None:

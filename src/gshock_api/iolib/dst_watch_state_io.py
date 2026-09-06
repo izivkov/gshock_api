@@ -51,6 +51,13 @@ class DstWatchStateIO:
                 await connection.write(command.handle, command.data)
 
     @staticmethod
+    def set_dst(original_data: bytes, dst_value: int) -> bytes:
+        data_list = list(original_data)
+        if len(data_list) > 3:
+            data_list[3] = dst_value
+        return bytes(data_list)
+
+    @staticmethod
     def on_received(data: bytes) -> None:
         if DstWatchStateIO.result is None:
             raise RuntimeError("DstWatchStateIO.result is not set")

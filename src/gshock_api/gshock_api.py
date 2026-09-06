@@ -1,6 +1,8 @@
 import logging
+
 from typing import Final, TypeVar, Any
 
+from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
 from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
@@ -46,9 +48,10 @@ class GshockAPI:
         return await watch_info.protocol.get_home_time(self.connection)
 
     async def set_time(
-        self, current_time: object | None = None, offset: int = 0
+        self, current_time: object | None = None, offset: int = 0, timezone: str | None = None
     ) -> None:
         """Sets current time on the watch via current WatchProtocol."""
+        CasioTimeZoneHelper.set_timezone(timezone)
         await watch_info.protocol.set_time(self.connection, current_time, offset)
 
     async def get_alarms(self) -> list[Any]:

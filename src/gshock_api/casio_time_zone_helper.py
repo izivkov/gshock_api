@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import NamedTuple
 from zoneinfo import ZoneInfo
 
@@ -13,14 +13,36 @@ class LatLon(NamedTuple):
 class CasioTimeZone:
     name: str
     zone_name: str
-    dst_rules: int = 0
+    _dst_rules: int = 0
 
     @property
-    def zone_id(self) -> ZoneInfo | timezone:
+    def zone_id(self) -> ZoneInfo:
         try:
             return ZoneInfo(self.zone_name)
         except Exception:
-            return timezone.utc
+            return ZoneInfo("UTC")
+
+    @property
+    def offset(self) -> int:
+        """Standard offset in 15-minute intervals."""
+        try:
+            now = datetime.now(self.zone_id)
+            # Standard offset = Total offset - DST offset
+            total_offset_seconds = now.utcoffset().total_seconds() if now.utcoffset() else 0
+            dst_offset_seconds = now.dst().total_seconds() if now.dst() else 0
+            return int((total_offset_seconds - dst_offset_seconds) / 60 / 15)
+        except Exception:
+            return 0
+
+    @property
+    def dst_offset(self) -> int:
+        """DST offset in 15-minute intervals."""
+        return int(self.get_dst_duration().total_seconds() / 60 / 15)
+
+    @property
+    def dst_rules(self) -> int:
+        # If we have no DST for this timezone, override the dstRules with a 0
+        return self._dst_rules if self.dst_offset > 0 else 0
 
     def is_in_dst(self) -> bool:
         try:
@@ -29,9 +51,45 @@ class CasioTimeZone:
         except Exception:
             return False
 
+    def has_rules(self) -> bool:
+        return self.dst_rules != 0
+
+    def get_dst_duration(self) -> timedelta:
+        """
+        Calculates the daylight saving time (DST) offset duration.
+        Matches Kotlin's getDTSDuration logic.
+        """
+        try:
+            now = datetime.now(self.zone_id)
+            # In Python, we can't easily get the 'next transition' like in Java's TimeZone API
+            # without external libs like pytz, but we can check if it EVER has DST.
+            # However, to be precise and match Kotlin:
+            dst = now.dst()
+            if dst and dst.total_seconds() != 0:
+                return dst
+
+            # If not currently in DST, we need to find if it has rules.
+            # We can check a few months ahead/behind.
+            # Summer in Northern Hemisphere (June)
+            summer = datetime(now.year, 6, 21, tzinfo=self.zone_id)
+            # Winter in Northern Hemisphere (Dec)
+            winter = datetime(now.year, 12, 21, tzinfo=self.zone_id)
+
+            dst_summer = summer.dst().total_seconds() if summer.dst() else 0
+            dst_winter = winter.dst().total_seconds() if winter.dst() else 0
+
+            max_dst = max(abs(dst_summer), abs(dst_winter))
+            return timedelta(seconds=max_dst)
+
+        except Exception:
+            return timedelta(0)
+
 
 class CasioTimeZoneHelper:
     """Helper class providing Casio timezone mapping and coordinates lookup."""
+
+    _current_timezone: str = datetime.now().astimezone().tzname() or "UTC"
+    _casio_timezone: CasioTimeZone | None = None
 
     TIME_ZONE_TABLE: list[CasioTimeZone] = [
         CasioTimeZone("BAKER ISLAND", "UTC-12"),
@@ -86,6 +144,53 @@ class CasioTimeZoneHelper:
     ]
 
     TIME_ZONE_MAP: dict[str, CasioTimeZone] = {tz.zone_name: tz for tz in TIME_ZONE_TABLE}
+
+    @classmethod
+    def set_timezone(cls, timezone_name: str | None) -> None:
+        if timezone_name is None:
+            from tzlocal import get_localzone_name
+            timezone_name = get_localzone_name()
+
+        cls._current_timezone = timezone_name
+        cls._casio_timezone = cls.find_time_zone(timezone_name)
+
+    @classmethod
+    def get_casio_time_zone(cls) -> CasioTimeZone:
+        if cls._casio_timezone is None:
+            cls._casio_timezone = cls.find_time_zone(cls._current_timezone)
+        return cls._casio_timezone
+
+    @classmethod
+    def is_equivalent(cls, tz1_name: str, tz2_name: str) -> bool:
+        try:
+            tz1 = ZoneInfo(tz1_name)
+            tz2 = ZoneInfo(tz2_name)
+            now = datetime.now()
+
+            # Compare offsets and DST rules at current time and 6 months from now
+            future = now + timedelta(days=182)
+
+            for t in [now, future]:
+                if tz1.utcoffset(t) != tz2.utcoffset(t):
+                    return False
+                if tz1.dst(t) != tz2.dst(t):
+                    return False
+            return True
+        except Exception:
+            return False
+
+    @classmethod
+    def find_time_zone(cls, time_zone_name: str) -> CasioTimeZone:
+        if time_zone_name in cls.TIME_ZONE_MAP:
+            return cls.TIME_ZONE_MAP[time_zone_name]
+
+        for entry in cls.TIME_ZONE_TABLE:
+            if cls.is_equivalent(entry.zone_name, time_zone_name):
+                return entry
+
+        # Fallback
+        name = time_zone_name.split("/")[-1].replace("_", " ").upper()
+        return CasioTimeZone(name, time_zone_name, 0x00)
 
     WORLD_CITY_COORDINATES: dict[str, LatLon] = {
         "Asia/Ho_Chi_Minh": LatLon(10.7958, 106.7062),
@@ -156,7 +261,7 @@ class CasioTimeZoneHelper:
         return cls.TIME_ZONE_MAP.get("UTC", CasioTimeZone("UTC", "UTC"))
 
     @classmethod
-    def find_time_zone(cls, time_zone_name: str) -> CasioTimeZone:
+    def find_time_zone_legacy(cls, time_zone_name: str) -> CasioTimeZone:
         if time_zone_name in cls.TIME_ZONE_MAP:
             return cls.TIME_ZONE_MAP[time_zone_name]
         for tz in cls.TIME_ZONE_TABLE:

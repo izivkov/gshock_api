@@ -28,6 +28,7 @@ dependencies = [
     "twine>=6.2.0",
     "pytz>=2026.3.post1",
     "bleak>=3.0.2",
+    "tzlocal>=5.4.1",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",

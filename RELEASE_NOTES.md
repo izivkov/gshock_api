@@ -1,5 +1,28 @@
 # G-Shock API Release Notes
 
+## [2.0.46] - 2026-09-06 - Architectural Alignment, Timezone Support, and Step Counter Robustness
+
+### Added
+- **Full Timezone Support**: Enhanced `CasioTimeZoneHelper` and `StandardProtocol` to correctly synchronize the watch's timezone offset, DST rules, and Home City when setting the time.
+- **Dynamic Timezone Detection**: Added `tzlocal` integration to automatically detect the system's IANA timezone name.
+- **Step Counter Caching**: Implemented a "Cache & Return" strategy in `StepCounterIO` to provide instantaneous data on redundant calls and prevent protocol errors.
+- **Self-Healing Transactions**: Added robust error handling for step-counter transfers; the library now gracefully recovers if a watch session was left hanging from a previous crash.
+
+### Fixed
+- **Circular Dependencies**: Refactored `GshockAPI` and `WatchProtocol` to remove circular imports and ensure a clean `User -> API -> Protocol -> IOLib` call flow.
+- **Protocol Rejections**: Fixed `BleakGATTProtocolError` crashes when starting a step-counter transaction on a busy watch.
+- **Typo Cleanup**: Corrected numerous typos in method parameters and filenames (e.g., `time_adjustement` -> `time_adjustment`).
+- **Misleading Errors**: Updated `Connection.write` to provide more accurate error messages for BLE failures.
+
+### Changed
+- **API Simplification**: Removed redundant `get_step_summary()` and `get_step_count_today()`. All step-related data is now accessible via the consolidated `get_step_count()` method.
+- **Safety Defaults**: `get_step_count()` now defaults to `peek=True` to prevent accidental clearing of the watch's internal history buffers.
+- **Build System**: Updated `build-package.sh` to use `uv build` for more reliable and modern package distribution.
+
+### Dependencies
+- Added `tzlocal>=5.4.1` for reliable local timezone detection.
+
+
 ## [2.0.43] - 2026-09-03 - Lifelog history and BLE transfer fixes
 
 ### Added

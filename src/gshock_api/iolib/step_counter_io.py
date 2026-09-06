@@ -70,8 +70,12 @@ class StepCounterIOFunctional:
                 minute = _decode_bcd(payload[4])
                 second = _decode_bcd(payload[5])
                 timestamp = datetime(year, month, day_of_month, hour, minute, second)
+                day_of_week = timestamp.weekday()
             except ValueError:
                 warnings.append("invalid BCD timestamp in step counter header")
+                # Even if timestamp creation fails, we might still have individual fields
+                # from BCD decode (if those didn't throw)
+                pass
 
         current_day_offset = StepCounterIOFunctional.CURRENT_STEPS_OFFSET
         current_day_steps = (
