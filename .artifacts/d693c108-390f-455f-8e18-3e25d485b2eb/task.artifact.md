@@ -1,6 +1,0 @@
-- [x] Update `WatchProtocol` abstract base class
-- [x] Update `StandardProtocol` implementation
-- [x] Update `AnalogueProtocol` implementation
-- [x] Update `MipProtocol` implementation
-- [x] Refactor `GshockAPI` to delegate to protocol
-- [x] Verify changes and fix any circular imports or syntax errors
