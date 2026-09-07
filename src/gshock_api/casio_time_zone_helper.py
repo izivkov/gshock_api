@@ -150,6 +150,12 @@ class CasioTimeZoneHelper:
         if timezone_name is None:
             from tzlocal import get_localzone_name
             timezone_name = get_localzone_name()
+        else:
+            # Validate the timezone name
+            try:
+                ZoneInfo(timezone_name)
+            except Exception:
+                raise ValueError(f"Invalid timezone name: {timezone_name}")
 
         cls._current_timezone = timezone_name
         cls._casio_timezone = cls.find_time_zone(timezone_name)
@@ -158,6 +164,7 @@ class CasioTimeZoneHelper:
     def get_casio_time_zone(cls) -> CasioTimeZone:
         if cls._casio_timezone is None:
             cls._casio_timezone = cls.find_time_zone(cls._current_timezone)
+
         return cls._casio_timezone
 
     @classmethod
