@@ -1,5 +1,14 @@
 # G-Shock API Release Notes
 
+## [2.0.47] - 2026-09-07 - Refinement of Timezone Handling
+
+### Changed
+- **Simplified Timezone API**: Refactored `GshockAPI.set_time` and `CasioTimeZoneHelper.set_timezone` to streamline timezone synchronization. Detection of the local system timezone is now automatically handled within the helper class if not explicitly provided.
+
+### Added
+- **`tzlocal` Dependency**: Formally added `tzlocal` to `pyproject.toml` to support reliable IANA timezone detection across different platforms.
+
+
 ## [2.0.46] - 2026-09-06 - Architectural Alignment, Timezone Support, and Step Counter Robustness
 
 ### Added

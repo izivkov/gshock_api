@@ -59,7 +59,7 @@ async def run_time_server() -> None:
             logger.info(f"name: {name}")
 
             fine_adjustment_secs = args.get().fine_adjustment_secs
-            await api.set_time(offset=fine_adjustment_secs, timezone="Europe/Sofia")
+            await api.set_time(offset=fine_adjustment_secs) # Could also pass timezone like this: timezone="Europe/Sofia"
 
             logger.info(f"Time set at {datetime.now()} on {watch_info.name}")
 
