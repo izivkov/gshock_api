@@ -64,8 +64,8 @@ class Alarms:
     def from_json_alarm_secondary_alarms(self, alarms_json: list[AlarmDict]) -> bytearray:
         if len(alarms_json) < 2:
             return bytearray()
-        alarms = self.alarms[1:]
-        return self.create_secondary_alarm(alarms)
+        # Encode the alarms passed in, not the state left by the last read (self.alarms).
+        return self.create_secondary_alarm(alarms_json[1:])
 
     def create_secondary_alarm(self, alarms: list[AlarmDict]) -> bytearray:
         all_alarms: bytearray = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
