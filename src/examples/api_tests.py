@@ -61,10 +61,6 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
 
-        logger.info("Getting step count today...")
-        steps_today = await api.get_step_count_today()
-        logger.info(f"steps today: {steps_today}")
-
         steps_life_log = await api.get_step_count()
         logger.info(f"steps life log: {steps_life_log}")
 
