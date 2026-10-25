@@ -31,6 +31,7 @@ class WatchModel(Enum):
     GW_BX5600 = auto()
     MTG_B1000 = auto()
     MTG_B3000 = auto()
+    BSA_B100 = auto()
     GENERIC = auto()
     UNKNOWN = auto()  # Legacy fallback alias for GENERIC
 
@@ -175,6 +176,16 @@ _MODEL_LIST: list[ModelInfo] = [
     ),
     ModelInfo(
         model=WatchModel.F_B100,
+        hasAutoLight=False, hasReminders=False,
+        hasTemperature=False, hasBatteryLevel=False,
+        hasWorldCities=False, hasHomeTime=False,
+        hasStepCounter=True,
+        hasDateFormat=False,
+        weekLanguageSupported=False,
+        hasAppInfo=True,
+    ),
+    ModelInfo(
+        model=WatchModel.BSA_B100,
         hasAutoLight=False, hasReminders=False,
         hasTemperature=False, hasBatteryLevel=False,
         hasWorldCities=False, hasHomeTime=False,
@@ -398,7 +409,7 @@ EXACT_MODEL_MAP: dict[str, WatchModel] = {
     "GMC-B2100": WatchModel.GA,
     "OCW-SG1000": WatchModel.GENERIC,
     "MTG-B4000": WatchModel.GENERIC,
-    "BSA-B100": WatchModel.GENERIC,
+    "BSA-B100": WatchModel.BSA_B100,
     "GMA-B800": WatchModel.GENERIC,
     "GR-B100": WatchModel.GENERIC,
     "GG-B100": WatchModel.GENERIC,
