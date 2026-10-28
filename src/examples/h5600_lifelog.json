@@ -1,0 +1,54 @@
+{
+  "format": "h5600_lifelog_session",
+  "version": 2,
+  "source": "ble:C5:56:0E:AD:9B:CA",
+  "started": "2026-10-27T14:13:30-0400",
+  "ended": "2026-10-27T14:14:25-0400",
+  "finished": false,
+  "error": "ConnectionError: the watch disconnected before this write",
+  "events": [
+    {
+      "t": 1793124814.061,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793124822.569,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793124831.079,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793124839.589,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793124848.098,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793124856.607,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    }
+  ],
+  "announcements": []
+}

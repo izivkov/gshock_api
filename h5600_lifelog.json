@@ -1,0 +1,2486 @@
+{
+  "format": "h5600_lifelog_session",
+  "version": 2,
+  "source": "ble:C5:43:35:6D:E0:DF",
+  "started": "2026-10-27T19:57:50-0400",
+  "ended": "2026-10-27T19:58:38-0400",
+  "finished": true,
+  "error": null,
+  "events": [
+    {
+      "t": 1793145475.234,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "23"
+    },
+    {
+      "t": 1793145475.473,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "23434153494f2044572d48353630300000000000"
+    },
+    {
+      "t": 1793145475.473,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "10"
+    },
+    {
+      "t": 1793145475.654,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "10dfe06d3543c57f0e030fffffffff28000000"
+    },
+    {
+      "t": 1793145475.654,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "11"
+    },
+    {
+      "t": 1793145475.893,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "110000000600000000000100000000"
+    },
+    {
+      "t": 1793145475.893,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "110000000600000000000100000000"
+    },
+    {
+      "t": 1793145476.042,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "3b"
+    },
+    {
+      "t": 1793145476.371,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "3b50000a4001050520032801a000054001141c00"
+    },
+    {
+      "t": 1793145476.372,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "3b50000a4001050520032801a000054001141c00"
+    },
+    {
+      "t": 1793145476.611,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "3a"
+    },
+    {
+      "t": 1793145476.762,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "3a003401400104005802"
+    },
+    {
+      "t": 1793145476.762,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "3a003401400104005802"
+    },
+    {
+      "t": 1793145477.001,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "26"
+    },
+    {
+      "t": 1793145477.272,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "2600000000000000000000000000000000"
+    },
+    {
+      "t": 1793145477.273,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "28"
+    },
+    {
+      "t": 1793145477.513,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "2806140000fa00000001"
+    },
+    {
+      "t": 1793145477.513,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "20"
+    },
+    {
+      "t": 1793145477.754,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "2023070011000000000000000004020100080000"
+    },
+    {
+      "t": 1793145477.754,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "2f"
+    },
+    {
+      "t": 1793145477.992,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "2f0c04000000"
+    },
+    {
+      "t": 1793145477.992,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "2f0c04000000"
+    },
+    {
+      "t": 1793145478.442,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "43"
+    },
+    {
+      "t": 1793145478.803,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "43401f0000000000000000000000000000"
+    },
+    {
+      "t": 1793145478.804,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "13"
+    },
+    {
+      "t": 1793145479.048,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "1300010000000000000000000600000600"
+    },
+    {
+      "t": 1793145479.048,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "1300010000000000000000000600000600"
+    },
+    {
+      "t": 1793145479.432,
+      "dir": "TX",
+      "uuid": "SETUP",
+      "handle": null,
+      "hex": "45"
+    },
+    {
+      "t": 1793145479.553,
+      "dir": "RX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "45008cfe9dffa7e6f9fd00"
+    },
+    {
+      "t": 1793145479.553,
+      "dir": "TX",
+      "uuid": "STATUS",
+      "handle": null,
+      "hex": "45008cfe9dffa7e6f9fd00"
+    },
+    {
+      "t": 1793145479.912,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002effffffffff"
+    },
+    {
+      "t": 1793145479.972,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793145480.063,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000107"
+    },
+    {
+      "t": 1793145483.567,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793145483.633,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1793145483.633,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "04000000000000000000"
+    },
+    {
+      "t": 1793145483.695,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002effffffffff"
+    },
+    {
+      "t": 1793145483.753,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "04002800280000002a00"
+    },
+    {
+      "t": 1793145483.753,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "0401180018000000dc05"
+    },
+    {
+      "t": 1793145483.813,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "04002800280000002a00"
+    },
+    {
+      "t": 1793145483.815,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "0600000000000000000000000000"
+    },
+    {
+      "t": 1793145483.873,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "06fa00001000000002"
+    },
+    {
+      "t": 1793145483.873,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "06fa00001000000002"
+    },
+    {
+      "t": 1793145483.933,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "06fa00001000000002"
+    },
+    {
+      "t": 1793145483.933,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002effffffffff"
+    },
+    {
+      "t": 1793145484.983,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e0014000000"
+    },
+    {
+      "t": 1793145484.983,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e0014000000"
+    },
+    {
+      "t": 1793145486.032,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fff0ffffffe5f5e4e8c5f5abffff82edffffc6f9df4a"
+    },
+    {
+      "t": 1793145486.032,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145486.092,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e0014000000"
+    },
+    {
+      "t": 1793145486.092,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e0014000000"
+    },
+    {
+      "t": 1793145486.154,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e6563000000"
+    },
+    {
+      "t": 1793145486.154,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e6563000000"
+    },
+    {
+      "t": 1793145486.994,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "059a9cffffffa40100000001010001009fffffffff9dffffffffd3e0fffff0ffffffffffe4eed8c5ffd2f29e010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101ffa15effddffc8ffdca6"
+    },
+    {
+      "t": 1793145486.994,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145487.051,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e6563000000"
+    },
+    {
+      "t": 1793145487.052,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e6563000000"
+    },
+    {
+      "t": 1793145487.113,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e50a1040000"
+    },
+    {
+      "t": 1793145487.113,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e50a1040000"
+    },
+    {
+      "t": 1793145488.106,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05af5efbffffffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ff"
+    },
+    {
+      "t": 1793145488.108,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.195,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ddff0ff7f0ff0ff739fe0ff77aff0ff731ff0ff732fe0ff72efe0ff7f1ff0ff7e7ff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff748fe0ff7c3fe0ff770fe0ff7ecfe0ff7ebfe0ff7ccfd0ff70afe0ff761ff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0f"
+    },
+    {
+      "t": 1793145488.195,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.253,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0f10e8"
+    },
+    {
+      "t": 1793145488.253,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.345,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ff"
+    },
+    {
+      "t": 1793145488.345,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.463,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0f"
+    },
+    {
+      "t": 1793145488.463,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.522,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0f91f4"
+    },
+    {
+      "t": 1793145488.522,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.613,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7ffff0ff7a2ff0ff7ffff0ff7ffff0ff7e4ff0ff737f7"
+    },
+    {
+      "t": 1793145488.613,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145488.703,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e50a1040000"
+    },
+    {
+      "t": 1793145488.703,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e50a1040000"
+    },
+    {
+      "t": 1793145489.693,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e51a1040000"
+    },
+    {
+      "t": 1793145489.693,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e51a1040000"
+    },
+    {
+      "t": 1793145490.055,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ae5efbffff05fd0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff755fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2"
+    },
+    {
+      "t": 1793145490.056,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.145,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fd0ff7a1fd0ff7a2fd0ff73afc0ff754fc0ff7a5fd0ff748fd0ff761fd0ff72ffd0ff78bfc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff767fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a0fd0ff7a1fd0ff79afd0ff7e1fb0ff750f90ff72af30ff732fc0ff7a0fa0ff7a0f70ff793f50ff71cfd0ff798fd0ff7a1fd0ff78ffd0ff790fd0ff79cfd0ff7ecfc0ff79bf40ff716f80ff710f90ff78df90ff727f50ff74eea0ff7b9f60ff7aafb0ff77dfd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a1fd0ff7a1fd0f"
+    },
+    {
+      "t": 1793145490.148,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.233,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7a2fd0ff7a1fd0ff7a1fd0ff780fd0ff73efd0f7e74"
+    },
+    {
+      "t": 1793145490.233,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.325,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f73dfd0ff787fc0ff7a8fc0ff726fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff77efd0ff7a8fc0ff7a8fc0ff727fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a4fd0ff79ffd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff77efd0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8"
+    },
+    {
+      "t": 1793145490.325,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.415,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff762fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a1fd0ff777fd0ff7a8fc0ff7f2fc0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0ff7a1fd0ff7a2fd0f"
+    },
+    {
+      "t": 1793145490.415,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.473,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7a1fd0ff7a2fd0ff79dfd0ff7c0fc0ff78efc0f4aa4"
+    },
+    {
+      "t": 1793145490.473,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.565,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff7a8fc0ff71bfd0ff7a1fd0ff7a2fd0ff7a2fd0ff7a2fd0ff7a2fd0ff7a2fd0ff7a2fd0ff7a3fd0ff7a0fd0ff7a1fd0ff7a1fd0ff756fd0ff73bfc0ff799fd0ff73ffd0ff756fc0ff7fd41"
+    },
+    {
+      "t": 1793145490.565,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145490.623,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e51a1040000"
+    },
+    {
+      "t": 1793145490.623,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e51a1040000"
+    },
+    {
+      "t": 1793145491.702,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e52890b0000"
+    },
+    {
+      "t": 1793145491.702,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e52890b0000"
+    },
+    {
+      "t": 1793145492.034,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ad76f4ffffa3ff0ff7b5ff0ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701"
+    },
+    {
+      "t": 1793145492.034,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.124,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff7aeff0ff7b4ff0ff7b7ff0ff7b6ff0ff7b8ff0ff7b7ff0f"
+    },
+    {
+      "t": 1793145492.124,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.182,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7aeff0ff7b8ff0ff7b6ff0ff7b4ff0ff7b3ff0f41e6"
+    },
+    {
+      "t": 1793145492.183,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.274,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7b6ff0ff7b6ff0ff7b4ff0ff7b6ff0ff7b6ff0ff7b2ff0ff7b6ff0ff7b8ff0ff792ff0ff796e60ff796ff0ff793ff0ff797ff0ff798ff0ff79aff0ff79eff0ff79ee60ff7a0ff0ff7a3ff0ff7a4e60ff7a8ff0ff7b8e60ff7bbe60ff7aae60ff79de60ff7a4e60ff798e60ff78ee60ff79eff0ff79ee60ff79bff0ff7a0e60ff79ae60ff780e60ff779e60ff770e60ff701010ff701010ff701010ff701010ff776ff0ff795e60ff79bff0ff786e60ff76aff0ff765e60ff7b6ff0ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701"
+    },
+    {
+      "t": 1793145492.274,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.392,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff7b9ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b5ff0ff7b5e60ff7b8ff0ff7afff0ff7b1e60ff7abff0ff7b8ff0ff7b3ff0ff7afff0ff7b8ff0ff7b7ff0ff7b2ff0ff7b6ff0ff7b4ff0ff7b6ff0ff7aeff0ff7b8ff0ff7b2ff0ff7b6ff0ff7b7ff0ff7a3ff0ff772ff0ff76ce60ff77ce60ff78be60ff7a3e60ff7a6e60ff7acff0ff7b49b0ff7b5e60ff7b3cd0ff79fff0ff77bff0ff76eff0ff783e60ff799e60ff794e60ff7b9e60ff7b7e60ff7b5e60ff793e60ff791ff0ff7a3e60f"
+    },
+    {
+      "t": 1793145492.392,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.452,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f785ff0ff78be60ff791e60ff7b1e60ff7a9e60f5340"
+    },
+    {
+      "t": 1793145492.452,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.544,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f79fff0ff7c5e60ff7c9cd0ff7cbcd0ff7c7e60ff7c3cd0ff7c9e60ff7aae60ff7c3e60ff7cce60ff7d5cd0ff7c6cd0ff7d1e60ff7c0e60ff7c7e60ff7b6cd0ff782e60ff78ae60ff7aee60ff79cff0ff793ff0ff79ae60ff7ace60ff7ade60ff79bff0ff79ce60ff7b0e60ff77ee60ff764cd0ff761cd0ff76ee60ff78cff0ff798ff0ff7b2e60ff7a6e60ff766ff0ff764ff0ff764ff0ff767e60ff765e60ff77bff0ff77ae60ff788e60ff792ff0ff796e60ff798ff0ff78ae60ff787e60ff79ce60ff788e60ff78ae60ff788e60ff769e60ff764e60ff75ee60ff77ce60ff79be60ff768e60ff701010ff701010ff701010ff7b5"
+    },
+    {
+      "t": 1793145492.544,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.635,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05e60ff7b7ff0ff76eff0ff784e60ff78bff0ff781e60ff701010ff701010ff701010ff701010ff701010ff77cff0ff792e60ff79de60ff7aaff0ff7aeff0ff7b4e60ff7b1ff0ff7b7ff0ff7b7ff0ff7b6ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b8ff0ff79dff0ff7a0ff0ff7a8ff0ff7b1ff0ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff7b9ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b9ff0f"
+    },
+    {
+      "t": 1793145492.635,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.693,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7b8ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b9ff0f4c68"
+    },
+    {
+      "t": 1793145492.693,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.785,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7b9ff0ff7b9ff0ff7b9e60ff7b9ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b8ff0ff7a4ff0ff7a8ff0ff7afff0ff7b7ff0ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701"
+    },
+    {
+      "t": 1793145492.785,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.875,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010f"
+    },
+    {
+      "t": 1793145492.875,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145492.964,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f701010ff701010ff701010ff701010ff701010fb35d"
+    },
+    {
+      "t": 1793145492.964,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.085,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff7b9ff0ff7b9ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b9"
+    },
+    {
+      "t": 1793145493.088,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.177,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ff0ff7b9ff0ff7b8ff0ff7b8ff0ff7b8ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b8ff0ff7b8ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b9ff0ff7b8ff0ff7b8ff0ff7b9ff0ff7b8ff0ff7b9ff0ff773ff0ff772ff0ff774ff0ff774ff0ff701010ff701010ff701010ff701010ff701010ff7b8ff0ff7b8ff0ff7baff0ff7b8ff0ff7b7ff0ff7b8ff0ff7b1ff0ff7b7ff0ff7b9ff0ff7b8ff0ff7b9ff0ff7b6ff0ff799ff0ff79bff0ff79ee60ff7b8ff0ff7b9ff0ff7b9ff0ff7b8ff0ff79bff0ff7a0e60ff7a5e60ff797e60ff792e60ff7a3e60ff7abff0ff7b1ff0ff7abe60ff7afff0ff787ff0ff798ff0f"
+    },
+    {
+      "t": 1793145493.177,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.234,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7bce60ff7b6ff0ff701010ff701010ff701010fa129"
+    },
+    {
+      "t": 1793145493.234,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.327,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff701010ff78ee60ff790ff0ff794ff0ff797ff0ff701"
+    },
+    {
+      "t": 1793145493.327,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.386,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05010ff701010ff701010ff701010ff701010ff701010ff701010ff79fff0ff7a4e60ff7a3ff0ff7aaff0ff7b3ff0ff79cff0ff7a0ff0ff7a4ff0ff7a8ff0ff7abe60ff7a5ff0ff7a8ff0ff7b0e60ff7b8ff0ff7a6ff0ff7a7ff0ff7b2e60ff7b0ff0ff79cff0ff7a3ff0ff7aaff0ff7b4e60ff7b8e60ff7c8ff0ff7cfcd0ff7bae60ff7c39b0ff7c2b40ff7c3ff0ff7c4e60ff78b6d"
+    },
+    {
+      "t": 1793145493.386,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145493.448,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e52890b0000"
+    },
+    {
+      "t": 1793145493.448,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e52890b0000"
+    },
+    {
+      "t": 1793145494.703,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e53e5070000"
+    },
+    {
+      "t": 1793145494.703,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e53e5070000"
+    },
+    {
+      "t": 1793145495.036,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ac1af8ffff0101010101010ff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.036,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.125,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.125,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.183,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffff32a0"
+    },
+    {
+      "t": 1793145495.183,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.275,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.279,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.365,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.365,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.453,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fffffffffffffffffffffffffffffffffffffffffe85"
+    },
+    {
+      "t": 1793145495.453,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.547,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.547,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.634,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.634,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.692,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fffffffffffffffffffffffffffffffffffffffffe85"
+    },
+    {
+      "t": 1793145495.692,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.786,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "t": 1793145495.786,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.905,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000093a0"
+    },
+    {
+      "t": 1793145495.905,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145495.964,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e53e5070000"
+    },
+    {
+      "t": 1793145495.964,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e53e5070000"
+    },
+    {
+      "t": 1793145497.703,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e564b110000"
+    },
+    {
+      "t": 1793145497.703,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e564b110000"
+    },
+    {
+      "t": 1793145498.036,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05a9b4eeffffdf0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145498.044,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.155,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145498.155,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.213,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff76de5"
+    },
+    {
+      "t": 1793145498.214,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.305,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7"
+    },
+    {
+      "t": 1793145498.305,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.395,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7ef0ff7df0ff7df0ff7"
+    },
+    {
+      "t": 1793145498.395,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.483,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05df0ff7df0ff7df0ff7ef0ff7df0ff7df0ff7ef0fbfa6"
+    },
+    {
+      "t": 1793145498.483,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.576,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7df0ff7df0ff7df0ff7df0ff7ef0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f"
+    },
+    {
+      "t": 1793145498.576,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.695,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff7ef0ff7ef0ff7df0ff7df0ff77f0ff77f0ff77f0ff7df0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0f"
+    },
+    {
+      "t": 1793145498.695,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.754,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f77f0ff77f0ff77f0ff7df0ff7df0ff7df0ff7dfb567"
+    },
+    {
+      "t": 1793145498.754,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.845,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff77f0ff77f0ff77f0ff77f0ff7df0ff7df0ff7df0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff7ef0ff7df0ff7df0ff77f0ff77f0ff7df0ff77f0ff7df0ff7df0ff7df0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff77f0ff7df0ff77f0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145498.846,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.935,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145498.94,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145498.993,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7897d"
+    },
+    {
+      "t": 1793145498.993,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.087,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7"
+    },
+    {
+      "t": 1793145499.087,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.204,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7"
+    },
+    {
+      "t": 1793145499.204,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.263,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f4b20"
+    },
+    {
+      "t": 1793145499.264,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.357,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f"
+    },
+    {
+      "t": 1793145499.357,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.444,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f"
+    },
+    {
+      "t": 1793145499.444,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.502,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef6314"
+    },
+    {
+      "t": 1793145499.502,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.595,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145499.595,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.685,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef"
+    },
+    {
+      "t": 1793145499.685,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.743,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff72258"
+    },
+    {
+      "t": 1793145499.748,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.835,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7ef0ff7ef0ff7ef0ff7"
+    },
+    {
+      "t": 1793145499.835,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145499.983,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7"
+    },
+    {
+      "t": 1793145499.983,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145500.043,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f9951"
+    },
+    {
+      "t": 1793145500.043,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145500.135,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0f"
+    },
+    {
+      "t": 1793145500.135,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145500.195,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7ef0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7df0ff7e4bc"
+    },
+    {
+      "t": 1793145500.195,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145500.253,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e564b110000"
+    },
+    {
+      "t": 1793145500.253,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e564b110000"
+    },
+    {
+      "t": 1793145502.562,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5a3c000000"
+    },
+    {
+      "t": 1793145502.562,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5a3c000000"
+    },
+    {
+      "t": 1793145503.013,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05a5c3ffffffd9efd80ff7010101010000000101010001000100010001000000010000000101010101010100000001010101010101010101010101010164db"
+    },
+    {
+      "t": 1793145503.013,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145503.074,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5a3c000000"
+    },
+    {
+      "t": 1793145503.074,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5a3c000000"
+    },
+    {
+      "t": 1793145504.694,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5b13000000"
+    },
+    {
+      "t": 1793145504.699,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5b13000000"
+    },
+    {
+      "t": 1793145504.994,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05a4ecffffffd9efd90f010000000101000100f7920d"
+    },
+    {
+      "t": 1793145504.994,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145505.053,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5b13000000"
+    },
+    {
+      "t": 1793145505.053,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5b13000000"
+    },
+    {
+      "t": 1793145506.704,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e6372000000"
+    },
+    {
+      "t": 1793145506.704,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e6372000000"
+    },
+    {
+      "t": 1793145507.033,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "059c8dffffffd9efd80fa2eee0fcffa3b3fcffffbfe0fffff5ff9fffffffff9dfffffffff6daffffd9fffffffffee4f5e0cbfff4d5009e010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101ff00a187ffcfffc8ff9b0000432b"
+    },
+    {
+      "t": 1793145507.034,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145507.093,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e6372000000"
+    },
+    {
+      "t": 1793145507.093,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e6372000000"
+    },
+    {
+      "t": 1793145508.714,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e72e5240000"
+    },
+    {
+      "t": 1793145508.714,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e72e5240000"
+    },
+    {
+      "t": 1793145509.046,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "058d1adbffffd9efd8dcaa0ff7ea00faffffffc1febeffffffff01f5fffe99ffffffff00fbffd9efd8dcaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcbf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dccf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcdf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145509.046,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.134,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8dcea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dcff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddbf0ff7"
+    },
+    {
+      "t": 1793145509.134,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.193,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000003f65"
+    },
+    {
+      "t": 1793145509.193,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.316,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8ddca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dddf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ddff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145509.326,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.406,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8deaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8debf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8decf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dedf0ff7"
+    },
+    {
+      "t": 1793145509.406,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.463,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff00000000d80c"
+    },
+    {
+      "t": 1793145509.463,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.556,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8deea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8defa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8deff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfbf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145509.556,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.645,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8dfca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfdf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dffa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8dfff0ff7"
+    },
+    {
+      "t": 1793145509.645,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.703,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff0000000058a8"
+    },
+    {
+      "t": 1793145509.703,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.795,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8e6aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6bf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6df0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145509.795,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.885,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8e6ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e6fa0ff7ddfefbffffffc0fde5ffffffff23fbffff99ffffffff00f7ffd9efd8e6ff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e7aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e7af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e7ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e7bf0ff7"
+    },
+    {
+      "t": 1793145509.885,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145509.943,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05c103f5ffffffc102f3ffffffff48f6ffff80ffff1425"
+    },
+    {
+      "t": 1793145509.943,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.036,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffff00f3ffd9efd8e7ca0ff7f103dcf9fbfcc1e5beffffffff01b2fffe80ffffffff00f3ffd9efd8e7cf0ff7cf02ecfefefec1f2bfffffffff01e4fffe90ffffffff00f7ffd9efd8e7da0ff7e604e9fdfefebefbbeffffffff01defffd96ffffffff00f3ffd9efd8e7df0ff73702ecfefefefef5c0ffffffff01ebfffc89ffffffff00f3ffd9efd8e7ea0ff73304e9fdfdfd03e6c0ffffffff01d7fffc85ffffffff00f3ffd9efd8e7ef0ff7ff01f9fffeffe6ffc0ffffffff01f5fffe9df5ffecff00ffffd9efd8e7fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e7ff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145510.036,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.125,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8e8aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8bf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8df0ff7"
+    },
+    {
+      "t": 1793145510.131,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.184,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff0000000096ed"
+    },
+    {
+      "t": 1793145510.184,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.275,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8e8ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e8ff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9bf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145510.275,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.394,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8e9ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9df0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8e9ef0ff7da03ebfdfdfdc1d7c2ffffffff48e0ffff80ffffffff00f3ffd9efd8e9fa0ff7fd1ce8fafbfac0ddc2ffffffff01b6fffba2ffffffff00f3ffd9efd8e9ff0ff7"
+    },
+    {
+      "t": 1793145510.394,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.483,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050729f4f1f5f0d30bcfffffffff01f4fef0abfeff339c"
+    },
+    {
+      "t": 1793145510.483,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.575,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fffa00f3ffd9efd8eaaa0ff7331c06efedf2ea13faffffffff01f7ffffa8fdffffff00f3ffd9efd8eaaf0ff7062a16f9f8f9ccf3caffffffff01ecfffcaeffffffff00fbfed9efd8eaba0ff70a2b15f7f7f8e81afbffffffff01f2ffffa8fdffffff00f3ffd9efd8eabf0ff72e1d05edebf1edeac6ffffffff01f4ffffaafbffffff00f3ffd9efd8eaca0ff7321d08eceaf3cd16edffffffff01ebfffeaafbffffff00f3ffd9efd8eacf0ff7f73505fdfdfcdd15cfffffffff01d0fffe97ffffffff00f3ffd9efd8eada0ff7092c24fdfdfde31de5ffffffff01efffff97ffffffff00fbffd9efd8eadf0ff7021715ffffffffffffff"
+    },
+    {
+      "t": 1793145510.575,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.666,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffff01feffff99ffffffff00f7ffd9efd8eaea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eaef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eafa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eaff0ff7ee3619ffffffed3517ffffffff98ffffff80ffffffff00f3ffd9efd8ebaa0ff7261c04ebeff3cb05caffffffff01dbfffda8fffffdff00f3ffd9efd8ebaf0ff71a1e18f2f0f4d411f3ffffffff01c1fffea8fdffffff00f3ffd9efd8ebba0ff7211f12f1eef3f418fcffffffff01fdffffaaffffffff00f3ffd9efd8ebbf0ff7"
+    },
+    {
+      "t": 1793145510.666,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.723,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "051a2213f3f2f6e301d8ffffffff01c9fffda8fdff87a1"
+    },
+    {
+      "t": 1793145510.723,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.815,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffff00f3fbd9efd8ebca0ff7152915f6f5f7f11a00ffffffff01f3ffffa8fdffffff00f3ffd9efd8ebcf0ff7331e09ebe8eefa1adeffffffff01f9ffffaafbffffff00f3ffd9efd8ebda0ff7322006eeebf1f51bfdffffffff01ffffffaafbffffff00f3ffd9efd8ebdf0ff7fa12f7f4f4f4c6dbcaffffffff0198fff9aafbffffff00f3ffd9efd8ebea0ff7ff04f9fefdfcded7c1ffffffff01d6fffe94ffffffff00ffffd9efd8ebef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ebfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ebff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145510.815,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.905,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8ecaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecbf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eccf0ff7c203f4ffffffc1f7c0ffffffff01f8ffff88ffffffff00f3ffd9efd8ecda0ff7da05e7fcfefdc0f7c1ffffffff01e6ffff80fffffdff00f3ffd9efd8ecdf0ff7"
+    },
+    {
+      "t": 1793145510.905,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145510.966,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05d300e4fcfdfdc0e9bfffffffff01e8fffa87ffff62b4"
+    },
+    {
+      "t": 1793145510.973,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.086,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffff00f7ffd9efd8ecea0ff7fdfff2fdfdfec0edbfffffffff01caffff98ffffffff00fbffd9efd8ecef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ecff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edbf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145511.086,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.205,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8edca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eddf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8edfa0ff7c20cfdfffeffc0fffcffffffff7eecffffa1ffffffff00f3ffd9efd8edff0ff7"
+    },
+    {
+      "t": 1793145511.205,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.263,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff00000000efbb"
+    },
+    {
+      "t": 1793145511.263,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.355,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8eeaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eebf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eecf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eedf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145511.355,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.446,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8eeea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eefa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8eeff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efaf0ff7c20cfdfffeffc0fffdffffffff7eedffffa4ffffffff00f3ffd9efd8efba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efbf0ff7"
+    },
+    {
+      "t": 1793145511.446,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.503,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000006648"
+    },
+    {
+      "t": 1793145511.503,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.595,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8efca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efdf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8effa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8efff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145511.595,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.684,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8f6aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6bf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6df0ff7"
+    },
+    {
+      "t": 1793145511.684,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.743,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000003bf2"
+    },
+    {
+      "t": 1793145511.743,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.836,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8f6ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f6ff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7bf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145511.843,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145511.954,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8f7ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7df0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f7ff0ff7"
+    },
+    {
+      "t": 1793145511.954,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.013,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000004c31"
+    },
+    {
+      "t": 1793145512.014,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.134,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8f8aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8bf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8df0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145512.134,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.226,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8f8ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f8ff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9aa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9af0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9ba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9bf0ff7"
+    },
+    {
+      "t": 1793145512.226,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.313,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff00000000a725"
+    },
+    {
+      "t": 1793145512.313,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.404,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8f9ca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9cf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9da0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9df0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9ea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9ef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9fa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8f9ff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145512.404,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.496,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8faaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8faaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8faba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fabf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8faca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8facf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fada0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fadf0ff7"
+    },
+    {
+      "t": 1793145512.496,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.553,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000004aae"
+    },
+    {
+      "t": 1793145512.553,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.645,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8faea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8faef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fafa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8faff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbbf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145512.645,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.734,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8fbca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbdf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fbfa0ff7c30cfefeffffc102feffffffff82feffffa7ffffffff00f3ffd9efd8fbff0ff7"
+    },
+    {
+      "t": 1793145512.736,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.792,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000005350"
+    },
+    {
+      "t": 1793145512.792,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145512.884,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8fcaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcbf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fccf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcdf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145512.884,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.004,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8fcea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fcff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdaa0ff7c107f6ffffffc107f6ffffffffd4ffffff80fffff7ff00f3ffd9efd8fdaf0ff7f6f3e0fbfbfbc1c0bfffffffff01bbfffd80fffffdff00f3ffd9efd8fdba0ff7fffefafefeffdee5c2ffffffff01f4ffff9ff0fff4ff00ffffd9efd8fdbf0ff7"
+    },
+    {
+      "t": 1793145513.004,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.062,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff000000002f66"
+    },
+    {
+      "t": 1793145513.062,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.154,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8fdca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fddf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdfa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fdff0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145513.154,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.245,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8feaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8febf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fecf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fedf0ff7"
+    },
+    {
+      "t": 1793145513.245,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.333,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff00000000c740"
+    },
+    {
+      "t": 1793145513.333,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.454,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd8feea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fefa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8feff0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffba0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffbf0ff77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1793145513.454,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.546,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9efd8ffca0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffcf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffda0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffdf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffea0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffef0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8fffa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd8ffff0ff7"
+    },
+    {
+      "t": 1793145513.546,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.664,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff0000000047e4"
+    },
+    {
+      "t": 1793145513.673,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.755,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9efd9dcaa0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd9dcaf0ff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd9dcba0ff7c203fafefefebef5f5ffffffff77e2fffc8effffffff00f3ffd9efd9dcbf0ff7082618f7f7f5db11d0ffffffff0176fff9aafdffffff00f3ffd9efd9dcca0ff7ee2c20fdfefde125e7ffffffff01edffff84ffffffff00f3ffd9efd9dccf0ff705350efdfdfae724d4ffffffff01c3ffff80fffffdff00f3ffd9efd9dcda0ff7f22b11fcfbf8e1fec4ffffffff01a9ffff97fdffffff00f3fffb8e"
+    },
+    {
+      "t": 1793145513.755,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1793145513.814,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e72e5240000"
+    },
+    {
+      "t": 1793145513.814,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e72e5240000"
+    },
+    {
+      "t": 1793145515.581,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "042effffffffff"
+    },
+    {
+      "t": 1793145515.582,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "042effffffffff"
+    }
+  ],
+  "announcements": [
+    {
+      "index": 0,
+      "value": "140000"
+    },
+    {
+      "index": 101,
+      "value": "630000"
+    },
+    {
+      "index": 80,
+      "value": "a10400"
+    },
+    {
+      "index": 81,
+      "value": "a10400"
+    },
+    {
+      "index": 82,
+      "value": "890b00"
+    },
+    {
+      "index": 83,
+      "value": "e50700"
+    },
+    {
+      "index": 86,
+      "value": "4b1100"
+    },
+    {
+      "index": 90,
+      "value": "3c0000"
+    },
+    {
+      "index": 91,
+      "value": "130000"
+    },
+    {
+      "index": 99,
+      "value": "720000"
+    },
+    {
+      "index": 114,
+      "value": "e52400"
+    }
+  ]
+}
