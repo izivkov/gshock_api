@@ -346,8 +346,8 @@ class StepCounterIO:
                 logger.warning(f"Failed to schedule end transaction task: {e}")
 
         full_payload = bytes(StepCounterIO.accumulator)
-        from gshock_api.watch_info import watch_info, WatchModel
-        if watch_info.model == WatchModel.F_B100:
+        from gshock_api.watch_info import watch_info, StepRecordFormat
+        if watch_info.stepRecordFormat == StepRecordFormat.F_B100:
             from gshock_api.iolib.fb100_step_counter_io import Fb100StepCounterIO
             step_data = Fb100StepCounterIO.parse(full_payload)
         else:

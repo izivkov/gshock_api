@@ -405,12 +405,39 @@ class TestFb100w(unittest.TestCase):
         self.assertEqual(d.timestamp, datetime(2026, 9, 30, 17, 13, 1))
         self.assertEqual(len(d.hourly_steps), 24)
 
-    def test_exercise_profile_codec(self):
-        from gshock_api.iolib.exercise_io import ExerciseProfile
+    def test_exercise_model_codec(self):
+        from gshock_api.model.exercise import Exercise
         # capture: 2d 00 00 00 01 00 87 fe 8f ff => goal 10000, height 178, weight 70
-        p = ExerciseProfile.decode(bytes.fromhex("2d000000010087fe8fff"))
+        p = Exercise.decode(bytes.fromhex("2d000000010087fe8fff"))
         self.assertEqual((p.step_goal, p.height, p.weight), (10000, 178, 70))
         self.assertEqual(p.encode(), bytes.fromhex("2d000000010087fe8fff"))
+
+    def test_exercise_io_accepts_app_supplied_model(self):
+        import asyncio
+        from gshock_api.iolib.exercise_io import ExerciseIO
+        from gshock_api.model.exercise import Exercise
+
+        class Connection:
+            def __init__(self):
+                self.writes = []
+
+            async def write(self, handle, data):
+                self.writes.append((handle, data))
+
+        connection = Connection()
+        exercise = Exercise(step_goal=10000, height=178, weight=70)
+        asyncio.run(ExerciseIO.set_exercise(connection, exercise))
+        self.assertEqual(
+            connection.writes, [(0x000E, bytes.fromhex("2d000000010087fe8fff"))])
+
+    def test_step_record_format_is_a_watch_capability(self):
+        from gshock_api.watch_info import StepRecordFormat, resolve_model_info, WatchModel
+        self.assertEqual(
+            resolve_model_info(WatchModel.F_B100).stepRecordFormat,
+            StepRecordFormat.F_B100)
+        self.assertEqual(
+            resolve_model_info(WatchModel.ABL_100).stepRecordFormat,
+            StepRecordFormat.ABL_100)
 
     def test_dst_transaction(self):
         from gshock_api.iolib.dst_transaction_io import DstTransactionIO, DstTransactionType
