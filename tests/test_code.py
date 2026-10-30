@@ -38,7 +38,8 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(encoded[4], 8)
         self.assertEqual(encoded[5], 45)
         self.assertEqual(encoded[6], 30)
-        self.assertEqual(encoded[7], 5)
+        # 2026-05-30 is a Saturday: official app uses 1=Mon..7=Sun (isoweekday) => 6
+        self.assertEqual(encoded[7], 6)
         expected_nano_byte = (123456000 * 256 // 1000000000) & 0xFF
         self.assertEqual(encoded[8], expected_nano_byte)
         self.assertEqual(encoded[9], 1)
@@ -374,3 +375,50 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestFb100w(unittest.TestCase):
+    """F-B100W (module 3589) codecs, validated against official-app captures (2026-09/10)."""
+
+    def test_alarm_flags_snooze_onetime(self):
+        from gshock_api.model.alarms import Alarms
+        al = Alarms()
+        # snooze daily 06:00 => flags 0x50
+        cmd = al.create_first_alarm({"enabled": True, "snooze": True, "hour": 6, "minute": 0})
+        self.assertEqual(cmd[1], 0x50)
+        # one-time => 0x60
+        cmd = al.create_first_alarm({"enabled": True, "oneTime": True, "hour": 6, "minute": 0})
+        self.assertEqual(cmd[1], 0x60)
+        # daily + hourly chime => 0xC0
+        cmd = al.create_first_alarm({"enabled": True, "hasHourlyChime": True, "hour": 6, "minute": 0})
+        self.assertEqual(cmd[1], 0xC0)
+
+    def test_step_record_parse(self):
+        from pathlib import Path
+        from gshock_api.iolib.fb100_step_counter_io import Fb100StepCounterIO
+        # real record from F-B100W capture (2026-09-30): today=273
+        fixture = Path(__file__).parent.parent / "test_data" / "fb100w_step_record.hex"
+        payload = bytes.fromhex(fixture.read_text())
+        d = Fb100StepCounterIO.parse(payload)
+        self.assertEqual(d.current_day_steps, 273)
+        self.assertEqual(d.bcd_total_steps, 273)
+        self.assertEqual(d.distance_meters, 100)
+        self.assertEqual(d.timestamp, datetime(2026, 9, 30, 17, 13, 1))
+        self.assertEqual(len(d.hourly_steps), 24)
+
+    def test_exercise_profile_codec(self):
+        from gshock_api.iolib.exercise_io import ExerciseProfile
+        # capture: 2d 00 00 00 01 00 87 fe 8f ff => goal 10000, height 178, weight 70
+        p = ExerciseProfile.decode(bytes.fromhex("2d000000010087fe8fff"))
+        self.assertEqual((p.step_goal, p.height, p.weight), (10000, 178, 70))
+        self.assertEqual(p.encode(), bytes.fromhex("2d000000010087fe8fff"))
+
+    def test_dst_transaction(self):
+        from gshock_api.iolib.dst_transaction_io import DstTransactionIO, DstTransactionType
+        self.assertEqual(
+            DstTransactionIO.encode(0, DstTransactionType.WORLD_CITY), bytes([0x21, 0, 1]))
+        self.assertEqual(
+            DstTransactionIO.encode(1, DstTransactionType.WORLD_CITY), bytes([0x21, 1, 1]))
+        self.assertEqual(
+            DstTransactionIO.encode(0, DstTransactionType.SWAP_HOME_WORLD), bytes([0x21, 0, 2]))
+        self.assertEqual(
+            DstTransactionIO.encode(1, DstTransactionType.DST_STATE), bytes([0x21, 1, 3]))

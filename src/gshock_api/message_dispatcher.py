@@ -11,6 +11,7 @@ from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
 from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
+from gshock_api.iolib.exercise_io import ExerciseIO
 from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.home_time_io import HomeTimeIO
 from gshock_api.iolib.settings_io import SettingsIO
@@ -46,6 +47,8 @@ class MessageDispatcher:
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
         "GET_HOME_TIME": HomeTimeIO.send_to_watch,
+        "GET_EXERCISE": ExerciseIO.send_to_watch,
+        "SET_EXERCISE": ExerciseIO.send_to_watch_set,
     }
 
     data_received_messages: typing.ClassVar[dict[int, OnReceivedFunction]] = {
@@ -68,6 +71,7 @@ class MessageDispatcher:
         CHARACTERISTICS["CMD_SET_TIMEMODE"]: UnknownIO.on_received,
         CHARACTERISTICS["FIND_PHONE"]: UnknownIO.on_received,
         CHARACTERISTICS["CASIO_ACTIVITY_RECORD"]: StepCounterIO.on_received,
+        CHARACTERISTICS["CASIO_SETTING_FOR_EXERCISE"]: ExerciseIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_03"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,

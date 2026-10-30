@@ -5,7 +5,7 @@ from typing import Optional
 
 @dataclass
 class StepCounterData:
-    """ABL-100WE life-log record representation.
+    """Casio life-log record representation (ABL-100WE, F-B100W).
 
     The library keeps the lightweight fields required for the public API, while also
     preserving optional raw/derived values when a watch record is present. Callers do
