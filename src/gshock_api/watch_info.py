@@ -8,6 +8,13 @@ from gshock_api.protocols.standard_protocol import StandardProtocol
 from gshock_api.protocols.watch_protocol import WatchProtocol
 
 
+class StepRecordFormat(Enum):
+    """Wire-format variants for the category-0x11 life-log record."""
+
+    ABL_100 = auto()
+    F_B100 = auto()
+
+
 class WatchModel(Enum):
     GA = auto()
     GW = auto()
@@ -69,6 +76,7 @@ class ModelInfo:
     hasHomeTime: bool = True
     hasMultipleFonts: bool = False
     hasStepCounter: bool = False
+    stepRecordFormat: StepRecordFormat = StepRecordFormat.ABL_100
     hasStepCounterMock: bool = False
     hasNewTimeFormat: bool = False
     hasTimeAdjustment: bool = True
@@ -170,6 +178,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasTemperature=False, hasBatteryLevel=False,
         hasWorldCities=False, hasHomeTime=False,
         hasStepCounter=True,
+        stepRecordFormat=StepRecordFormat.ABL_100,
         hasDateFormat=False,
         weekLanguageSupported=False,
         hasAppInfo=True,
@@ -180,6 +189,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasTemperature=False, hasBatteryLevel=False,
         hasWorldCities=False, hasHomeTime=False,
         hasStepCounter=True,
+        stepRecordFormat=StepRecordFormat.F_B100,
         hasDateFormat=False,
         weekLanguageSupported=False,
         hasAppInfo=True,
@@ -606,6 +616,10 @@ class WatchInfo:
     @property
     def hasStepCounter(self) -> bool:
         return self.info.hasStepCounter
+
+    @property
+    def stepRecordFormat(self) -> StepRecordFormat:
+        return self.info.stepRecordFormat
 
     @property
     def hasStepCounterMock(self) -> bool:

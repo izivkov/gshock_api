@@ -26,13 +26,14 @@ class TimeEncoderPure:
         year_bytes = dt.year.to_bytes(2, byteorder="little")
         
         # Bytes 2-7: Month, Day, Hour, Minute, Second, Weekday
+        # Weekday: 1=Mon .. 7=Sun (matches official app; isoweekday()).
         time_bytes = bytes([
             dt.month,
             dt.day,
             dt.hour,
             dt.minute,
             dt.second,
-            dt.weekday()
+            dt.isoweekday()
         ])
         
         # Byte 8: Nanoseconds mapped to the eighth byte formula
