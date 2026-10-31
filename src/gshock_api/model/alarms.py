@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import Any, NotRequired, TypedDict
+from typing import NotRequired, TypedDict
 
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.logger import logger
@@ -15,9 +15,6 @@ ALARM_CONSTANT_VALUE: int = 0x40
 # capturing the 0x15/0x16 writes before relying on these values.
 ONE_TIME_MASK: int = 0b00100000
 SNOOZE_MASK: int = 0b00010000
-
-# Alarm 5 (index 4) is the only alarm that can snooze.
-SNOOZE_CAPABLE_INDEX: int = 4
 
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -40,27 +37,6 @@ class Alarm:
     has_hourly_chime: bool
     one_time: bool = False
     snooze: bool = False
-
-
-def apply_alarm5_mode(alarms: list[Any], snooze: bool = True) -> list[Any]:
-    """
-    Returns a copy of the alarm list where alarm 5 is either a snooze alarm
-    (snooze=True) or a one-time alarm (snooze=False). All other alarms are
-    returned unchanged, and no keys are added to them.
-    """
-    if len(alarms) <= SNOOZE_CAPABLE_INDEX:
-        return list(alarms)
-
-    result = list(alarms)
-    alarm5 = dict(alarms[SNOOZE_CAPABLE_INDEX])
-    if snooze:
-        alarm5["snooze"] = True
-        alarm5["oneTime"] = False
-    else:
-        alarm5["oneTime"] = True
-        alarm5["snooze"] = False
-    result[SNOOZE_CAPABLE_INDEX] = alarm5
-    return result
 
 
 class Alarms:
@@ -102,8 +78,8 @@ class Alarms:
     def from_json_alarm_secondary_alarms(self, alarms_json: list[AlarmDict]) -> bytearray:
         if len(alarms_json) < 2:
             return bytearray()
-        alarms = self.alarms[1:]
-        return self.create_secondary_alarm(alarms)
+        # Encode the alarms passed in, not the state left by the last read (self.alarms).
+        return self.create_secondary_alarm(alarms_json[1:])
 
     def create_secondary_alarm(self, alarms: list[AlarmDict]) -> bytearray:
         all_alarms: bytearray = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])

@@ -59,10 +59,14 @@ class GshockAPI:
         """Gets alarms from the watch via current WatchProtocol."""
         return await watch_info.protocol.get_alarms(self.connection)
 
-    async def set_alarms(self, alarms: list[Any]) -> None:
-        """Sets alarms on the watch via current WatchProtocol."""
-        await watch_info.protocol.set_alarms(self.connection, alarms)
-
+    async def set_alarms(self, alarms: list[Any], snooze_alarm5: bool = True) -> None:
+        """
+        Sets alarms on the watch via current WatchProtocol.
+        Alarm 5 is a snooze alarm when snooze_alarm5 is True (default),
+        or a one-time alarm when False. Alarms 1-4 are not changed.
+        """
+        await watch_info.protocol.set_alarms(self.connection, alarms, snooze_alarm5)
+        
     async def get_timer(self) -> int:
         """Get Timer value in seconds via current WatchProtocol."""
         return await watch_info.protocol.get_timer(self.connection)

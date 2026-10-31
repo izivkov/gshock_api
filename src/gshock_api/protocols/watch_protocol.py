@@ -97,7 +97,7 @@ class WatchProtocol(ABC):
         pass
 
     @abstractmethod
-    async def set_alarms(self, connection: Any, alarms: list[Any]) -> None:
+    async def set_alarms(self, connection: Any, alarms: list[Any], snooze_alarm5: bool = True) -> None:
         """Sets alarms on the watch."""
         pass
 

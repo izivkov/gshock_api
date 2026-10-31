@@ -177,13 +177,18 @@ class StandardProtocol(WatchProtocol):
         await message_dispatcher.AlarmsIO.request(connection)
         return alarms_inst.alarms
 
-    async def set_alarms(self, connection: Any, alarms: list[Any]) -> None:
+    async def set_alarms(self, connection: Any, alarms: list[Any], snooze_alarm5: bool = True) -> None:
         if not alarms:
             return
+        # Copy so the caller's list is not modified. Only alarm 5 (index 4) changes.
+        alarms = [dict(alarm) for alarm in alarms]
+        if len(alarms) > 4:
+            alarms[4]["snooze"] = snooze_alarm5
+            alarms[4]["oneTime"] = not snooze_alarm5
         alarms_str = json.dumps(alarms)
         set_action_cmd = f'{{"action":"SET_ALARMS", "value":{alarms_str} }}'
         await connection.send_message(set_action_cmd)
-
+        
     async def get_settings(self, connection: Any) -> dict[str, Any]:
         from gshock_api import message_dispatcher
         settings = await self.get_basic_settings(connection)

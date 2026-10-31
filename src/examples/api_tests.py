@@ -14,7 +14,6 @@ from gshock_api.always_connected_watch_filter import (
 )
 from gshock_api.app_notification import AppNotification, NotificationType
 from gshock_api.connection import Connection
-from gshock_api.model.alarms import apply_alarm5_mode
 from gshock_api.model.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
@@ -84,7 +83,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             alarms[0]["hour"] = 7
             alarms[0]["minute"] = 25
             alarms[0]["enabled"] = True
-            await api.set_alarms(apply_alarm5_mode(alarms, snooze=False))
+            await api.set_alarms(alarms, snooze_alarm5=False)
 
             seconds = await api.get_timer()
             logger.info(f"timer: {seconds} seconds")
