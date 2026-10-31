@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable
-
+from gshock_api.model.exercise_profile import ExerciseProfile
 
 class WatchProtocol(ABC):
     """Abstract base class defining the WatchProtocol interface for G-Shock watches."""
@@ -156,4 +156,14 @@ class WatchProtocol(ABC):
     @abstractmethod
     async def set_reminders(self, connection: Any, events: list[Any]) -> None:
         """Sets reminders on the watch."""
+        pass
+
+    @abstractmethod
+    async def get_exercise_profile(self, connection: Any) -> ExerciseProfile:
+        """Gets the exercise profile (step goal, height, weight) from the watch."""
+        pass
+
+    @abstractmethod
+    async def set_exercise_profile(self, connection: Any, profile: ExerciseProfile) -> None:
+        """Sets the exercise profile on the watch."""
         pass

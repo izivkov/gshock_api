@@ -8,6 +8,7 @@ from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.model.step_counter_data import StepCounterData
+from gshock_api.model.exercise_profile import ExerciseProfile
 from gshock_api.watch_info import watch_info
 
 T = TypeVar("T")
@@ -125,3 +126,11 @@ class GshockAPI:
         encoded_buffer: bytes = AppNotificationIO.encode_notification_packet(notification)
         encrypted_buffer: bytes = AppNotificationIO.xor_encode_buffer(encoded_buffer)
         await self.connection.write(HANDLE_NOTIFICATION, encrypted_buffer)
+
+    async def get_exercise_profile(self) -> ExerciseProfile:
+        """Get the exercise profile (step goal, height, weight) from the watch."""
+        return await watch_info.protocol.get_exercise_profile(self.connection)
+
+    async def set_exercise_profile(self, profile: ExerciseProfile) -> None:
+        """Set the exercise profile on the watch."""
+        await watch_info.protocol.set_exercise_profile(self.connection, profile)

@@ -79,6 +79,7 @@ class ModelInfo:
     hasLongTimerKey: bool = False
     settingsSize: int = 17
     hasAppInfo: bool = True
+    hasExcersiseProfile: bool = False
     protocol: WatchProtocol = field(default_factory=lambda: STANDARD_PROTOCOL)
 
 _MODEL_LIST: list[ModelInfo] = [
@@ -173,6 +174,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasDateFormat=False,
         weekLanguageSupported=False,
         hasAppInfo=True,
+        hasExcersiseProfile=True,
     ),
     ModelInfo(
         model=WatchModel.F_B100,
@@ -183,6 +185,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasDateFormat=False,
         weekLanguageSupported=False,
         hasAppInfo=True,
+        hasExcersiseProfile=True,
     ),
     ModelInfo(
         model=WatchModel.BSA_B100,
@@ -599,6 +602,10 @@ class WatchInfo:
     def hasHomeTime(self) -> bool:
         return self.info.hasHomeTime
 
+    @property
+    def hasExcersiseProfile(self) -> bool:
+        return self.info.hasExcersiseProfile
+    
     @property
     def hasMultipleFonts(self) -> bool:
         return self.info.hasMultipleFonts

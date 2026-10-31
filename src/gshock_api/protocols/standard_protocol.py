@@ -2,6 +2,8 @@ import json
 from typing import Any, Callable
 from gshock_api.iolib.dst_watch_state_io import DtsState
 from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.model.exercise_profile import ExerciseProfile
+from gshock_api.iolib.packet import Protocol
 
 from gshock_api.protocols.watch_protocol import WatchProtocol
 
@@ -200,6 +202,21 @@ class StandardProtocol(WatchProtocol):
         message = f'{{"action": "SET_SETTINGS", "value": {setting_json} }}'
         await connection.send_message(message)
 
+    async def get_exercise_profile(self, connection: Any) -> ExerciseProfile:
+        from gshock_api.iolib.exercise_io import ExerciseIO
+        data = json.loads(await ExerciseIO.request(connection))
+        return ExerciseProfile(
+            step_goal=data["stepGoal"],
+            height=data["height"],
+            weight=data["weight"],
+        )
+
+    async def set_exercise_profile(self, connection: Any, profile: ExerciseProfile) -> None:
+        from gshock_api.iolib.exercise_io import ExerciseIO
+        from gshock_api.utils import to_compact_string, to_hex_string
+        payload = ExerciseIO.encode(profile)
+        await connection.write(0x000E, to_compact_string(to_hex_string(payload)))
+        
     async def get_basic_settings(self, connection: Any) -> dict[str, Any]:
         from gshock_api import message_dispatcher
         result_str = await message_dispatcher.SettingsIO.request(connection)

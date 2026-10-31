@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import TypedDict
+from typing import Any, NotRequired, TypedDict
 
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.logger import logger
@@ -9,6 +9,15 @@ from gshock_api.utils import to_int_array
 HOURLY_CHIME_MASK: int = 0b10000000
 ENABLED_MASK: int = 0b01000000
 ALARM_CONSTANT_VALUE: int = 0x40
+
+# Unverified: no HCI capture in test_data contains these bits set.
+# Confirm by creating one-time and snooze alarms in the official app and
+# capturing the 0x15/0x16 writes before relying on these values.
+ONE_TIME_MASK: int = 0b00100000
+SNOOZE_MASK: int = 0b00010000
+
+# Alarm 5 (index 4) is the only alarm that can snooze.
+SNOOZE_CAPABLE_INDEX: int = 4
 
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -19,6 +28,8 @@ class AlarmDict(TypedDict):
     hasHourlyChime: bool
     hour: int
     minute: int
+    oneTime: NotRequired[bool]
+    snooze: NotRequired[bool]
 
 
 @dataclass(frozen=True)
@@ -27,6 +38,29 @@ class Alarm:
     minute: int
     enabled: bool
     has_hourly_chime: bool
+    one_time: bool = False
+    snooze: bool = False
+
+
+def apply_alarm5_mode(alarms: list[Any], snooze: bool = True) -> list[Any]:
+    """
+    Returns a copy of the alarm list where alarm 5 is either a snooze alarm
+    (snooze=True) or a one-time alarm (snooze=False). All other alarms are
+    returned unchanged, and no keys are added to them.
+    """
+    if len(alarms) <= SNOOZE_CAPABLE_INDEX:
+        return list(alarms)
+
+    result = list(alarms)
+    alarm5 = dict(alarms[SNOOZE_CAPABLE_INDEX])
+    if snooze:
+        alarm5["snooze"] = True
+        alarm5["oneTime"] = False
+    else:
+        alarm5["oneTime"] = True
+        alarm5["snooze"] = False
+    result[SNOOZE_CAPABLE_INDEX] = alarm5
+    return result
 
 
 class Alarms:
@@ -48,6 +82,10 @@ class Alarms:
         flag: int = 0
         if alarm.get("enabled"):
             flag |= ENABLED_MASK
+            if alarm.get("oneTime"):
+                flag |= ONE_TIME_MASK
+            elif alarm.get("snooze"):
+                flag |= SNOOZE_MASK
         if alarm.get("hasHourlyChime"):
             flag |= HOURLY_CHIME_MASK
 
@@ -64,8 +102,8 @@ class Alarms:
     def from_json_alarm_secondary_alarms(self, alarms_json: list[AlarmDict]) -> bytearray:
         if len(alarms_json) < 2:
             return bytearray()
-        # Encode the alarms passed in, not the state left by the last read (self.alarms).
-        return self.create_secondary_alarm(alarms_json[1:])
+        alarms = self.alarms[1:]
+        return self.create_secondary_alarm(alarms)
 
     def create_secondary_alarm(self, alarms: list[AlarmDict]) -> bytearray:
         all_alarms: bytearray = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
@@ -74,6 +112,10 @@ class Alarms:
             flag: int = 0
             if alarm.get("enabled"):
                 flag |= ENABLED_MASK
+                if alarm.get("oneTime"):
+                    flag |= ONE_TIME_MASK
+                elif alarm.get("snooze"):
+                    flag |= SNOOZE_MASK
             if alarm.get("hasHourlyChime"):
                 flag |= HOURLY_CHIME_MASK
 
@@ -118,11 +160,14 @@ class AlarmDecoder:
         return json_response
 
     def create_json_alarm(self, int_array: list[int]) -> str:
+        # Some models clear byte 1 on read-back; alarm fields are bytes 0, 2 and 3.
         alarm = Alarm(
             hour=int_array[2],
             minute=int_array[3],
             enabled=bool(int_array[0] & ENABLED_MASK),
             has_hourly_chime=bool(int_array[0] & HOURLY_CHIME_MASK),
+            one_time=bool(int_array[0] & ONE_TIME_MASK),
+            snooze=bool(int_array[0] & SNOOZE_MASK) and not int_array[0] & ONE_TIME_MASK,
         )
         return self.to_json_new_alarm(alarm)
 
@@ -131,6 +176,8 @@ class AlarmDecoder:
             {
                 "enabled": alarm.enabled,
                 "hasHourlyChime": alarm.has_hourly_chime,
+                "oneTime": alarm.one_time,
+                "snooze": alarm.snooze,
                 "hour": alarm.hour,
                 "minute": alarm.minute,
             }

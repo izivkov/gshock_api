@@ -22,6 +22,7 @@ from gshock_api.iolib.unknown_io import UnknownIO
 from gshock_api.iolib.watch_condition_io import WatchConditionIO
 from gshock_api.iolib.watch_name_io import WatchNameIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
+from gshock_api.iolib.exercise_io import ExerciseIO
 from gshock_api.logger import logger
 
 CHARACTERISTICS: Final[Mapping[str, int]] = CasioConstants.CHARACTERISTICS
@@ -46,6 +47,8 @@ class MessageDispatcher:
         "SET_TIMER": TimerIO.send_to_watch_set,
         "SET_TIME": TimeIO.send_to_watch_set,
         "GET_HOME_TIME": HomeTimeIO.send_to_watch,
+        "GET_EXERCISE": ExerciseIO.send_to_watch,
+        "SET_EXERCISE": ExerciseIO.send_to_watch_set,
     }
 
     data_received_messages: typing.ClassVar[dict[int, OnReceivedFunction]] = {
@@ -72,6 +75,7 @@ class MessageDispatcher:
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_05"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["GW_BX5600_SP_DATA_HEADER_06"]: GwBx5600TimeIO.on_received,
         CHARACTERISTICS["CASIO_HOME_TIME"]: HomeTimeIO.on_received,
+        CHARACTERISTICS["CASIO_SETTING_FOR_EXERCISE"]: ExerciseIO.on_received,
     }
 
     @staticmethod

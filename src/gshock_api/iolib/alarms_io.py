@@ -1,7 +1,8 @@
 import json
 from typing import Protocol as TypingProtocol
 
-from gshock_api.model.alarms import alarm_decoder, alarms_inst
+from gshock_api.model.alarms import alarm_decoder, alarms_inst, apply_alarm5_mode
+
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
@@ -83,13 +84,21 @@ class AlarmsIOFunctional:
     def prepare_watch_commands_set(message_json: str) -> list[BLEAction]:
         """
         Pure Data Mapper.
-        
+
         Translates raw input into a structured instruction set (The Command Pattern).
-        The mapping logic is deterministic: given the same input, it will ALWAYS 
+        The mapping logic is deterministic: given the same input, it will ALWAYS
         return the same list of Write actions.
+
+        Optional top-level key "snoozeAlarm5" (default true): when true, alarm 5
+        is a snooze alarm; when false, it is a one-time alarm. Alarms 1-4 are
+        not changed.
         """
         parsed: dict[str, object] = json.loads(message_json)
         alarms_json_arr: list[dict[str, object]] = parsed.get("value", [])  # type: ignore
+        snooze_alarm5: bool = bool(parsed.get("snoozeAlarm5", True))
+
+        # Apply alarm 5 mode before encoding; other alarms are passed through unchanged.
+        alarms_json_arr = apply_alarm5_mode(alarms_json_arr, snooze_alarm5)  # type: ignore
 
         # Transformation logic is isolated here, away from side-effecting code
         alarm_casio0 = alarms_inst_typed.from_json_alarm_first_alarm(alarms_json_arr[0])
@@ -99,7 +108,7 @@ class AlarmsIOFunctional:
             Write(handle=0x000E, data=bytes(alarm_casio0)),
             Write(handle=0x000E, data=bytes(alarm_casio))
         ]
-
+    
     @staticmethod
     def prepare_watch_commands_set_mtg_b3000(message_json: str) -> list[BLEAction]:
         parsed: dict[str, object] = json.loads(message_json)

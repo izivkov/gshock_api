@@ -8,6 +8,26 @@ from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.logger import logger
 from gshock_api.model.step_counter_data import StepCounterData
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 FALLBACK_EXPECTED_LENGTH: Final[int] = 400
 DRSP_CATEGORY_EXERCISE: Final[int] = 0x11
 START_TRANSACTION_CMD: Final[bytes] = bytes([0x00, DRSP_CATEGORY_EXERCISE, 0x00, 0x00, 0x00])

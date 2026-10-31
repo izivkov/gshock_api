@@ -24,24 +24,26 @@ class TimeEncoderPure:
         """
         # Byte 0-1: Year (little endian)
         year_bytes = dt.year.to_bytes(2, byteorder="little")
-        
+
         # Bytes 2-7: Month, Day, Hour, Minute, Second, Weekday
+        # Weekday: 1=Mon .. 7=Sun (isoweekday). Mon-Sat confirmed against 19
+        # SET_TIME captures; Sun=7 is inferred and not yet verified by a capture.
         time_bytes = bytes([
             dt.month,
             dt.day,
             dt.hour,
             dt.minute,
             dt.second,
-            dt.weekday()
+            dt.isoweekday(),
         ])
-        
+
         # Byte 8: Nanoseconds mapped to the eighth byte formula
         nanos = dt.microsecond * 1_000
         nano_byte = bytes([(nanos * 256 // 1_000_000_000) & 0xFF])
-        
+
         # Byte 9: Constants/Flags (always 1)
         flag_byte = b"\x01"
-        
+
         # Compose using pure Binary Monoid concatenation (+)
         return year_bytes + time_bytes + nano_byte + flag_byte
 
@@ -84,10 +86,10 @@ class TimeIOFunctional:
         # Calculate time with offset
         date_time: datetime = datetime.fromtimestamp(timestamp + offset)
         time_payload: bytes = TimeEncoderPure.encode_current_time(date_time)
-        
+
         # Concatenate protocol header (CURRENT_TIME = 0x09) and the payload
         packet_bytes = bytes([Protocol.CURRENT_TIME.value]) + time_payload
-        
+
         # Return a list (Monoid B) of commands
         return [Write(handle=0x000E, data=packet_bytes)]
 
@@ -111,16 +113,16 @@ class TimeIO:
         # Obtain system time at invocation to pass into the pure command generator
         system_time = time.time()
         commands = TimeIOFunctional.prepare_watch_commands(message, system_time)
-        
+
         if TimeIO.connection is None:
             raise RuntimeError("TimeIO.connection is not set")
-            
+
         for command in commands:
             if isinstance(command, Write):
                 time_command: str = to_hex_string(command.data)
                 try:
                     await TimeIO.connection.write(
-                        command.handle, 
+                        command.handle,
                         to_compact_string(time_command)
                     )
                 except GShockIgnorableException as e:
@@ -137,3 +139,4 @@ class TimeEncoder:
     @staticmethod
     def prepare_current_time(dt: datetime) -> bytearray:
         return bytearray(TimeEncoderPure.encode_current_time(dt))
+    
