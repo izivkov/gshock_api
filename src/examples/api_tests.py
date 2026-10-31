@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import Sequence
+from dataclasses import replace
 from datetime import datetime
 import json
 from pprint import pformat
@@ -54,9 +55,12 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             app_info = await api.get_app_info()
             logger.info(f"app info: {app_info}")
 
+        if watch_info.hasExcersiseProfile:
+            await test_exercise_profile(api)
+
         if watch_info.hasHomeTime:
             home_time = await api.get_home_time()
-            logger.info(f"home time: {home_time}")  
+            logger.info(f"home time: {home_time}")
 
         pressed_button = await api.get_pressed_button()
         logger.info(f"pressed button: {pressed_button}")
@@ -128,7 +132,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             if watch_info.hasReminders:
                 reminders = await api.get_reminders()
                 for reminder in reminders:
-                    logger.info (f"reminder: {pformat(reminder)}")
+                    logger.info(f"reminder: {pformat(reminder)}")
 
                 reminders[3]["title"] = "Test Event"
 
@@ -141,6 +145,32 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
 
     await connection.disconnect()
     logger.info("--- END OF TESTS ---")
+
+
+async def test_exercise_profile(api: GshockAPI) -> None:
+    """Reads the exercise profile. When destructive, changes the step goal,
+    reads it back to verify, then restores the original profile."""
+    original = await api.get_exercise_profile()
+    logger.info(f"exercise profile: {original}")
+
+    if not destructive:
+        return
+
+    test_goal = original.step_goal + 500
+    await api.set_exercise_profile(replace(original, step_goal=test_goal))
+
+    readback = await api.get_exercise_profile()
+    logger.info(f"exercise profile after set: {readback}")
+    if readback.step_goal != test_goal:
+        logger.error(f"Exercise profile mismatch: expected step goal {test_goal}, got {readback.step_goal}")
+
+    await api.set_exercise_profile(original)
+
+    restored = await api.get_exercise_profile()
+    if restored == original:
+        logger.info("Exercise profile restored to original values.")
+    else:
+        logger.error(f"Exercise profile restore failed: expected {original}, got {restored}")
 
 
 async def run_api_tests_notifications() -> None:
