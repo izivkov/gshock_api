@@ -75,7 +75,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
         logger.info(f"condition: {condition}")
 
         if destructive:
-            await api.set_time(time.time() + 10 * 60)
+            await api.set_time(time.time())
 
             alarms = await api.get_alarms()
             logger.info(f"alarms: {pformat(alarms)}")
@@ -83,6 +83,12 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
             alarms[0]["hour"] = 7
             alarms[0]["minute"] = 25
             alarms[0]["enabled"] = True
+
+            last_alarm_index = max(0, watch_info.alarmCount - 1)
+            if len(alarms) > last_alarm_index:
+                alarms[last_alarm_index]["hour"] = 20
+                alarms[last_alarm_index]["minute"] = 30
+                alarms[last_alarm_index]["enabled"] = True
             await api.set_alarms(alarms, snooze_alarm5=False)
 
             seconds = await api.get_timer()

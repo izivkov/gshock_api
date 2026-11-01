@@ -180,11 +180,17 @@ class StandardProtocol(WatchProtocol):
     async def set_alarms(self, connection: Any, alarms: list[Any], snooze_alarm5: bool = True) -> None:
         if not alarms:
             return
-        # Copy so the caller's list is not modified. Only alarm 5 (index 4) changes.
+
+        from gshock_api.watch_info import watch_info
+
+        # Copy so the caller's list is not modified. Set the last valid alarm slot
+        # for the current watch model, which may be 1, 4, or 5 depending on alarmCount.
         alarms = [dict(alarm) for alarm in alarms]
-        if len(alarms) > 4:
-            alarms[4]["snooze"] = snooze_alarm5
-            alarms[4]["oneTime"] = not snooze_alarm5
+        last_alarm_index = max(0, watch_info.alarmCount - 1)
+        if len(alarms) > last_alarm_index:
+            alarms[last_alarm_index]["snooze"] = snooze_alarm5
+            alarms[last_alarm_index]["oneTime"] = not snooze_alarm5
+
         alarms_str = json.dumps(alarms)
         set_action_cmd = f'{{"action":"SET_ALARMS", "value":{alarms_str} }}'
         await connection.send_message(set_action_cmd)

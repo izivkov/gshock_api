@@ -1,6 +1,9 @@
+import json
 import unittest
 
 from gshock_api.iolib.alarms_io import encode_secondary_alarms
+from gshock_api.protocols.standard_protocol import StandardProtocol
+from gshock_api.watch_info import watch_info
 
 
 def alarm(hour: int, minute: int, enabled: bool = True) -> dict:
@@ -18,6 +21,31 @@ class TestSecondaryAlarms(unittest.TestCase):
 
     def test_fewer_than_two_alarms_writes_nothing(self):
         self.assertEqual(bytes(encode_secondary_alarms([alarm(7, 25)])), b"")
+
+    def test_set_alarms_uses_last_alarm_slot_for_watch_alarm_count(self):
+        class DummyConnection:
+            def __init__(self):
+                self.messages = []
+
+            async def send_message(self, message):
+                self.messages.append(message)
+
+        original_model = watch_info.model
+        original_info = watch_info.info
+        try:
+            watch_info.set_name_and_model("CASIO MTG-B3000")
+            connection = DummyConnection()
+            alarms = [
+                {"enabled": True, "hasHourlyChime": False, "hour": 7, "minute": 25},
+            ]
+            import asyncio
+            asyncio.run(StandardProtocol().set_alarms(connection, alarms, snooze_alarm5=True))
+            payload = json.loads(connection.messages[0])
+            self.assertTrue(payload["value"][0]["snooze"])
+            self.assertFalse(payload["value"][0].get("oneTime", False))
+        finally:
+            watch_info.model = original_model
+            watch_info.info = original_info
 
 
 if __name__ == "__main__":

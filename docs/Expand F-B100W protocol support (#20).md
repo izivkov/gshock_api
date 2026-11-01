@@ -1,6 +1,7 @@
 # fb-100w vs main (current)
 
-Status: `fb-100w` has been merged into `main`.
+Status: `fb-100w` has been merged into `main` and this document reflects the current merged state.
+This summary is intended to describe the behavior on the current branch as compared with the earlier `da955e1d09c614f90c48c28eb4af908eb96dbd74` checkpoint, rather than the pre-merge branch state.
 - `origin/fb-100w`: `5f81d12`
 - `origin/main`: `3aeb753`
 - `fb-100w` is an ancestor of `main`.

@@ -1,5 +1,26 @@
 # G-Shock API Release Notes
 
+## [2.0.48] - 2026-10-31 - F-B100W protocol support and protocol cleanup
+
+### Added
+- Added merged F-B100W protocol support for the exercise-profile payload (`0x2D`), including the `ExerciseProfile` model, `ExerciseIO` encode/decode logic, and public `GshockAPI.get_exercise_profile()` / `set_exercise_profile()` helpers.
+- Added official-model capability support for the F-B100W / ABL-100 exercise-profile feature flag and protocol wiring.
+- Added watch-model-aware alarm handling for the final alarm slot using `watch_info.alarmCount`, fixing support for models with 1, 4, or 5 alarms.
+
+### Changed
+- Updated the weekday encoding path to use `datetime.isoweekday()` so the write payload matches the Casio protocol expectations used by captured watch traffic.
+- Kept the alarm data model as a flat container while moving JSON/byte conversion into the I/O layer where it belongs.
+- Refined the standard protocol alarm setter so it copies the input list before mutation and only updates the last valid alarm slot for the connected watch model.
+
+### Fixed
+- Fixed the MTG-B3000 alarm-set path for single-alarm watches by targeting the last valid alarm slot rather than assuming a fixed fifth alarm.
+- Restored the expected alarm-write behavior for snooze vs one-time alarms, including default snooze behavior when the caller does not override it.
+- Corrected stale assumptions in the example and protocol-summary docs so the merge documentation reflects the current main-branch behavior.
+
+### Notes
+- The F-B100W support summary was merged into the current branch and should be read as the current state of the protocol implementation rather than the pre-merge working branch.
+
+
 ## [2.0.47] - 2026-09-07 - Refinement of Timezone Handling
 
 ### Changed
