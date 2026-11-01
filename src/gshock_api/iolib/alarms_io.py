@@ -1,13 +1,22 @@
 import json
 from typing import Protocol as TypingProtocol
 
-from gshock_api.model.alarms import alarm_decoder, alarms_inst
+from gshock_api.model.alarms import (
+    ALARM_CONSTANT_VALUE,
+    CHARACTERISTICS,
+    ENABLED_MASK,
+    HOURLY_CHIME_MASK,
+    ONE_TIME_MASK,
+    SNOOZE_MASK,
+    alarms_inst,
+)
 
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
-from gshock_api.utils import to_compact_string, to_hex_string
+from gshock_api.logger import logger
+from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.watch_info import WatchModel, watch_info
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -31,17 +40,101 @@ class AlarmsInstProtocol(TypingProtocol):
         """Appends new alarms to the internal storage."""
         ...
 
-    def from_json_alarm_first_alarm(self, alarm_json: dict[str, object]) -> bytes:
-        """Encodes the primary alarm configuration into bytes."""
-        ...
-
-    def from_json_alarm_secondary_alarms(self, alarms_json: list[dict[str, object]]) -> bytes:
-        """Encodes remaining alarm configurations into bytes."""
-        ...
-
 # Typed references to the global singletons
-alarm_decoder_typed: AlarmDecoderProtocol = alarm_decoder  # type: ignore[assignment]
 alarms_inst_typed: AlarmsInstProtocol = alarms_inst  # type: ignore[assignment]
+
+
+def require_int(alarm: dict[str, object], key: str) -> int:
+    value = alarm.get(key)
+    if isinstance(value, int):
+        return value
+    raise TypeError(f"Alarm field '{key}' must be an int, got {type(value).__name__}")
+
+
+def encode_alarm_flag(alarm: dict[str, object]) -> int:
+    flag = 0
+    if alarm.get("enabled"):
+        flag |= ENABLED_MASK
+        if alarm.get("oneTime"):
+            flag |= ONE_TIME_MASK
+        elif alarm.get("snooze"):
+            flag |= SNOOZE_MASK
+    if alarm.get("hasHourlyChime"):
+        flag |= HOURLY_CHIME_MASK
+    return flag
+
+
+def encode_first_alarm(alarm_json: dict[str, object]) -> bytearray:
+    return bytearray(
+        [
+            CHARACTERISTICS["CASIO_SETTING_FOR_ALM"],
+            encode_alarm_flag(alarm_json),
+            ALARM_CONSTANT_VALUE,
+            require_int(alarm_json, "hour"),
+            require_int(alarm_json, "minute"),
+        ]
+    )
+
+
+def encode_secondary_alarms(alarms_json: list[dict[str, object]]) -> bytearray:
+    if len(alarms_json) < 2:
+        return bytearray()
+
+    all_alarms = bytearray([CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]])
+    for alarm in alarms_json[1:]:
+        all_alarms += bytearray(
+            [
+                encode_alarm_flag(alarm),
+                ALARM_CONSTANT_VALUE,
+                require_int(alarm, "hour"),
+                require_int(alarm, "minute"),
+            ]
+        )
+    return all_alarms
+
+
+class AlarmDecoder:
+    def to_json(self, command: str) -> dict[str, list[dict[str, object]]]:
+        json_response: dict[str, list[dict[str, object]]] = {}
+        int_array: list[int] = to_int_array(command)
+        alarms: list[dict[str, object]] = []
+
+        if int_array[0] == CHARACTERISTICS["CASIO_SETTING_FOR_ALM"]:
+            int_array.pop(0)
+            alarms.append(self.create_json_alarm(int_array))
+            json_response["ALARMS"] = alarms
+        elif int_array[0] == CHARACTERISTICS["CASIO_SETTING_FOR_ALM2"]:
+            int_array.pop(0)
+            quarter_len = len(int_array) // 4
+            subarrays = [
+                int_array[:quarter_len],
+                int_array[quarter_len : 2 * quarter_len],
+                int_array[2 * quarter_len : 3 * quarter_len],
+                int_array[3 * quarter_len :],
+            ]
+            for subarr in subarrays:
+                if subarr:
+                    alarms.append(self.create_json_alarm(subarr))
+            json_response["ALARMS"] = alarms
+        else:
+            logger.warning(f"Unhandled Command {command}")
+
+        return json_response
+
+    def create_json_alarm(self, int_array: list[int]) -> dict[str, object]:
+        flag = int_array[0]
+        return {
+            "enabled": bool(flag & ENABLED_MASK),
+            "hasHourlyChime": bool(flag & HOURLY_CHIME_MASK),
+            "oneTime": bool(flag & ONE_TIME_MASK),
+            "snooze": bool(flag & SNOOZE_MASK) and not bool(flag & ONE_TIME_MASK),
+            "hour": int_array[2],
+            "minute": int_array[3],
+        }
+
+
+alarm_decoder = AlarmDecoder()
+alarm_decoder_typed: AlarmDecoderProtocol = alarm_decoder  # type: ignore[assignment]
 
 
 class AlarmsIOFunctional:
@@ -92,15 +185,27 @@ class AlarmsIOFunctional:
         parsed: dict[str, object] = json.loads(message_json)
         alarms_json_arr: list[dict[str, object]] = parsed.get("value", [])  # type: ignore
 
-        # Transformation logic is isolated here, away from side-effecting code
-        alarm_casio0 = alarms_inst_typed.from_json_alarm_first_alarm(alarms_json_arr[0])
-        alarm_casio = alarms_inst_typed.from_json_alarm_secondary_alarms(alarms_json_arr)
+        if not alarms_json_arr:
+            return []
+
+        alarm_casio0 = encode_first_alarm(alarms_json_arr[0])
+        alarm_casio = encode_secondary_alarms(alarms_json_arr)
 
         return [
             Write(handle=0x000E, data=bytes(alarm_casio0)),
-            Write(handle=0x000E, data=bytes(alarm_casio))
+            Write(handle=0x000E, data=bytes(alarm_casio)),
         ]
-    
+
+    @staticmethod
+    def prepare_watch_commands_set_mtg_b3000(message_json: str) -> list[BLEAction]:
+        parsed: dict[str, object] = json.loads(message_json)
+        alarms_json_arr: list[dict[str, object]] = parsed.get("value", [])  # type: ignore
+
+        if not alarms_json_arr:
+            return []
+
+        return [Write(handle=0x000E, data=bytes(encode_first_alarm(alarms_json_arr[0])))]
+
     @staticmethod
     def parse_packet(data: bytes) -> list[dict[str, object]]:
         """
