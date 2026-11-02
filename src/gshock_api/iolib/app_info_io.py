@@ -2,7 +2,6 @@ from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Header, Payload, Protocol, Trailer
-from gshock_api.utils import to_hex_string
 
 
 class AppInfoIOFunctional:
@@ -67,7 +66,6 @@ class AppInfoIO:
 
     @staticmethod
     def on_received(data: bytes) -> None:
-        print(f"AppInfoIO.on_received: {to_hex_string(data)}")
         async def set_app_info(data_bytes: bytes) -> None:
             commands = AppInfoIOFunctional.prepare_watch_response(data_bytes)
             if commands:

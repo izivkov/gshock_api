@@ -165,11 +165,32 @@ class EventsIOFunctional:
                 time_period |= ReminderMasks.YEARLY_MASK
             return time_period
 
-        enabled: bool = reminder_json.get("enabled", False)
-        repeat_period: str = reminder_json.get("repeat_period", "")
-        start_date: DateDict = reminder_json.get("start_date", {"year": 0, "month": "", "day": 0})
-        end_date: DateDict = reminder_json.get("end_date", {"year": 0, "month": "", "day": 0})
-        days_of_week: list[str] | None = reminder_json.get("days_of_week")
+        enabled = bool(reminder_json.get("enabled", False))
+        repeat_period = str(reminder_json.get("repeat_period", ""))
+        start_date = reminder_json.get("start_date", {"year": 0, "month": "", "day": 0})
+        end_date = reminder_json.get("end_date", {"year": 0, "month": "", "day": 0})
+        days_of_week = reminder_json.get("days_of_week")
+
+        if not isinstance(start_date, dict):
+            start_date = {"year": 0, "month": "", "day": 0}
+        if not isinstance(end_date, dict):
+            end_date = {"year": 0, "month": "", "day": 0}
+        if not isinstance(days_of_week, list):
+            days_of_week = None
+
+        start_date = DateDict(
+            year=int(start_date.get("year", 0)),
+            month=str(start_date.get("month", "")),
+            day=int(start_date.get("day", 0)),
+        )
+        end_date = DateDict(
+            year=int(end_date.get("year", 0)),
+            month=str(end_date.get("month", "")),
+            day=int(end_date.get("day", 0)),
+        )
+
+        if days_of_week is not None:
+            days_of_week = [str(day) for day in days_of_week]
 
         reminder_cmd = bytearray()
         reminder_cmd += bytearray([create_time_period(enabled, repeat_period)])
@@ -202,7 +223,7 @@ class EventsIOFunctional:
     @staticmethod
     def decode_time(reminder_str: str) -> dict[str, object]:
         def convert_array_list_to_json_array(array_list: list[object]) -> list[object]:
-            return [item for item in array_list]
+            return list(array_list)
 
         def decode_time_period(time_period: int) -> TimePeriod:
             enabled = (time_period & ReminderMasks.ENABLED_MASK) == ReminderMasks.ENABLED_MASK

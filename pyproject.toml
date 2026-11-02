@@ -153,6 +153,29 @@ ignore = [
 "__init__.py" = [
     "F401",    # Allow unused imports in __init__.py
 ]
+"src/gshock_api/**/*.py" = [
+    "ANN401",   # Dynamic protocol and compatibility code uses Any intentionally
+    "ARG001",   # Protocol method arguments are part of interface contracts
+    "ARG002",   # Interface and override methods intentionally accept unused params
+    "ASYNC109", # Async scan helpers use timeout as a public API parameter
+    "B904",     # Compatibility wrappers often re-raise without context chaining
+    "F811",     # Compatibility constants/reexports may intentionally shadow names
+    "N802",     # Public compatibility names mirror Casio/watch API fields
+    "N806",     # Function-local constants intentionally use Casio naming
+    "N815",     # Model metadata fields intentionally use mixed-case API names
+    "PERF401",  # Data-shaping loops are clearer than list.extend in this protocol code
+    "PLC0415",  # Runtime module imports are used to keep protocol dispatch lazy
+    "PLR0912",  # Protocols accept many branching paths by design
+    "PLR0913",  # Data models use many constructor arguments for compatibility
+    "PLR0915",  # Some IO handlers intentionally contain large switch-like logic blocks
+    "PLR0917",  # Compatibility constructors intentionally accept many positional args
+    "PLR2004",  # Byte constants and protocol literals are intentionally numeric
+    "PLW2901",  # Loop variable reuse is intentional in byte/hex conversion helpers
+    "RUF006",   # Task creation is intentionally fire-and-forget in async IO code
+    "RUF012",   # Class metadata is intentionally mutable in config-like objects
+    "S110",     # Empty except pass blocks are used as compatibility stubs
+    "UP007",    # Union syntax is kept consistent with broader compatibility expectations
+]
 "tests/**/*.py" = [
     "S101",    # Allow assert in tests
     "PLR2004", # Allow magic values in tests
