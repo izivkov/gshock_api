@@ -9,7 +9,7 @@ from gshock_api.iolib.packet import Protocol
 from gshock_api.logger import logger
 from gshock_api.model.settings import settings
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
-from gshock_api.watch_info import watch_info, WatchModel
+from gshock_api.watch_info import WatchModel, watch_info
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
 

@@ -1,14 +1,13 @@
 import logging
-
-from typing import Final, TypeVar, Any
+from typing import Any, Final, TypeVar
 
 from gshock_api.casio_time_zone_helper import CasioTimeZoneHelper
 from gshock_api.connection import Connection  # type: ignore
 from gshock_api.iolib.app_notification_io import AppNotificationIO
 from gshock_api.iolib.button_pressed_io import WatchButton
 from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.model.step_counter_data import StepCounterData
 from gshock_api.model.exercise_profile import ExerciseProfile
+from gshock_api.model.step_counter_data import StepCounterData
 from gshock_api.watch_info import watch_info
 
 T = TypeVar("T")
@@ -59,13 +58,11 @@ class GshockAPI:
         """Gets alarms from the watch via current WatchProtocol."""
         return await watch_info.protocol.get_alarms(self.connection)
 
-    async def set_alarms(self, alarms: list[Any], snooze_alarm5: bool = True) -> None:
+    async def set_alarms(self, alarms: list[Any]) -> None:
         """
         Sets alarms on the watch via current WatchProtocol.
-        Alarm 5 is a snooze alarm when snooze_alarm5 is True (default),
-        or a one-time alarm when False. Alarms 1-4 are not changed.
         """
-        await watch_info.protocol.set_alarms(self.connection, alarms, snooze_alarm5)
+        await watch_info.protocol.set_alarms(self.connection, alarms)
         
     async def get_timer(self) -> int:
         """Get Timer value in seconds via current WatchProtocol."""

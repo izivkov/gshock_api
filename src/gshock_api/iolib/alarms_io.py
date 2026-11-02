@@ -1,21 +1,18 @@
 import json
 from typing import Protocol as TypingProtocol
 
-from gshock_api.model.alarms import (
-    ALARM_CONSTANT_VALUE,
-    CHARACTERISTICS,
-    ENABLED_MASK,
-    HOURLY_CHIME_MASK,
-    ONE_TIME_MASK,
-    SNOOZE_MASK,
-    alarms_inst,
-)
-
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.casio_constants import CasioConstants
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.logger import logger
+from gshock_api.model.alarms import (
+    ALARM_CONSTANT_VALUE,
+    CHARACTERISTICS,
+    ENABLED_MASK,
+    HOURLY_CHIME_MASK,
+    alarms_inst,
+)
 from gshock_api.utils import to_compact_string, to_hex_string, to_int_array
 from gshock_api.watch_info import WatchModel, watch_info
 
@@ -55,10 +52,6 @@ def encode_alarm_flag(alarm: dict[str, object]) -> int:
     flag = 0
     if alarm.get("enabled"):
         flag |= ENABLED_MASK
-        if alarm.get("oneTime"):
-            flag |= ONE_TIME_MASK
-        elif alarm.get("snooze"):
-            flag |= SNOOZE_MASK
     if alarm.get("hasHourlyChime"):
         flag |= HOURLY_CHIME_MASK
     return flag
@@ -126,8 +119,6 @@ class AlarmDecoder:
         return {
             "enabled": bool(flag & ENABLED_MASK),
             "hasHourlyChime": bool(flag & HOURLY_CHIME_MASK),
-            "oneTime": bool(flag & ONE_TIME_MASK),
-            "snooze": bool(flag & SNOOZE_MASK) and not bool(flag & ONE_TIME_MASK),
             "hour": int_array[2],
             "minute": int_array[3],
         }

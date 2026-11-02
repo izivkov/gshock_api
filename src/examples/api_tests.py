@@ -14,10 +14,10 @@ from gshock_api.always_connected_watch_filter import (
 )
 from gshock_api.app_notification import AppNotification, NotificationType
 from gshock_api.connection import Connection
-from gshock_api.model.event import Event, RepeatPeriod, create_event_date
 from gshock_api.exceptions import GShockConnectionError
 from gshock_api.gshock_api import GshockAPI
 from gshock_api.logger import logger
+from gshock_api.model.event import Event, RepeatPeriod, create_event_date
 from gshock_api.watch_info import watch_info
 
 destructive = True  # Set to True to enable destructive tests (time change, alarms, etc.)
@@ -89,7 +89,7 @@ async def run_api_tests(argv: Sequence[str]) -> None:  # noqa: PLR0915
                 alarms[last_alarm_index]["hour"] = 20
                 alarms[last_alarm_index]["minute"] = 30
                 alarms[last_alarm_index]["enabled"] = True
-            await api.set_alarms(alarms, snooze_alarm5=False)
+            await api.set_alarms(alarms)
 
             seconds = await api.get_timer()
             logger.info(f"timer: {seconds} seconds")

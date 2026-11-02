@@ -1,14 +1,15 @@
 import struct
 
+
 def parse_btsnoop(path):
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         f.read(16)
         records = []
         while True:
             hdr = f.read(24)
             if len(hdr) < 24:
                 break
-            orig_len, inc_len, flags, drops, ts = struct.unpack('>IIIIq', hdr)
+            orig_len, inc_len, flags, drops, ts = struct.unpack(">IIIIq", hdr)
             data = f.read(inc_len)
             records.append((flags, data, ts))
     return records
@@ -30,9 +31,9 @@ for i in range(1120, 1145):
                 item = body[j:j+item_len]
                 if len(item) < 3:
                     continue
-                decl_handle = int.from_bytes(item[0:2], 'little')
+                decl_handle = int.from_bytes(item[0:2], "little")
                 props = item[2]
-                val_handle = int.from_bytes(item[3:5], 'little') if len(item) >= 5 else 0
+                val_handle = int.from_bytes(item[3:5], "little") if len(item) >= 5 else 0
                 prop_str = []
                 if props & 0x02: prop_str.append("READ")
                 if props & 0x04: prop_str.append("WRITE_NO_RESP")

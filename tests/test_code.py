@@ -216,7 +216,7 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         self.assertEqual(set_commands[0].data, encoded)
 
     def test_mtg_b3000_settings_encode_decode(self):
-        from gshock_api.watch_info import watch_info, WatchModel
+        from gshock_api.watch_info import WatchModel, watch_info
         watch_info.model = WatchModel.MTG_B3000
 
         settings_dict = {
@@ -243,10 +243,10 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
     # --- WatchInfo & Protocol Tests ---
     def test_watch_info_exact_lookup_and_protocols(self):
-        from gshock_api.watch_info import watch_info, WatchModel
-        from gshock_api.protocols.mip_protocol import MipProtocol
         from gshock_api.protocols.analogue_protocol import AnalogueProtocol
+        from gshock_api.protocols.mip_protocol import MipProtocol
         from gshock_api.protocols.standard_protocol import StandardProtocol
+        from gshock_api.watch_info import WatchModel, watch_info
 
         watch_info.set_name_and_model("CASIO GW-BX5600")
         self.assertEqual(watch_info.model, WatchModel.GW_BX5600)
@@ -275,8 +275,8 @@ class TestGShockFunctionalAPI(unittest.TestCase):
 
     # --- Step Counter Tests ---
     def test_step_counter_data_and_parse(self):
-        from gshock_api.model.step_counter_data import StepCounterData
         from gshock_api.iolib.step_counter_io import StepCounterIOFunctional
+        from gshock_api.model.step_counter_data import StepCounterData
 
         unavail = StepCounterData.unavailable()
         self.assertEqual(unavail.current_day_steps, None)

@@ -11,6 +11,7 @@ from gshock_api.iolib.dst_for_world_cities_io import DstForWorldCitiesIO
 from gshock_api.iolib.dst_watch_state_io import DstWatchStateIO
 from gshock_api.iolib.error_io import ErrorIO
 from gshock_api.iolib.events_io import EventsIO
+from gshock_api.iolib.exercise_io import ExerciseIO
 from gshock_api.iolib.gw_bx5600_time_io import GwBx5600TimeIO
 from gshock_api.iolib.home_time_io import HomeTimeIO
 from gshock_api.iolib.settings_io import SettingsIO
@@ -22,7 +23,6 @@ from gshock_api.iolib.unknown_io import UnknownIO
 from gshock_api.iolib.watch_condition_io import WatchConditionIO
 from gshock_api.iolib.watch_name_io import WatchNameIO
 from gshock_api.iolib.world_cities_io import WorldCitiesIO
-from gshock_api.iolib.exercise_io import ExerciseIO
 from gshock_api.logger import logger
 
 CHARACTERISTICS: Final[Mapping[str, int]] = CasioConstants.CHARACTERISTICS

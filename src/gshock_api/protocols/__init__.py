@@ -4,8 +4,8 @@ from gshock_api.protocols.standard_protocol import StandardProtocol
 from gshock_api.protocols.watch_protocol import WatchProtocol
 
 __all__ = [
-    "WatchProtocol",
-    "StandardProtocol",
-    "MipProtocol",
     "AnalogueProtocol",
+    "MipProtocol",
+    "StandardProtocol",
+    "WatchProtocol",
 ]

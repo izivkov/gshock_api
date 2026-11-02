@@ -1,17 +1,11 @@
 from dataclasses import dataclass
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 
 from gshock_api.casio_constants import CasioConstants
 
 HOURLY_CHIME_MASK: int = 0b10000000
 ENABLED_MASK: int = 0b01000000
 ALARM_CONSTANT_VALUE: int = 0x40
-
-# Unverified: no HCI capture in test_data contains these bits set.
-# Confirm by creating one-time and snooze alarms in the official app and
-# capturing the 0x15/0x16 writes before relying on these values.
-ONE_TIME_MASK: int = 0b00100000
-SNOOZE_MASK: int = 0b00010000
 
 
 CHARACTERISTICS: dict[str, int] = CasioConstants.CHARACTERISTICS
@@ -22,8 +16,6 @@ class AlarmDict(TypedDict):
     hasHourlyChime: bool
     hour: int
     minute: int
-    oneTime: NotRequired[bool]
-    snooze: NotRequired[bool]
 
 
 @dataclass(frozen=True)
@@ -32,8 +24,6 @@ class Alarm:
     minute: int
     enabled: bool
     has_hourly_chime: bool
-    one_time: bool = False
-    snooze: bool = False
 
 
 class Alarms:

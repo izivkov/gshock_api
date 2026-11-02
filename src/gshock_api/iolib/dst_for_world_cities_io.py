@@ -1,4 +1,5 @@
 from typing import Any
+
 from gshock_api.cancelable_result import CancelableResult
 from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol

@@ -1,11 +1,11 @@
+from collections.abc import Callable
 import json
-from typing import Any, Callable
-from gshock_api.iolib.dst_watch_state_io import DtsState
-from gshock_api.utils import to_compact_string, to_hex_string
-from gshock_api.model.exercise_profile import ExerciseProfile
-from gshock_api.iolib.packet import Protocol
+from typing import Any
 
+from gshock_api.iolib.dst_watch_state_io import DtsState
+from gshock_api.model.exercise_profile import ExerciseProfile
 from gshock_api.protocols.watch_protocol import WatchProtocol
+from gshock_api.utils import to_compact_string, to_hex_string
 
 HANDLE_ALL_FEATURES = 0x0E
 
@@ -52,9 +52,9 @@ class StandardProtocol(WatchProtocol):
         return await message_dispatcher.DstWatchStateIO.request(connection, state)
 
     async def set_time(self, connection: Any, current_time: Any = None, offset: int = 0) -> None:
+        from gshock_api import message_dispatcher
         from gshock_api.iolib.second_dial_io import SecondDialIO
         from gshock_api.watch_info import watch_info
-        from gshock_api import message_dispatcher
 
         await self.initialize_for_setting_time(connection)
         await message_dispatcher.TimeIO.request(connection, current_time, offset)
@@ -63,7 +63,7 @@ class StandardProtocol(WatchProtocol):
             await SecondDialIO.set_second_dial(connection)
 
     async def initialize_for_setting_time(self, connection: Any) -> None:
-        from gshock_api.watch_info import watch_info, WatchModel
+        from gshock_api.watch_info import WatchModel, watch_info
 
         await self.read_write_dst_watch_states(connection)
         await self.read_write_dst_for_world_cities(connection)
@@ -126,8 +126,8 @@ class StandardProtocol(WatchProtocol):
             await self.read_and_write(connection, self.get_world_cities, city_number)
 
     async def read_write_home_times(self, connection: Any) -> None:
-        from gshock_api.watch_info import watch_info
         from gshock_api import message_dispatcher
+        from gshock_api.watch_info import watch_info
         for city_number in range(watch_info.worldCitiesCount):
             raw_bytes = await message_dispatcher.HomeTimeIO.request_raw(connection, city_number)
             hex_data = to_hex_string(raw_bytes)
@@ -171,25 +171,16 @@ class StandardProtocol(WatchProtocol):
         return getattr(cond, "temperature", 0)
 
     async def get_alarms(self, connection: Any) -> list[Any]:
-        from gshock_api.model.alarms import alarms_inst
         from gshock_api import message_dispatcher
+        from gshock_api.model.alarms import alarms_inst
         alarms_inst.clear()
         await message_dispatcher.AlarmsIO.request(connection)
         return alarms_inst.alarms
 
-    async def set_alarms(self, connection: Any, alarms: list[Any], snooze_alarm5: bool = True) -> None:
+    async def set_alarms(self, connection: Any, alarms: list[Any]) -> None:
         if not alarms:
             return
 
-        from gshock_api.watch_info import watch_info
-
-        # Copy so the caller's list is not modified. Set the last valid alarm slot
-        # for the current watch model, which may be 1, 4, or 5 depending on alarmCount.
-        alarms = [dict(alarm) for alarm in alarms]
-        last_alarm_index = max(0, watch_info.alarmCount - 1)
-        if len(alarms) > last_alarm_index:
-            alarms[last_alarm_index]["snooze"] = snooze_alarm5
-            alarms[last_alarm_index]["oneTime"] = not snooze_alarm5
 
         alarms_str = json.dumps(alarms)
         set_action_cmd = f'{{"action":"SET_ALARMS", "value":{alarms_str} }}'

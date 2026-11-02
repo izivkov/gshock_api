@@ -45,7 +45,7 @@ class WorldCitiesIO:
 
     @staticmethod
     def parse_city(time_zone_name: str) -> str:
-        return time_zone_name.split("/")[-1].split(":")[-1].upper()
+        return time_zone_name.rsplit("/", maxsplit=1)[-1].rsplit(":", maxsplit=1)[-1].upper()
 
     @staticmethod
     def encode_and_pad(city_name: str, city_number: int) -> bytes:

@@ -24,7 +24,7 @@ class HomeTimeIOFunctional:
         Skip the first 2 header bytes, decode the remainder as ASCII,
         and strip any null terminator — mirrors Kotlin's toAsciiString(data, 2).
         """
-        return data[2:].split(b'\x00')[0].decode('ascii', errors='replace')
+        return data[2:].split(b"\x00")[0].decode("ascii", errors="replace")
 
 
 class HomeTimeIO:
@@ -37,8 +37,8 @@ class HomeTimeIO:
 
     @staticmethod
     async def request_raw(connection: ConnectionProtocol, slot: int = 0) -> bytes:
-        from gshock_api.watch_info import watch_info, WatchModel
         from gshock_api.casio_constants import CasioConstants
+        from gshock_api.watch_info import WatchModel, watch_info
 
         if watch_info.model == WatchModel.MTG_B3000:
             HomeTimeIO.connection = connection
@@ -46,8 +46,7 @@ class HomeTimeIO:
             await connection.request(key)
             HomeTimeIO.result = CancelableResult[bytes]()
             return await HomeTimeIO.result.get_result()
-        else:
-            return await WorldCitiesIO.request(connection, slot)
+        return await WorldCitiesIO.request(connection, slot)
 
     @staticmethod
     async def send_to_watch(_message: str = "") -> None:

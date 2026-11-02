@@ -30,7 +30,7 @@ class Connection:
         self.characteristics_map: dict[str, str] = {}
 
     def notification_handler(
-        self, characteristic: BleakGATTCharacteristic, data: bytearray  # noqa: ARG002
+        self, characteristic: BleakGATTCharacteristic, data: bytearray
     ) -> None:
         # Lifelog transfers are fragmented on the DRSP/Convoy characteristics;
         # continuation packets do not contain a command key and must bypass

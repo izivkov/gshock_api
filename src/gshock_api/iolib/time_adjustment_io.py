@@ -91,7 +91,7 @@ class TimeAdjustmentIO:
             if isinstance(command, Write):
                 write_cmd = to_compact_string(to_hex_string(command.data))
                 await TimeAdjustmentIO.connection.write(0x000E, write_cmd)
-        return None
+        return
 
     @staticmethod
     def on_received(message: bytes) -> None:

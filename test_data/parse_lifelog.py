@@ -2,10 +2,10 @@
 #License: CC0-1.0
 # https://creativecommons.org/publicdomain/zero/1.0/
 
+from datetime import UTC, datetime, timedelta
 import os
-import sys
 import struct
-from datetime import datetime, timedelta, timezone
+import sys
 
 DATA_NOT_AVAILABLE = -1
 
@@ -35,40 +35,40 @@ FRAME_CURRENT_STATS =    0x65
 FRAME_TYPE_0X72 =        0x72
 FRAME_SMART_ALARM =      0x73
 
-class Record_Metadata():
+class Record_Metadata:
 	def __init__(self, record_size, interval, time_unit, parser):
 		self.record_size = record_size
 		self.unit = time_unit
 		self.interval = interval
 		self.parser = parser
 
-class Common_Data():
+class Common_Data:
 	def __init__(self, time, data, flag):
 		self.time = time
 		self.data = data
 		self.flag = flag
 
-class Stairs_Data():
+class Stairs_Data:
 	def __init__(self, time, climbed, descended, flag):
 		self.time = time
 		self.climbed = climbed
 		self.descended = descended
 		self.flag = flag
 
-class Sleep_Phase_Data():
+class Sleep_Phase_Data:
 	def __init__(self, time, n_data, data):
 		self.time = time
 		self.n_data = n_data
 		self.data = data
 
-class Heart_Rate_Data():
+class Heart_Rate_Data:
 	def __init__(self, time, heart_rate, flag1, flag2):
 		self.time = time
 		self.heart_rate = heart_rate
 		self.flag1 = flag1
 		self.flag2 = flag2
 
-class Type_0x72_Data():
+class Type_0x72_Data:
 	def __init__(self, time, a, b, c, flag1, flag2, data):
 		self.time = time
 		self.a = a
@@ -78,7 +78,7 @@ class Type_0x72_Data():
 		self.flag2 = flag2
 		self.bindata = data
 
-class Cardio_Load_Data():
+class Cardio_Load_Data:
 	def __init__(self, date, cadio_load, status, strain, tolerance):
 		self.date = date
 		self.cadio_load = cadio_load
@@ -86,7 +86,7 @@ class Cardio_Load_Data():
 		self.strain = strain
 		self.tolerance = tolerance
 
-class Breathing_Exercise_Data():
+class Breathing_Exercise_Data:
 	def __init__(self, time_str, measurment_time, optimal, very_good, good):
 		self.time = time_str
 		self.measurment_time = measurment_time
@@ -94,7 +94,7 @@ class Breathing_Exercise_Data():
 		self.very_good = very_good
 		self.good = good
 
-class Summary_Data():
+class Summary_Data:
 	def __init__(
 		self,
 		date,
@@ -140,31 +140,31 @@ class Summary_Data():
 # TODO mark packages with flags other than "20 10"
 # TODO mark records after flags other than "20 10"
 def parse_flag(data):
-	if data == b'\x20\x10':
+	if data == b"\x20\x10":
 		flag = "0x2010"
-	elif data == b'\xfe\xfe':
+	elif data == b"\xfe\xfe":
 		flag = "0xfefe"
-	elif data == b'\xf0\x10':
+	elif data == b"\xf0\x10":
 		flag = "0xf010"
-	elif data == b'\x24\x10':
+	elif data == b"\x24\x10":
 		flag = "0x2410"
 	else:
 		print("Unexpected bytes for flag data: %02x %02x" % (data[0], data[1]), file = sys.stderr)
-		flag = "0x" + f'{data[0]:02x}' + f'{data[1]:02x}'
+		flag = "0x" + f"{data[0]:02x}" + f"{data[1]:02x}"
 
 	return flag
 
 def step_count_parser(record):
 	flag = parse_flag(record[2:])
 
-	step_count = struct.unpack_from('<H', record)[0]
+	step_count = struct.unpack_from("<H", record)[0]
 
 	return Common_Data("date_unknown", step_count, flag)
 
 def energy_parser(record):
 	flag = parse_flag(record[2:])
 
-	energy = struct.unpack_from('<H', record)[0] / 128.0
+	energy = struct.unpack_from("<H", record)[0] / 128.0
 
 	return Common_Data("date_unknown", energy, flag)
 
@@ -174,9 +174,9 @@ def heart_rate_parser(record):
 	if record[0] == 0xfe:
 		heart_rate = DATA_NOT_AVAILABLE
 	else:
-		heart_rate = struct.unpack_from('<B', record)[0]
+		heart_rate = struct.unpack_from("<B", record)[0]
 
-	flag1 = struct.unpack_from('<B', record[1:])[0]
+	flag1 = struct.unpack_from("<B", record[1:])[0]
 	if flag1 != 0xfe and (flag1 % 25 != 0 or flag1 > 100):
 		print("Unexpected flag1 for heart rate data:", file = sys.stderr)
 
@@ -192,37 +192,37 @@ def sleep_phase_parser(record):
 
 		#print(tmp, file = sys.stderr)
 		if i == 0:
-			if tmp[6:] != b'\x20\x10':
+			if tmp[6:] != b"\x20\x10":
 				print("Unexpected bytes for sleep phase data:", file = sys.stderr)
 				print(tmp[6:], file = sys.stderr)
 
-			if tmp == b'\xfe\xfe\xfe\xfe\xfe\xfe\x20\x10':
+			if tmp == b"\xfe\xfe\xfe\xfe\xfe\xfe\x20\x10":
 				valid = False
 			else:
 				valid = True
-				time = ("20" + f'{record[0]:02x}' + "-" +
-					f'{record[1]:02x}' + "-" +
-					f'{record[2]:02x}' + "_" +
-					f'{record[3]:02x}' + ":" +
-					f'{record[4]:02x}' + ":" +
-					f'{record[5]:02x}')
+				time = ("20" + f"{record[0]:02x}" + "-" +
+					f"{record[1]:02x}" + "-" +
+					f"{record[2]:02x}" + "_" +
+					f"{record[3]:02x}" + ":" +
+					f"{record[4]:02x}" + ":" +
+					f"{record[5]:02x}")
 
 			continue
 
 		if i == NUM_SLEEP_DATA - 1:
-			if tmp != b'\xff\xff\xff\xff\xff\xff\xff\xff':
+			if tmp != b"\xff\xff\xff\xff\xff\xff\xff\xff":
 				print("Unexpected last line for sleep phase data:", file = sys.stderr)
 
 			continue
 
-		if tmp == b'\x00\x00\x00\x00\x00\x00\x00\x00':
+		if tmp == b"\x00\x00\x00\x00\x00\x00\x00\x00":
 			continue
 
-		if tmp[5:] != b'\xff\xff\xff':
+		if tmp[5:] != b"\xff\xff\xff":
 			print("Unexpected bytes for sleep phase data:", file = sys.stderr)
 			print(tmp[5:], file = sys.stderr)
 
-		seconds = struct.unpack_from('<I', tmp[0:4])[0]
+		seconds = struct.unpack_from("<I", tmp[0:4])[0]
 
 		#0xfe 254 Interuptions
 		#0xfd 253 REM
@@ -233,7 +233,7 @@ def sleep_phase_parser(record):
 			print("Unexpected bytes for sleep phase type:", file = sys.stderr)
 			print(tmp[4], file = sys.stderr)
 
-		flag = struct.unpack_from('<B', tmp[4:])[0]
+		flag = struct.unpack_from("<B", tmp[4:])[0]
 
 		data_point = {}
 		data_point[seconds] = flag
@@ -262,7 +262,7 @@ def behavior_pattern_parser(record):
 #     0x20 32      => little movement???
 #          254     => manual powersave/battery LOW?
 #          4       => ???
-	behavior_pattern = struct.unpack_from('<B', record)[0]
+	behavior_pattern = struct.unpack_from("<B", record)[0]
 
 	# TODO date-time
 	return Common_Data("date_unknown", behavior_pattern, flag)
@@ -270,27 +270,27 @@ def behavior_pattern_parser(record):
 def past_stairs_parser(record):
 	flag = parse_flag(record[6:8])
 
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}' + "_" + f'{record[3]:02x}' + ":" +
-                    f'{record[4]:02x}' + ":" + f'{record[5]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}" + "_" + f"{record[3]:02x}" + ":" +
+                    f"{record[4]:02x}" + ":" + f"{record[5]:02x}")
 
-	climbed = struct.unpack_from('<B', record[8:])[0]
-	descended = struct.unpack_from('<B', record[10:])[0]
+	climbed = struct.unpack_from("<B", record[8:])[0]
+	descended = struct.unpack_from("<B", record[10:])[0]
 
 	return Stairs_Data(time_str, climbed, descended, flag)
 
 def breath_exercise_parser(record):
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}' + "_" + f'{record[3]:02x}' + ":" +
-                    f'{record[4]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}" + "_" + f"{record[3]:02x}" + ":" +
+                    f"{record[4]:02x}")
 
 	if record[5] != 0x20:
 		print("Unexpected byte[5] for breath exercise data: %02x" % (record[5]), file = sys.stderr)
 
-	measurment_time = f'{record[6]:02x}' + ":" f'{record[7]:02x}'
-	optimal = f'{record[8]:02x}' + ":" f'{record[9]:02x}'
-	very_good = f'{record[10]:02x}' + ":" f'{record[11]:02x}'
-	good = f'{record[12]:02x}' + ":" f'{record[13]:02x}'
+	measurment_time = f"{record[6]:02x}" + ":" f"{record[7]:02x}"
+	optimal = f"{record[8]:02x}" + ":" f"{record[9]:02x}"
+	very_good = f"{record[10]:02x}" + ":" f"{record[11]:02x}"
+	good = f"{record[12]:02x}" + ":" f"{record[13]:02x}"
 
 	if record[14] != 0x10:
 		print("Unexpected last byte for breath exercise data", file = sys.stderr)
@@ -298,9 +298,9 @@ def breath_exercise_parser(record):
 	return Breathing_Exercise_Data(time_str, measurment_time, optimal, very_good, good)
 
 def blood_O2_leveres_parser(record):
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}' + "_" + f'{record[3]:02x}' + ":" +
-                    f'{record[4]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}" + "_" + f"{record[3]:02x}" + ":" +
+                    f"{record[4]:02x}")
 
 	if record[5] != 0x20:
 		print("Unexpected byte[5] for blood oxygen level: %02x" % (record[5]), file = sys.stderr)
@@ -309,15 +309,15 @@ def blood_O2_leveres_parser(record):
 
 	# XXX
 	# TODO return record[7]
-	if record[7:] != b'\x03\x00\x10' and record[7:] != b'\x04\x00\x10':
+	if record[7:] != b"\x03\x00\x10" and record[7:] != b"\x04\x00\x10":
 		print("Unexpected tailing bytes for blood oxygen level", file = sys.stderr)
 
 	return Common_Data(time_str, bload_O2_level, 0)
 
 def sleep_data_parser(record):
 	# TODO
-	date_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}')
+	date_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}")
 
 	# FIXME
 	return Common_Data(date_str, 0, 0)
@@ -325,24 +325,24 @@ def sleep_data_parser(record):
 def cardio_load_parser(record):
 	# TODO
 	# XXX discrepancy between date_str and CASIO WATCHES
-	date_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}')
+	date_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}")
 
-	if record[3:] == b'\x20\xfe\xff\xff\xff\xfe\xfe\xff\xfe\xff\x10':
+	if record[3:] == b"\x20\xfe\xff\xff\xff\xfe\xfe\xff\xfe\xff\x10":
 		#return None
-		return Cardio_Load_Data(date_str, float('nan'), DATA_NOT_AVAILABLE, DATA_NOT_AVAILABLE, DATA_NOT_AVAILABLE)
+		return Cardio_Load_Data(date_str, float("nan"), DATA_NOT_AVAILABLE, DATA_NOT_AVAILABLE, DATA_NOT_AVAILABLE)
 
 	if record[3] != 0x20:
 		print("Unexpected byte[3] for cardio load data: %02x" % (record[3]), file = sys.stderr)
 
-	cadio_load = struct.unpack_from('<f', record[4:])[0]
+	cadio_load = struct.unpack_from("<f", record[4:])[0]
 
 	status = record[8]
 	if status not in cadio_load_status_names:
 		print("Unexpected cardio load status: %02x" % (status), file = sys.stderr)
 
-	strain = struct.unpack_from('<H', record[9:])[0]
-	tolerance = struct.unpack_from('<H', record[11:])[0]
+	strain = struct.unpack_from("<H", record[9:])[0]
+	tolerance = struct.unpack_from("<H", record[11:])[0]
 
 	if record[13] != 0x10:
 		print("Unexpected byte[13] for cardio load data: %02x" % (record[13]), file = sys.stderr)
@@ -350,8 +350,8 @@ def cardio_load_parser(record):
 	return Cardio_Load_Data(date_str, cadio_load, status, strain, tolerance)
 
 def summary_parser(record):
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}")
 	# TODO
 
 	if record[3] != 0x20:
@@ -360,21 +360,21 @@ def summary_parser(record):
 	if record[4] != 0x5d:
 		print("Unexpected byte[4] for daily summary data: %02x" % (record[4]), file = sys.stderr)
 
-	energy = struct.unpack_from('<i', record[5:])[0] / 128.0
+	energy = struct.unpack_from("<i", record[5:])[0] / 128.0
 
 	if record[9] != 0x5c:
 		print("Unexpected byte[9] for daily summary data: %02x" % (record[9]), file = sys.stderr)
 
-	steps = struct.unpack_from('<i', record[10:])[0]
-	step_target = struct.unpack_from('<i', record[14:])[0]
+	steps = struct.unpack_from("<i", record[10:])[0]
+	step_target = struct.unpack_from("<i", record[14:])[0]
 	# percentage of steps to step_target
-	step_completion = struct.unpack_from('<H', record[18:])[0]
+	step_completion = struct.unpack_from("<H", record[18:])[0]
 
 	if record[20] != 0x60:
 		print("Unexpected byte[20] for daily summary data: %02x" % (record[20]), file = sys.stderr)
 
-	stairs_climbed = struct.unpack_from('<H', record[21:])[0]
-	stairs_descended = struct.unpack_from('<H', record[23:])[0]
+	stairs_climbed = struct.unpack_from("<H", record[21:])[0]
+	stairs_descended = struct.unpack_from("<H", record[23:])[0]
 
 	if record[25] != 0x62:
 		print("Unexpected byte[25] for daily summary data: %02x" % (record[25]), file = sys.stderr)
@@ -403,8 +403,8 @@ def summary_parser(record):
 	step_reminder_times = []
 	n_not_fefe = 0
 	for i in range(24):
-		step_reminder_times.append(f'{record[49 + 2 * i + 1]:02x}'
-			+ ":" + f'{record[49 + 2 * i]:02x}')
+		step_reminder_times.append(f"{record[49 + 2 * i + 1]:02x}"
+			+ ":" + f"{record[49 + 2 * i]:02x}")
 
 		if record[49 + 2 * i + 1] != 0xfe and record[49 + 2 * i] != 0xfe:
 			n_not_fefe = n_not_fefe + 1
@@ -419,22 +419,22 @@ def summary_parser(record):
 	if record[99] != 0x5e:
 		print("Unexpected byte[99] for daily summary data: %02x" % (record[99]), file = sys.stderr)
 
-	if record[100:102] == b'\xfe\xff':
+	if record[100:102] == b"\xfe\xff":
 		heart_rate_max = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_max = struct.unpack_from('<H', record[100:])[0]
+		heart_rate_max = struct.unpack_from("<H", record[100:])[0]
 
-	if record[102:104] == b'\xfe\xff':
+	if record[102:104] == b"\xfe\xff":
 		heart_rate_min = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_min = struct.unpack_from('<H', record[102:])[0]
+		heart_rate_min = struct.unpack_from("<H", record[102:])[0]
 
-	if record[104:106] == b'\xfe\xff':
+	if record[104:106] == b"\xfe\xff":
 		heart_rate_rest = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_rest = struct.unpack_from('<H', record[104:])[0]
+		heart_rate_rest = struct.unpack_from("<H", record[104:])[0]
 
-	if record[106:] != b'\x64\x00\x00':
+	if record[106:] != b"\x64\x00\x00":
 		print("Unexpected byte[106:] for daily summary data: %02x %02x %02x" % (record[106], record[107], record[108]), file = sys.stderr)
 
 	return Summary_Data(
@@ -475,8 +475,8 @@ def current_stats_parser(record):
 	if record[10] != 0x60:
 		print("Unexpected byte[10] for daily summary data: %02x" % (record[10]), file = sys.stderr)
 
-	stairs_climbed = struct.unpack_from('<H', record[11:])[0]
-	stairs_descended = struct.unpack_from('<H', record[13:])[0]
+	stairs_climbed = struct.unpack_from("<H", record[11:])[0]
+	stairs_descended = struct.unpack_from("<H", record[13:])[0]
 
 	if record[15] != 0x62:
 		print("Unexpected byte[15] for daily summary data: %02x" % (record[15]), file = sys.stderr)
@@ -502,8 +502,8 @@ def current_stats_parser(record):
 	step_reminder_times = []
 	n_not_fefe = 0
 	for i in range(24):
-		step_reminder_times.append(f'{record[38 + 2 * i + 1]:02x}'
-			+ ":" + f'{record[38 + 2 * i]:02x}')
+		step_reminder_times.append(f"{record[38 + 2 * i + 1]:02x}"
+			+ ":" + f"{record[38 + 2 * i]:02x}")
 
 		if record[38 + 2 * i + 1] != 0xfe and record[38 + 2 * i] != 0xfe:
 			n_not_fefe = n_not_fefe + 1
@@ -515,20 +515,20 @@ def current_stats_parser(record):
 	if record[87] != 0x5e:
 		print("Unexpected byte[87] for daily summary data: %02x" % (record[87]), file = sys.stderr)
 
-	if record[88:90] == b'\xfe\xff':
+	if record[88:90] == b"\xfe\xff":
 		heart_rate_max = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_max = struct.unpack_from('<H', record[88:])[0]
+		heart_rate_max = struct.unpack_from("<H", record[88:])[0]
 
-	if record[90:92] == b'\xfe\xff':
+	if record[90:92] == b"\xfe\xff":
 		heart_rate_min = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_min = struct.unpack_from('<H', record[90:])[0]
+		heart_rate_min = struct.unpack_from("<H", record[90:])[0]
 
-	if record[92:94] == b'\xfe\xff':
+	if record[92:94] == b"\xfe\xff":
 		heart_rate_rest = DATA_NOT_AVAILABLE
 	else:
-		heart_rate_rest = struct.unpack_from('<H', record[92:])[0]
+		heart_rate_rest = struct.unpack_from("<H", record[92:])[0]
 
 	return Summary_Data(
 		time_str,
@@ -560,20 +560,20 @@ def type_0x72_parser(record):
 	flag1 = parse_flag(record[5:7])
 
 	# TODO
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}' + "_" + f'{record[3]:02x}' + ":" +
-                    f'{record[4]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}" + "_" + f"{record[3]:02x}" + ":" +
+                    f"{record[4]:02x}")
 
-	if record[7:] == b'\x80\x80\x80\x80\x80\x80\x80\x80\x80\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff':
+	if record[7:] == b"\x80\x80\x80\x80\x80\x80\x80\x80\x80\xff\xff\xff\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\xff":
 		flag2 = 8
-	elif record[7:] == b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00':
+	elif record[7:] == b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00":
 		flag2 = 0
-	elif record[7:] == b'\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xff\xfe\xff\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe':
+	elif record[7:] == b"\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xff\xfe\xff\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe":
 		flag2 = 254
 	else:
-		a = struct.unpack_from('<b', record[7:])[0]
-		b = struct.unpack_from('<b', record[8:])[0]
-		c = struct.unpack_from('<b', record[9:])[0]
+		a = struct.unpack_from("<b", record[7:])[0]
+		b = struct.unpack_from("<b", record[8:])[0]
+		c = struct.unpack_from("<b", record[9:])[0]
 
 		#print(time_str)
 		#sys.stdout.buffer.write(record[7:])
@@ -591,11 +591,11 @@ def type_0x72_parser(record):
 
 def smart_alarm_parser(record):
 	# TODO
-	time_str = ("20" + f'{record[0]:02x}' + "-" + f'{record[1]:02x}' + "-" +
-                    f'{record[2]:02x}' + "_" + f'{record[3]:02x}' + ":" +
-                    f'{record[4]:02x}' + ":" + f'{record[5]:02x}')
+	time_str = ("20" + f"{record[0]:02x}" + "-" + f"{record[1]:02x}" + "-" +
+                    f"{record[2]:02x}" + "_" + f"{record[3]:02x}" + ":" +
+                    f"{record[4]:02x}" + ":" + f"{record[5]:02x}")
 
-	if record[6:8] != b'\x20\x10':
+	if record[6:8] != b"\x20\x10":
 		print("Unexpected bytes[6:8] for type 0x73 data", file = sys.stderr)
 
 	if record[13] != 0x02:
@@ -605,20 +605,19 @@ def smart_alarm_parser(record):
 		print("Unexpected bytes[18] for type 0x73 data", file = sys.stderr)
 
 	# XXX
-	print("0x73 %s " % (time_str), end='')
+	print("0x73 %s " % (time_str), end="")
 
 	# XXX
 	for j in range(6, 19):
-		print("%02x " % (record[j]), end='')
+		print("%02x " % (record[j]), end="")
 		#print("%d " % (record[j]), end='')
 
-	sound_time = (f'{record[22]:02x}' + ":" + f'{record[23]:02x}' + ":" +
-		f'{record[24]:02x}')
+	sound_time = (f"{record[22]:02x}" + ":" + f"{record[23]:02x}" + ":" +
+		f"{record[24]:02x}")
 
 	# XXX
 	print("%s" % (sound_time))
 
-	return
 
 frame_types = {
 	FRAME_STEP_COUNTS:      Record_Metadata(4, 5, "min", step_count_parser),
@@ -687,27 +686,27 @@ if file_size < 119:
 
 DIFF_FILE_SIZE_PAYLOAD_LENGTH = 14
 
-with open(file_path, 'rb') as f:
+with open(file_path, "rb") as f:
 	chunk = f.read(header_size)
 	# TODO check len(chunk)
 
-	if chunk[0:5] != b'\x00\x0f\x00\x00\x00':
+	if chunk[0:5] != b"\x00\x0f\x00\x00\x00":
 		print("Unexpected values of the first 5 bytes", file = sys.stderr)
 
 	package_time_str = f"20{chunk[5]:02d}-{chunk[6]:02d}-{chunk[7]:02d}_{chunk[8]:02d}:{chunk[9]:02d}"
 	package_time = datetime(year = 2000 + chunk[5], month = chunk[6],
-		day = chunk[7], hour = chunk[8], minute = chunk[9], tzinfo=timezone.utc)
+		day = chunk[7], hour = chunk[8], minute = chunk[9], tzinfo=UTC)
 
-	payload_length = struct.unpack_from('<i', chunk[10:])[0]
+	payload_length = struct.unpack_from("<i", chunk[10:])[0]
 
 	if payload_length + DIFF_FILE_SIZE_PAYLOAD_LENGTH != file_size:
 		print("Unexpected payload length: %d" % (file_size - DIFF_FILE_SIZE_PAYLOAD_LENGTH), file = sys.stderr)
 		print("Expecting: %d" % (payload_length), file = sys.stderr)
 
 	# today's current step count
-	current_steps = struct.unpack_from('<i', chunk[14:])[0]
+	current_steps = struct.unpack_from("<i", chunk[14:])[0]
 	# today's current energy in kcal
-	current_energy = struct.unpack_from('<H', chunk[18:])[0]
+	current_energy = struct.unpack_from("<H", chunk[18:])[0]
 
 	print("0x00 %s %d %d" % (package_time_str, current_steps, current_energy))
 
@@ -720,7 +719,7 @@ with open(file_path, 'rb') as f:
 
 		frame_type = chunk[0]
 
-		frame_length = struct.unpack_from('<i', chunk[1:])[0]
+		frame_length = struct.unpack_from("<i", chunk[1:])[0]
 
 		body_length = frame_length - frame_header_size
 		frame_body = f.read(body_length)
@@ -732,7 +731,7 @@ with open(file_path, 'rb') as f:
 
 
 		# XXX
-		print('type-len 0x%02x %d' % (frame_type, frame_length))
+		print("type-len 0x%02x %d" % (frame_type, frame_length))
 
 		parse_frame(frame_type, body_length, frame_body, package)
 
@@ -919,13 +918,13 @@ with open(file_path, 'rb') as f:
 			#	print("%d " % (record.bindata[j]), end='')
 			#print("%s %d" % (record.flag1, record.flag2))
 
-			print("0x72-step-energy %s %d %d %d " % (record.time, record.a, record.b, record.c), end='')
-			print("%d %d %d " % (record.bindata[3], record.bindata[4], record.bindata[5]), end='')
+			print("0x72-step-energy %s %d %d %d " % (record.time, record.a, record.b, record.c), end="")
+			print("%d %d %d " % (record.bindata[3], record.bindata[4], record.bindata[5]), end="")
 			for j in range(6, 9):
-				byte = struct.unpack_from('<b', record.bindata[j:])[0]
-				print("%d " % (byte), end='')
+				byte = struct.unpack_from("<b", record.bindata[j:])[0]
+				print("%d " % (byte), end="")
 			for j in range(9, 25):
-				print("%d " % (record.bindata[j]), end='')
+				print("%d " % (record.bindata[j]), end="")
 			# XXX
 			if i < len(package[FRAME_STEP_COUNTS]):
 				step_counts = package[FRAME_STEP_COUNTS][i].data

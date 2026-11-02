@@ -15,10 +15,9 @@ class AnalogueProtocol(StandardProtocol):
             handlers = self.data_received_handlers
             if data[1] == 0x01 and data[4] in handlers:
                 return data[4]
-            elif data[1] == 0x00 and data[3] in handlers:
+            if data[1] == 0x00 and data[3] in handlers:
                 return data[3]
-            else:
-                return 0x28
+            return 0x28
         return first_byte
 
     def unwrap_payload(self, data: bytes, key: int) -> bytes:
@@ -34,9 +33,9 @@ class AnalogueProtocol(StandardProtocol):
         return "280000"
 
     async def set_time(self, connection: Any, current_time: Any = None, offset: int = 0) -> None:
+        from gshock_api import message_dispatcher
         from gshock_api.iolib.second_dial_io import SecondDialIO
         from gshock_api.watch_info import watch_info
-        from gshock_api import message_dispatcher
 
         await self.read_write_dst_watch_states(connection)
         await self.read_write_dst_for_world_cities(connection)

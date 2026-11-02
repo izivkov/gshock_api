@@ -5,7 +5,7 @@ from gshock_api.iolib.actions import BLEAction, Write
 from gshock_api.iolib.connection_protocol import ConnectionProtocol
 from gshock_api.iolib.packet import Protocol
 from gshock_api.utils import to_compact_string, to_hex_string
-from gshock_api.watch_info import watch_info, WatchModel
+from gshock_api.watch_info import WatchModel, watch_info
 
 
 class TimerIOFunctional:

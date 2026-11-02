@@ -26,15 +26,15 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from collections import Counter
+from dataclasses import dataclass, field
 import datetime as dt
 import json
+from pathlib import Path
 import struct
 import sys
 import time
 import traceback
-from collections import Counter
-from dataclasses import dataclass, field
-from pathlib import Path
 
 from gshock_api.connection import Connection
 
@@ -274,7 +274,7 @@ async def download_live(address: str | None, session: Session, setup: bool, set_
                 break
             try:
                 uuid, data = await asyncio.wait_for(inbox.get(), timeout=min(remaining, POLL_RETRY_S + 5))
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if sync.phase == "polling":
                     for which, d in sync.on_notify(UUID_CONVOY, b"\x00\x01\x04"):
                         await write(which, d)
@@ -312,7 +312,7 @@ async def _wait_reply(inbox: asyncio.Queue, cmd: int, timeout: float):
     while time.monotonic() < deadline and found is None:
         try:
             uuid, data = await asyncio.wait_for(inbox.get(), timeout=deadline - time.monotonic())
-        except asyncio.TimeoutError:
+        except TimeoutError:
             break
         if uuid == UUID_STATUS and data[:1] == bytes([cmd]):
             found = data

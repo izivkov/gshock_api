@@ -19,9 +19,9 @@ Connects to a paired watch, calls each method in turn, and prints the results.
 """
 
 import asyncio
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 

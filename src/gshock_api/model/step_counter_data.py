@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass
@@ -13,7 +12,7 @@ class StepCounterData:
     """
 
     # Timestamp covering year/month/day/hour/minute/second when available.
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
     day_of_week: int | None = None
     month: int | None = None
     day_of_month: int | None = None

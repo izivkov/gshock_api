@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import NamedTuple
 from zoneinfo import ZoneInfo
 
@@ -196,7 +196,7 @@ class CasioTimeZoneHelper:
                 return entry
 
         # Fallback
-        name = time_zone_name.split("/")[-1].replace("_", " ").upper()
+        name = time_zone_name.rsplit("/", maxsplit=1)[-1].replace("_", " ").upper()
         return CasioTimeZone(name, time_zone_name, 0x00)
 
     WORLD_CITY_COORDINATES: dict[str, LatLon] = {
@@ -274,7 +274,7 @@ class CasioTimeZoneHelper:
         for tz in cls.TIME_ZONE_TABLE:
             if tz.name == time_zone_name.upper():
                 return tz
-        name = time_zone_name.split("/")[-1].upper()
+        name = time_zone_name.rsplit("/", maxsplit=1)[-1].upper()
         return CasioTimeZone(name, time_zone_name, 0x00)
 
     @classmethod
