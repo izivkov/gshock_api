@@ -20,27 +20,21 @@ buf = bytes.fromhex(input_hex_2)
 
 
 notification = AppNotificationIO.decode_notification_packet(buf)
-print(notification)
 
 
 rebuilt_buf = AppNotificationIO.encode_notification_packet(notification)
 
 
-def compare_buffers(buf1: bytes, buf2: bytes):
+def compare_buffers(buf1: bytes, buf2: bytes) -> None:
     min_len = min(len(buf1), len(buf2))
     for i in range(min_len):
         if buf1[i] != buf2[i]:
-            print(f"Difference at byte {i}:")
-            print(f"  buf1: {buf1[i]:02x}")
-            print(f"  buf2: {buf2[i]:02x}")
-            print(f"  Context buf1: ... {buf1[max(0,i-5):i+5].hex()} ...")
-            print(f"  Context buf2: ... {buf2[max(0,i-5):i+5].hex()} ...")
             break
     else:
         if len(buf1) != len(buf2):
-            print(f"Buffers have different lengths: {len(buf1)} vs {len(buf2)}")
+            pass
         else:
-            print("No differences found.")
+            pass
 
 
 # Usage:

@@ -7,6 +7,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import contextlib
 import os
 import shutil
 import sys
@@ -35,10 +36,8 @@ except ImportError:
 
 output_dir = os.path.join(__location__, "api")
 module_dir = os.path.join(__location__, "../src/gshocktimeserver")
-try:
+with contextlib.suppress(FileNotFoundError):
     shutil.rmtree(output_dir)
-except FileNotFoundError:
-    pass
 
 try:
     import sphinx
@@ -51,8 +50,8 @@ try:
         args = args[1:]
 
     apidoc.main(args)
-except Exception as e:
-    print(f"Running `sphinx-apidoc` failed!\n{e}")
+except Exception:
+    pass
 
 # -- General configuration ---------------------------------------------------
 
@@ -283,4 +282,3 @@ intersphinx_mapping = {
     "pyscaffold": ("https://pyscaffold.org/en/stable", None),
 }
 
-print(f"loading configurations for {project} {version} ...", file=sys.stderr)

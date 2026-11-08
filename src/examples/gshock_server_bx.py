@@ -41,7 +41,7 @@ async def send_raw_command(connection: Connection, handle: int, hex_value: str) 
     await connection.write(handle, hex_value)
 
 
-async def run_gw_bx_sequence(connection: Connection):
+async def run_gw_bx_sequence(connection: Connection) -> None:
     logger.info("Starting GW-BX5600 initialization sequence...")
     
     # 1. Base initialization

@@ -9,7 +9,7 @@ def parse_btsnoop(path):
             hdr = f.read(24)
             if len(hdr) < 24:
                 break
-            orig_len, inc_len, flags, drops, ts = struct.unpack(">IIIIq", hdr)
+            _orig_len, inc_len, flags, _drops, ts = struct.unpack(">IIIIq", hdr)
             data = f.read(inc_len)
             records.append((flags, data, ts))
     return records
@@ -19,7 +19,6 @@ records = parse_btsnoop("/home/izivkov/projects/gshock_api/src/examples/btsnoop_
 # Read By Type responses [1123-1138] contain property flags for each characteristic
 # Property byte is at a fixed offset in the response
 # Format: length(1) | handle(2) | properties(1) | value_handle(2) | uuid(N)
-print("=== Characteristic properties from GATT discovery ===")
 for i in range(1120, 1145):
     flags, data, ts = records[i]
     if data and data[0] == 0x02 and len(data) >= 10:
@@ -42,5 +41,3 @@ for i in range(1120, 1145):
                 if props & 0x20: prop_str.append("INDICATE")
                 uuid_bytes = item[5:]
                 uuid_hex = uuid_bytes[::-1].hex() if len(uuid_bytes) == 16 else uuid_bytes.hex()
-                print(f"  [{i}] decl=0x{decl_handle:04x} val=0x{val_handle:04x} "
-                      f"props={props:#04x}({','.join(prop_str)}) uuid={uuid_hex}")

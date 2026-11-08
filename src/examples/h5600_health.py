@@ -109,7 +109,7 @@ class Session:
         self.events.append({"t": round(time.time(), 3), "dir": direction, "uuid": name,
                             "handle": handle, "hex": data.hex()})
         if echo:
-            print(f"  {direction:2} {name:7} {data.hex(' ')[:60]}", flush=True)
+            pass
         self._since_flush += 1
         if self._since_flush >= FLUSH_EVERY:
             self.save()
@@ -209,13 +209,11 @@ async def download_live(address: str | None, session: Session, setup: bool, set_
     inbox: asyncio.Queue = asyncio.Queue()
     conn = LifeLogConnection(address, lambda uuid, data: inbox.put_nowait((uuid, data)))
 
-    print("connecting ...", flush=True)
     ok = await conn.connect(timeout=20.0)
     if not ok or conn.client is None or not conn.client.is_connected:
         raise ConnectionError("could not connect to the watch (is it awake and not connected to a phone?)")
     address = conn.address
     session.source = f"ble:{address}"
-    print(f"connected to {address}", flush=True)
 
     try:
         # gshock_api.connect() has already subscribed to every notifiable characteristic,
@@ -231,15 +229,14 @@ async def download_live(address: str | None, session: Session, setup: bool, set_
         if setup:
             setup_char = find_setup_characteristic(conn.client.services)
             if setup_char is None:
-                print("no setup characteristic found; skipping setup requests", flush=True)
+                pass
             else:
-                print(f"setup requests -> {setup_char.uuid} (handle {setup_char.handle:#06x})", flush=True)
                 for cmd in SETUP_COMMANDS:
                     session.log("TX", "SETUP", bytes([cmd]))
                     await conn.client.write_gatt_char(setup_char.uuid, bytes([cmd]), response=False)
                     reply = await _wait_reply(inbox, cmd, SETUP_REPLY_TIMEOUT_S)
                     if reply is None:
-                        print(f"   no reply to setup request 0x{cmd:02x} (continuing)", flush=True)
+                        pass
                     else:
                         session.log("RX", "STATUS", reply)
                         if cmd in ECHO_REPLY_COMMANDS:
@@ -249,11 +246,9 @@ async def download_live(address: str | None, session: Session, setup: bool, set_
 
         if set_time:
             msg = time_message(dt.datetime.now())
-            print(f"setting the watch clock: {msg.hex(' ')}  ({dt.datetime.now().isoformat(timespec='seconds')})", flush=True)
             session.log("TX", "STATUS", msg)
             await conn.client.write_gatt_char(UUID_STATUS, msg, response=True)
             reply = await _wait_reply(inbox, 0x09, SETUP_REPLY_TIMEOUT_S)
-            print("   no reply to the time write" if reply is None else f"   time reply: {reply.hex(' ')}", flush=True)
             if reply is not None:
                 session.log("RX", "STATUS", reply)
 
@@ -270,7 +265,6 @@ async def download_live(address: str | None, session: Session, setup: bool, set_
         while not sync.done:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                print("timeout: the transfer did not finish; partial data is saved", flush=True)
                 break
             try:
                 uuid, data = await asyncio.wait_for(inbox.get(), timeout=min(remaining, POLL_RETRY_S + 5))
@@ -455,52 +449,40 @@ def decode(doc: dict, tz_offset_h: int) -> dict:
 # ----------------------------------------------------------------------------
 def show(doc: dict, dec: dict) -> None:
     def rule(title: str) -> None:
-        print(f"\n== {title} " + "=" * max(0, 60 - len(title)))
+        pass
 
     rule("Session")
-    print(f"  source    {doc['source']}")
-    print(f"  started   {doc['started']}")
-    print(f"  ended     {doc['ended']}")
-    print(f"  finished  {doc['finished']}")
     if doc.get("error"):
-        print(f"  error     {doc['error']}")
+        pass
 
     rule(f"Messages ({len(doc['events'])})")
-    for (direction, name), n in sorted(Counter((e["dir"], e["uuid"]) for e in doc["events"]).items()):
-        print(f"  {direction:3} {name:8} {n}")
+    for (_direction, _name), _n in sorted(Counter((e["dir"], e["uuid"]) for e in doc["events"]).items()):
+        pass
 
     rule("Announced frames")
     for a in doc["announcements"]:
-        val = int.from_bytes(bytes.fromhex(a["value"]), "little")
-        print(f"  0x{a['index']:02x}  {FRAME_NAME.get(a['index'], '?'):16} announced {val:>6} bytes")
+        int.from_bytes(bytes.fromhex(a["value"]), "little")
 
     rule("Status 0x28 (last 3)")
     status = [e["hex"] for e in doc["events"] if e["dir"] == "RX" and e["uuid"] == "STATUS" and e["hex"][:2] == "28"]
     if not status:
-        print("  none in this session")
+        pass
     for hx in status[-3:]:
         b = bytes.fromhex(hx)
         if len(b) >= 10:
-            print(f"  {' '.join(f'{x:02x}' for x in b)}   byte8={b[8]} byte9={b[9]}")
+            pass
 
     rule("Decoded (partial)")
     hdr = dec.get("header")
     if hdr is None:
-        print(f"  {dec.get('error', 'no data')}")
         return
-    print(f"  header time (stored, UTC)  {hdr['time_utc']}")
-    print(f"  header time (local)        {hdr['time_local']}")
-    print(f"  header steps               {hdr['steps']}")
-    print(f"  header energy (raw)        {hdr['energy_raw']}")
-    total = sum(s["steps"] for s in dec["slots"])
-    print(f"  step slots                 {len(dec['slots'])}   sum {total}")
+    sum(s["steps"] for s in dec["slots"])
     if dec["steps_by_hour"]:
-        print("  steps by local hour        " + ", ".join(f"{h}:00={v}" for h, v in sorted(dec["steps_by_hour"].items())))
+        pass
 
     rule("Frames located")
-    for t, f in sorted(dec["frames"].items()):
-        print(f"  0x{t:02x}  {f['name']:16} at byte {f['start']:6}  bytes received {f['bytes_received']}")
-    print("\n  energy: raw values only (kcal scale not confirmed). Other frames: not decoded.")
+    for _t, _f in sorted(dec["frames"].items()):
+        pass
 
 
 # ----------------------------------------------------------------------------
@@ -542,7 +524,6 @@ async def main_async(args: argparse.Namespace) -> int:
     dec = decode(doc, args.tz)
     if not args.quiet:
         show(doc, dec)
-    print(f"\nJSON written to {args.json} (overwritten on each run)")
     return 0
 
 

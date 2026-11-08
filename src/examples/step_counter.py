@@ -48,14 +48,8 @@ async def main() -> None:
 
     step_data = await api.get_step_count(peek=True)
 
-    print("\nget_step_count(peek=True) ->")
-    print(f"  current_day_steps: {step_data.current_day_steps}")
-    print(f"  timestamp: {step_data.timestamp}")
-    print(f"  distance_meters: {step_data.distance_meters}")
-    print(f"  hourly_steps: {step_data.hourly_steps}")
-    print(f"  daily_history: {step_data.daily_history}")
     if step_data.warnings:
-        print(f"  warnings: {step_data.warnings}")
+        pass
 
     logger.info("Syncing time...")
     await api.set_time(time.time())

@@ -14,15 +14,13 @@ COLORS = [
 ]
 RESET_COLOR = "\033[0m"
 
-def parse_btsnoop(filepath, use_color=False):
+def parse_btsnoop(filepath, use_color=False) -> None:
     with open(filepath, "rb") as f:
         # Header
         header = f.read(16)
         if not header.startswith(b"btsnoop\0"):
-            print("Not a btsnoop file")
             return
 
-        print("Parsing BTSnoop file...")
 
         packet_count = 0
         while True:
@@ -32,7 +30,7 @@ def parse_btsnoop(filepath, use_color=False):
             if len(rec_header) < 24:
                 break
 
-            orig_len, inc_len, flags, drops, ts = struct.unpack(">IIIIQ", rec_header)
+            _orig_len, inc_len, _flags, _drops, ts = struct.unpack(">IIIIQ", rec_header)
 
             packet_data = f.read(inc_len)
 
@@ -48,17 +46,17 @@ def parse_btsnoop(filepath, use_color=False):
                 if len(packet_data) < 5:
                     continue
 
-                handle_flags, data_len = struct.unpack("<HH", packet_data[1:5])
-                handle = handle_flags & 0x0FFF
-                pb_flag = (handle_flags >> 12) & 0x3
-                bc_flag = (handle_flags >> 14) & 0x3
+                handle_flags, _data_len = struct.unpack("<HH", packet_data[1:5])
+                handle_flags & 0x0FFF
+                (handle_flags >> 12) & 0x3
+                (handle_flags >> 14) & 0x3
 
                 # L2CAP Data
                 l2cap_data = packet_data[5:]
                 if len(l2cap_data) < 4:
                     continue
 
-                l2cap_len, l2cap_cid = struct.unpack("<HH", l2cap_data[:4])
+                _l2cap_len, l2cap_cid = struct.unpack("<HH", l2cap_data[:4])
                 payload = l2cap_data[4:]
 
                 # CID 4 is Attribute Protocol (ATT)
@@ -92,14 +90,13 @@ def parse_btsnoop(filepath, use_color=False):
                         dt_new = dt - datetime.timedelta(hours=5)
                         time_str = dt_new.strftime("%H:%M:%S.%f")
 
-                        line = f"[{time_str}] #{packet_count} {opcode_name} Handle: 0x{att_handle:04X} Value: {att_value.hex().upper()}"
+                        f"[{time_str}] #{packet_count} {opcode_name} Handle: 0x{att_handle:04X} Value: {att_value.hex().upper()}"
 
                         if use_color:
                             # Select color based on handle to distinguish different characteristics
-                            color = COLORS[att_handle % len(COLORS)]
-                            print(f"{color}{line}{RESET_COLOR}")
+                            COLORS[att_handle % len(COLORS)]
                         else:
-                            print(line)
+                            pass
 
             packet_count += 1
 
@@ -110,6 +107,6 @@ if __name__ == "__main__":
     args = [a for a in args if a != "--color"]
 
     if len(args) < 1:
-        print("Usage: python3 parse_btsnoop.py <file> [--color]")
+        pass
     else:
         parse_btsnoop(args[0], use_color=use_color)

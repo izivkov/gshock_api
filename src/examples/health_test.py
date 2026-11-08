@@ -8,7 +8,6 @@ buffer4 = "05fff0ffffffe6faf4eed7adedffffffffffff50fc756a"
 
 # XOR-decode the buffer with key 255
 decoded = AppNotificationIO.xor_decode_buffer(buffer, key=255)
-print(decoded.hex())
 
 # fa 56 14 00 00 00 10 f0 08 20 f0 08 20 f0 08 20 f0 08 20 f0 08 b6 6d
 

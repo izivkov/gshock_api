@@ -3,10 +3,10 @@ import sys
 
 
 class Args:
-    def __init__(self):
+    def __init__(self) -> None:
         self.parse_and_store(sys.argv[1:])
 
-    def parse_and_store(self, args):
+    def parse_and_store(self, args) -> None:
         parser = argparse.ArgumentParser(description="Parser")
 
         parser.add_argument(
