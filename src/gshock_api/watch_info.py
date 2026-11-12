@@ -79,6 +79,7 @@ class ModelInfo:
     hasLongTimerKey: bool = False
     settingsSize: int = 17
     hasAppInfo: bool = True
+    hasExerciseProfile: bool = False
     hasExcersiseProfile: bool = False
     protocol: WatchProtocol = field(default_factory=lambda: STANDARD_PROTOCOL)
 
@@ -173,7 +174,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasStepCounter=True,
         hasDateFormat=False,
         weekLanguageSupported=False,
-        hasAppInfo=True,
+        hasExerciseProfile=True,
         hasExcersiseProfile=True,
     ),
     ModelInfo(
@@ -184,7 +185,7 @@ _MODEL_LIST: list[ModelInfo] = [
         hasStepCounter=True,
         hasDateFormat=False,
         weekLanguageSupported=False,
-        hasAppInfo=True,
+        hasExerciseProfile=True,
         hasExcersiseProfile=True,
     ),
     ModelInfo(
@@ -195,7 +196,6 @@ _MODEL_LIST: list[ModelInfo] = [
         hasStepCounter=True,
         hasDateFormat=False,
         weekLanguageSupported=False,
-        hasAppInfo=True,
     ),
     ModelInfo(model=WatchModel.GA, hasAutoLight=False, hasReminders=True),
     ModelInfo(model=WatchModel.GB001, hasAutoLight=True, hasReminders=False),
@@ -213,7 +213,7 @@ _MODEL_LIST: list[ModelInfo] = [
         shortLightDuration="1.5s", longLightDuration="5s",
         hasBatteryLevel=False, alwaysConnected=True, hasDateFormat=False,
         weekLanguageSupported=False,
-        hasStepCounter=False,
+        hasStepCounter=True,
     ),
     ModelInfo(model=WatchModel.DW, hasAutoLight=True, hasReminders=False),
     ModelInfo(
@@ -601,6 +601,10 @@ class WatchInfo:
     @property
     def hasHomeTime(self) -> bool:
         return self.info.hasHomeTime
+
+    @property
+    def hasExerciseProfile(self) -> bool:
+        return self.info.hasExerciseProfile
 
     @property
     def hasExcersiseProfile(self) -> bool:

@@ -261,11 +261,20 @@ class TestGShockFunctionalAPI(unittest.TestCase):
         watch_info.set_name_and_model("CASIO ABL-100WE")
         self.assertEqual(watch_info.model, WatchModel.ABL_100)
         self.assertTrue(watch_info.hasStepCounter)
+        self.assertTrue(watch_info.hasExerciseProfile)
         self.assertIsInstance(watch_info.protocol, StandardProtocol)
 
         watch_info.set_name_and_model("CASIO F-B100W")
         self.assertEqual(watch_info.model, WatchModel.F_B100)
         self.assertTrue(watch_info.hasStepCounter)
+        self.assertTrue(watch_info.hasExerciseProfile)
+
+        watch_info.set_name_and_model("CASIO BSA-B100")
+        self.assertEqual(watch_info.model, WatchModel.BSA_B100)
+        self.assertTrue(watch_info.hasStepCounter)
+        self.assertFalse(watch_info.hasExerciseProfile)
+        self.assertFalse(watch_info.weekLanguageSupported)
+        self.assertIsInstance(watch_info.protocol, StandardProtocol)
 
         watch_info.set_name_and_model("CASIO GW-B5600")
         self.assertEqual(watch_info.model, WatchModel.GW)
