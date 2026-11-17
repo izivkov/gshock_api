@@ -1,644 +1,882 @@
 {
   "format": "h5600_lifelog_session",
   "version": 2,
-  "source": "ble:C5:74:00:C1:B9:4D",
-  "started": "2026-10-28T13:49:04-0400",
-  "ended": "2026-10-28T13:49:30-0400",
+  "source": "ble:C5:8F:36:6A:96:3E",
+  "started": "2026-11-16T19:46:36-0500",
+  "ended": "2026-11-16T19:47:12-0500",
   "finished": true,
   "error": null,
   "events": [
     {
-      "t": 1793209747.188,
+      "t": 1794876402.832,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "23"
     },
     {
-      "t": 1793209747.487,
+      "t": 1794876403.162,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "23434153494f2044572d48353630300000000000"
     },
     {
-      "t": 1793209747.487,
+      "t": 1794876403.162,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "10"
     },
     {
-      "t": 1793209747.727,
+      "t": 1794876403.402,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
-      "hex": "104db9c10074c57f0d030fffffffff28000000"
+      "hex": "103e966a368fc57f0e030fffffffff28000000"
     },
     {
-      "t": 1793209747.727,
+      "t": 1794876403.402,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "11"
     },
     {
-      "t": 1793209747.997,
+      "t": 1794876403.642,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "110000000600000000000100000000"
     },
     {
-      "t": 1793209747.997,
+      "t": 1794876403.642,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "110000000600000000000100000000"
     },
     {
-      "t": 1793209748.235,
+      "t": 1794876404.001,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "3b"
     },
     {
-      "t": 1793209748.358,
+      "t": 1794876404.121,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "3b50000a4001050520032801a000054001141c00"
     },
     {
-      "t": 1793209748.358,
+      "t": 1794876404.121,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "3b50000a4001050520032801a000054001141c00"
     },
     {
-      "t": 1793209748.596,
+      "t": 1794876404.364,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "3a"
     },
     {
-      "t": 1793209748.717,
+      "t": 1794876404.482,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "3a003401400104005802"
     },
     {
-      "t": 1793209748.717,
+      "t": 1794876404.482,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "3a003401400104005802"
     },
     {
-      "t": 1793209748.986,
+      "t": 1794876404.721,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "26"
     },
     {
-      "t": 1793209749.108,
+      "t": 1794876405.052,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "2600000000000000000000000000000000"
     },
     {
-      "t": 1793209749.108,
+      "t": 1794876405.052,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "28"
     },
     {
-      "t": 1793209749.347,
+      "t": 1794876405.293,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
-      "hex": "28061200001700000501"
+      "hex": "28061c00001700000101"
     },
     {
-      "t": 1793209749.347,
+      "t": 1794876405.293,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "20"
     },
     {
-      "t": 1793209749.587,
+      "t": 1794876405.532,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "2023070011000000000000000004020100080000"
     },
     {
-      "t": 1793209749.587,
+      "t": 1794876405.532,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "2f"
     },
     {
-      "t": 1793209749.737,
+      "t": 1794876405.682,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "2f0c04000000"
     },
     {
-      "t": 1793209749.737,
+      "t": 1794876405.682,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "2f0c04000000"
     },
     {
-      "t": 1793209750.066,
+      "t": 1794876406.101,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "43"
     },
     {
-      "t": 1793209750.217,
+      "t": 1794876406.462,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "43401f0000000000000000000000000000"
     },
     {
-      "t": 1793209750.217,
+      "t": 1794876406.462,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "13"
     },
     {
-      "t": 1793209750.457,
+      "t": 1794876406.702,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
-      "hex": "1300010000000000000000000600000600"
+      "hex": "1300010000000000000000000400000600"
     },
     {
-      "t": 1793209750.457,
+      "t": 1794876406.702,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
-      "hex": "1300010000000000000000000600000600"
+      "hex": "1300010000000000000000000400000600"
     },
     {
-      "t": 1793209750.906,
+      "t": 1794876407.091,
       "dir": "TX",
       "uuid": "SETUP",
       "handle": null,
       "hex": "45"
     },
     {
-      "t": 1793209751.057,
+      "t": 1794876407.213,
       "dir": "RX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "45008cfe9dffa7e6f9fd00"
     },
     {
-      "t": 1793209751.057,
+      "t": 1794876407.213,
       "dir": "TX",
       "uuid": "STATUS",
       "handle": null,
       "hex": "45008cfe9dffa7e6f9fd00"
     },
     {
-      "t": 1793209751.416,
+      "t": 1794876407.571,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002effffffffff"
     },
     {
-      "t": 1793209751.476,
+      "t": 1794876407.631,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "000000"
     },
     {
-      "t": 1793209751.536,
+      "t": 1794876407.721,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "000107"
     },
     {
-      "t": 1793209755.039,
+      "t": 1794876411.226,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "000000"
     },
     {
-      "t": 1793209755.078,
+      "t": 1794876411.262,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000107"
+    },
+    {
+      "t": 1794876414.766,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "000000"
+    },
+    {
+      "t": 1794876414.832,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "000000"
     },
     {
-      "t": 1793209755.078,
+      "t": 1794876414.832,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "04000000000000000000"
     },
     {
-      "t": 1793209755.137,
+      "t": 1794876414.892,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002effffffffff"
     },
     {
-      "t": 1793209755.198,
+      "t": 1794876414.952,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "04002800280000002a00"
     },
     {
-      "t": 1793209755.198,
+      "t": 1794876414.953,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "0401180018000000dc05"
     },
     {
-      "t": 1793209755.257,
+      "t": 1794876415.012,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "04002800280000002a00"
     },
     {
-      "t": 1793209755.259,
+      "t": 1794876415.012,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "0600000000000000000000000000"
     },
     {
-      "t": 1793209755.347,
+      "t": 1794876415.072,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "06fa00001000000002"
     },
     {
-      "t": 1793209755.347,
+      "t": 1794876415.072,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "06fa00001000000002"
     },
     {
-      "t": 1793209755.407,
+      "t": 1794876415.13,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "06fa00001000000002"
     },
     {
-      "t": 1793209755.407,
+      "t": 1794876415.13,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002effffffffff"
     },
     {
-      "t": 1793209755.707,
+      "t": 1794876415.642,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002e0014000000"
     },
     {
-      "t": 1793209755.707,
+      "t": 1794876415.642,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002e0014000000"
     },
     {
-      "t": 1793209756.757,
+      "t": 1794876416.692,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
-      "hex": "05fff0ffffffe5f5e3f2ce6bfdffff16ebffff53fb6c69"
+      "hex": "05fff0ffffffe5f4eeffd10cf1ffff03eaffffacf98436"
     },
     {
-      "t": 1793209756.757,
+      "t": 1794876416.692,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "070000000000000000000000000000"
     },
     {
-      "t": 1793209756.819,
+      "t": 1794876416.752,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "072e0014000000"
     },
     {
-      "t": 1793209756.819,
+      "t": 1794876416.752,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "072e0014000000"
     },
     {
-      "t": 1793209756.907,
+      "t": 1794876416.812,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002e6563000000"
     },
     {
-      "t": 1793209756.907,
+      "t": 1794876416.812,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "002e6563000000"
     },
     {
-      "t": 1793209757.716,
+      "t": 1794876417.682,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
-      "hex": "059a9cffffffa40100000001010001009fffffffff9dffffffffcdc4fffff7ffffffffffcef5e8f1ffccc79ef8ef01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101fea151ffccffc8ffa712"
+      "hex": "059a9cffffffa40100000001010001009fffffffff9dfffffcffc6e6ffffd2fffffffffdedf1f3c9feffe09e010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101ffa160ffd9ffc1ff7768"
     },
     {
-      "t": 1793209757.716,
+      "t": 1794876417.682,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "070000000000000000000000000000"
     },
     {
-      "t": 1793209757.777,
+      "t": 1794876417.741,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "072e6563000000"
     },
     {
-      "t": 1793209757.777,
+      "t": 1794876417.741,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "072e6563000000"
     },
     {
-      "t": 1793209757.837,
+      "t": 1794876417.802,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e5025000000"
+      "hex": "002e50e9000000"
     },
     {
-      "t": 1793209757.837,
+      "t": 1794876417.804,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e5025000000"
+      "hex": "002e50e9000000"
     },
     {
-      "t": 1793209758.707,
+      "t": 1794876418.702,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
-      "hex": "05afdafffffffffffff7fffffff7fffffff7fffffff7fffffff7fffffff7fffffff7fffffff78e31"
+      "hex": "05af16ffffffffff13f7f9ff13f7cfff13f7ffff13f7ffff13f7f5ff13f7ffff13f7ffff13f7ffff13f7d7ff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7d9ff13f7ffff13f7ffff13f7f2ff13f7ebff13f7f5ff13f7ffff13f75cff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7e3ff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f7d3ff13f7ffff13f7e2ff13f78eff13f7ffff13f7ffff13f7cfff13f7a2ff13f7ffff13f7ffff13f7ffff13f7ffff13f7ffff13f79e16"
     },
     {
-      "t": 1793209758.709,
-      "dir": "TX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "070000000000000000000000000000"
-    },
-    {
-      "t": 1793209758.767,
-      "dir": "RX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "072e5025000000"
-    },
-    {
-      "t": 1793209758.767,
-      "dir": "TX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "072e5025000000"
-    },
-    {
-      "t": 1793209760.416,
-      "dir": "RX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "002e5125000000"
-    },
-    {
-      "t": 1793209760.416,
-      "dir": "TX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "002e5125000000"
-    },
-    {
-      "t": 1793209760.717,
-      "dir": "RX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "05aedaffffffa1fdfff7a2fdfff7a1fdfff7a2fdfff7a1fdfff7a2fdfff79ffdfff776fdfff75a07"
-    },
-    {
-      "t": 1793209760.717,
+      "t": 1794876418.702,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "070000000000000000000000000000"
     },
     {
-      "t": 1793209760.777,
+      "t": 1794876418.762,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e5125000000"
+      "hex": "072e50e9000000"
     },
     {
-      "t": 1793209760.778,
+      "t": 1794876418.762,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e5125000000"
+      "hex": "072e50e9000000"
     },
     {
-      "t": 1793209762.425,
+      "t": 1794876420.352,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e5259000000"
+      "hex": "002e51e9000000"
     },
     {
-      "t": 1793209762.425,
+      "t": 1794876420.352,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e5259000000"
+      "hex": "002e51e9000000"
     },
     {
-      "t": 1793209762.697,
+      "t": 1794876420.712,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
-      "hex": "05ada6ffffff87e6fff789e6fff776e6fff798e6fff791e6fff787e6fff778e6fff779cdfff774e6fff77be6fff780e6fff780e6fff790fffff795e6fff79fe6fff795fffff7a9e6fff778e6fff794e6fff7abe6fff7b6fffff79ed5"
+      "hex": "05ae16ffffff63fd13f70afd13f733fd13f745fd13f731fd13f78dfc13f729fd13f71ffd13f737fd13f70bfd13f771fd13f7fafc13f774fd13f778fd13f77cfd13f78ffd13f793fd13f791fd13f78efd13f799fd13f787fd13f786fd13f78afc13f7d9fb13f739fd13f71bfc13f7c5fc13f7e8fc13f7befc13f786fa13f79ffd13f7a0fd13f7a0fd13f798fd13f79bfd13f78bfd13f74bfd13f796fd13f779fd13f784fd13f798fd13f794fd13f79bfd13f7a1fd13f789fc13f76bfd13f77bfd13f7dcfb13f7c5fc13f745fd13f724fa13f768fa13f79ffd13f7a1fd13f783fd13f70dfd13f7a1fd13f748f0"
     },
     {
-      "t": 1793209762.697,
-      "dir": "TX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "070000000000000000000000000000"
-    },
-    {
-      "t": 1793209762.756,
-      "dir": "RX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "072e5259000000"
-    },
-    {
-      "t": 1793209762.756,
-      "dir": "TX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "072e5259000000"
-    },
-    {
-      "t": 1793209764.407,
-      "dir": "RX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "002e5683000000"
-    },
-    {
-      "t": 1793209764.407,
-      "dir": "TX",
-      "uuid": "DRSP",
-      "handle": null,
-      "hex": "002e5683000000"
-    },
-    {
-      "t": 1793209764.708,
-      "dir": "RX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "05a97cffffffdffff7effff7dffff7dffff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7effff7dffff7dffff7dffff7dffff7dffff704b2"
-    },
-    {
-      "t": 1793209764.708,
+      "t": 1794876420.712,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "070000000000000000000000000000"
     },
     {
-      "t": 1793209764.766,
+      "t": 1794876420.802,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e5683000000"
+      "hex": "072e51e9000000"
     },
     {
-      "t": 1793209764.767,
+      "t": 1794876420.802,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e5683000000"
+      "hex": "072e51e9000000"
     },
     {
-      "t": 1793209766.417,
+      "t": 1794876422.332,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e7205010000"
+      "hex": "002e523d020000"
     },
     {
-      "t": 1793209766.417,
+      "t": 1794876422.332,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "002e7205010000"
+      "hex": "002e523d020000"
     },
     {
-      "t": 1793209766.746,
+      "t": 1794876422.694,
       "dir": "RX",
       "uuid": "CONVOY",
       "handle": null,
-      "hex": "058dfafeffffd9efd7ecbafff7f7fefeffffffc0f1dcffffffff01f8fffe9bf9ffefff00ffffd9efd7ecbffff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd7eccafff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd7eccffff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd7ecdafff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd7ecdffff77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9efd7eceafff7c0f9f7ffffffc0f9f7ffffffffa5ffffff80ffffffff00f3ffd9efd7eceffff7fbfce3fcfefec0e9c0ff"
+      "hex": "05adc2fdffffb8b413f7b6e613f7b9b413f7bbcd13f7bb9b13f7a2e613f7bae613f7b9ff13f7cae613f7ba9b13f7b7b413f7bfcd13f7b9ff13f7bdb413f7b0e613f7adff13f7b4ff13f7b1e613f7b6ff13f7ace613f7aae613f7b2e613f7aeff13f7afe613f7010113f7c19b13f7c1b413f7c0cd13f7bae613f7c1b413f7c1b413f7bf9b13f7be9b13f7bc9b13f7bb9b13f7bb9b13f7bf9b13f7bfb413f7bc9b13f7c19b13f7c09b13f7bf9b13f7c09b13f7bf9b13f7c09b13f7c09b13f7c29b13f7c09b13f7c1b413f7bd9b13f7c09b13f7c49b13f7c2e613f7c2cd13f7b4e613f7b3e613f7a9ff13f7b1e613f7b2e613f7afe613f795"
     },
     {
-      "t": 1793209766.747,
-      "dir": "TX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "070000000000000000000000000000"
-    },
-    {
-      "t": 1793209766.807,
-      "dir": "RX",
-      "uuid": "CONVOY",
-      "handle": null,
-      "hex": "05ffffff01e6ffff80fffffdff00f3ffd570"
-    },
-    {
-      "t": 1793209766.807,
+      "t": 1794876422.694,
       "dir": "TX",
       "uuid": "CONVOY",
       "handle": null,
       "hex": "070000000000000000000000000000"
     },
     {
-      "t": 1793209766.866,
+      "t": 1794876422.784,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ff13f7b3e613f7bde613f7c2e613f7b8e613f7c5ff13f7b8ff13f7bdb413f7afff13f7a6ff13f7c3ff13f7bc9b13f7abe613f7ba9b13f7a8e613f7a3e613f7b7cd13f7bbcd13f7bbb413f7bacd13f7b9e613f7b7e613f7c2e613f7c0e613f7bde613f7b5e613f7b4e613f7bccd13f7bccd13f7b7e613f7b9cd13f7c0e613f7b9cd13f7b89b13f7b6cd13f7b5e613f7b9e613f7bab413f7bde613f7b7cd13f7c3e613f7c5cd13f7d8cd13f7bbb413f7a9e613f7b8b413f7aecd13f7bde613f7bfe613f7bcb413f7bbff13f7bfb413f7a4e613f7bae613f7abff13f7c2e613f7c1e613f7beb413f7bdcd13f793e613f79fff13f7a4ff13"
+    },
+    {
+      "t": 1794876422.784,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876422.901,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f7afe613f7a9e613f7b4e613f7b9e613f7b5ff13b25a"
+    },
+    {
+      "t": 1794876422.901,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876422.992,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05f794ff13f79de613f7a7e613f762ff13f778e613f78ae613f79be613f7a1e613f77bff13f794e613f790e613f787e613f7a3e613f78fff13f784ff13f7299d"
+    },
+    {
+      "t": 1794876422.994,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876423.052,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e7205010000"
+      "hex": "072e523d020000"
     },
     {
-      "t": 1793209766.866,
+      "t": 1794876423.052,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
-      "hex": "072e7205010000"
+      "hex": "072e523d020000"
     },
     {
-      "t": 1793209768.427,
+      "t": 1794876424.342,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5656030000"
+    },
+    {
+      "t": 1794876424.342,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e5656030000"
+    },
+    {
+      "t": 1794876424.704,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05a9a9fcffffdf13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef"
+    },
+    {
+      "t": 1794876424.704,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876424.822,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "0513f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f77f13f77f13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7df"
+    },
+    {
+      "t": 1794876424.822,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876424.882,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "0513f7df13f7df13f7ef13f7ef13f7ef13f7ef13f73c6e"
+    },
+    {
+      "t": 1794876424.882,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876425.004,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7ef13f7df13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7df13f7df13f7df13f77f13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7"
+    },
+    {
+      "t": 1794876425.004,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876425.064,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7ef13f7df13f7df13f7df13f7df13f7df13f7df13f7ef13f7ef13f7ef13f727e7"
+    },
+    {
+      "t": 1794876425.064,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876425.122,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5656030000"
+    },
+    {
+      "t": 1794876425.122,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e5656030000"
+    },
+    {
+      "t": 1794876426.352,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e7225070000"
+    },
+    {
+      "t": 1794876426.352,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "002e7225070000"
+    },
+    {
+      "t": 1794876426.684,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "058ddaf8ffffd9eee8ffba13f7da26f1fdfdfdc102e6ffffffff01f6ffff80fffffdff00f3ffd9eee8ffbf13f7f82feffcfdfcc206ddffffffff01caffff94fdffffff00f3ffd9eee8ffca13f7f62516fbfbfbdbd9cdffffffff01cdfffe9efbffffff00f3ffd9eee8ffcf13f7fa2f1efdfefdd01cf3ffffffff01cfffff80fdffffff00f3ffd9eee8ffda13f706351bfdfefdde1ef8ffffffff01d2fffe88ffffffff00f3ffd9eee8ffdf13f7122e13fbfbfae309d7ffffffff0184fffaa6fdffffff00f3ffd9eee8ffea13f7fb3303fafbf8d70dcdffffffff0191ffff87fbffffff00f3ffd9eee8ffef13f7fc33f4fbfcfbe4fdc7ff"
+    },
+    {
+      "t": 1794876426.686,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876426.774,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffff01b1ffff88fffffdff00f3ffd9eee8fffa13f7f63803fdfdfbe21ccdffffffff01c5fffd82ffffffff00f3ffd9eee8ffff13f7001f03f8f8f5cdffc9ffffffff0137fff8aeffffffff00f3ffd9eee9dcaa13f7222421ffffff1921f9ffffffff7bf5ffff80ffffffff00f3ffd9eee9dcaf13f7f628fefcfcfcc0c1bfffffffff01d1ffff84ffffffff00f3ffd9eee9dcba13f7c30bf9fffefec000e4ffffffff01fdffff80fffffdff00f3ffd9eee9dcbf13f7c8ffedfffefec2e1dfffffffff01f9ffff80fffffdff00f3ffd9eee9dcca13f7f600fdffffffc1ffe2ffffffff01f9ffff99ffffeeff00ffffd9eee9dccf13f7"
+    },
+    {
+      "t": 1794876426.774,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876426.832,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "057f7f7f7f7f7f7f7f7f000000ffffffff00000000b0e2"
+    },
+    {
+      "t": 1794876426.832,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876426.924,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000000000d9eee9dcda13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9dcdf13f7e40df1ffffffcbffe5ffffffff23ffffff99ffffffff00f7ffd9eee9dcea13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9dcef13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9dcfa13f7193101ffffff102bd8ffffffff58fdffff80ffffffff00f3ffd9eee9dcff13f7012cdbfefefedf26d0ffffffff01efffff80fdffffff00f3ffd9eee9ddaa13f70221defafafae4d7c9ffffffff01c3fff7a2fffffdff00f3ffd9eee9ddaf13f7171f13f9faf9cdfacaff"
+    },
+    {
+      "t": 1794876426.924,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.072,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffff014dfffb94fdffffff00f3ffd9eee9ddba13f7221b15fbfbfbde08cdffffffff01a5fffd89fdffffff00f3ffd9eee9ddbf13f71c1819fafaf9d401e2ffffffff0178fffd9cfdffffff00f3ffd9eee9ddca13f7033505f7f9f6d91ad3ffffffff01f6fef591fdffffff00f3ffd9eee9ddcf13f7e730f0fcfbfbd3e4c4ffffffff0143fff791fdffffff00f3ffd9eee9ddda13f7e71ed9fbf7facfdac3ffffffff0150fffa80fffffdff00f3ffd9eee9dddf13f70025eaf3f2f4d5fac5ffffffff0150fffaaafffffdff00f3ffd9eee9ddea13f7fd2b25fefefeeaf0c1ffffffff01f9ffff97fdfffdf000ffffd9eee9ddef13f7"
+    },
+    {
+      "t": 1794876427.072,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.132,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ff1816fffffffcffffffffffff01ffffff99ffff1ebb"
+    },
+    {
+      "t": 1794876427.132,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.254,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffff00f7ffd9eee9ddfa13f7fe1b18ffffffefffffffffffff30faffff99ffffffff00f7ffd9eee9ddff13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9deaa13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9deaf13f7e02e1cffffffe02c13ffffffff88fbffff80ffffffff00f3ffd9eee9deba13f7ec2324fefefdd6ffffffffffff01eaffffacffffffff00f3ffd9eee9debf13f7f22630fffffff1242effffffffa2ffffff80ffffffff00f3ffd9eee9deca13f7ec242bfffefec7ffffffffffff01f8ffff99ffffffff00f3ffd9eee9decf13f77f7f7f7f7f7f7f7f7f00"
+    },
+    {
+      "t": 1794876427.254,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.344,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "050000ffffffff000000000000000000d9eee9deda13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9dedf13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9deea13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9deef13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9defa13f7fb3111fbfdfcd70fcaffffffff01cafffda5ffffffff00f3ffd9eee9deff13f7ff262dfefefef81410ffffffff01e2ffff83fbffffff00f3ffd9eee9dfaa13f7f9262efffffeef1226ffffffff01f1ffffa2ffffffff00fbffd9eee9dfaf13f7"
+    },
+    {
+      "t": 1794876427.344,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.401,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05052f10f7f7f7d90fc6ffffffff015dfff7a9ffffbb68"
+    },
+    {
+      "t": 1794876427.401,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.612,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05fdff00f3ffd9eee9dfba13f7e431f1fcfbfbd9e7ccffffffff0141ffefa6fffffdff00f3ffd9eee9dfbf13f7e831eafbfbfadb0bc1ffffffff0178fffa82fffffdff00f3ffd9eee9dfca13f7f821e4f4f5f5cef3c2ffffffff01d9fee8aefffffdff00f3ffd9eee9dfcf13f70c2100f2f3f0d0c9ccffffffff0128fff6adfdffffff00f3fcd9eee9dfda13f700fd03fefefeffd2ffffffffff01ebfff5d4f1fcffee00ffffd9eee9dfdf13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000d9eee9dfea13f73d05f4ffffff3d05f4ffffffffa0ffffff80ffffffff00f3ffd9eee9dfef13f71ff7e0fbfbfde4dbc2ff"
+    },
+    {
+      "t": 1794876427.612,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.672,
+      "dir": "RX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "05ffffff01a6fffc9dffffffff00f3ffd9eee9dffa13f77f7f7f7f7f7f7f7f7f000000ffffffff000000000000000000c36a"
+    },
+    {
+      "t": 1794876427.676,
+      "dir": "TX",
+      "uuid": "CONVOY",
+      "handle": null,
+      "hex": "070000000000000000000000000000"
+    },
+    {
+      "t": 1794876427.732,
+      "dir": "RX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e7225070000"
+    },
+    {
+      "t": 1794876427.732,
+      "dir": "TX",
+      "uuid": "DRSP",
+      "handle": null,
+      "hex": "072e7225070000"
+    },
+    {
+      "t": 1794876429.352,
       "dir": "RX",
       "uuid": "DRSP",
       "handle": null,
       "hex": "042effffffffff"
     },
     {
-      "t": 1793209768.427,
+      "t": 1794876429.352,
       "dir": "TX",
       "uuid": "DRSP",
       "handle": null,
@@ -656,23 +894,23 @@
     },
     {
       "index": 80,
-      "value": "250000"
+      "value": "e90000"
     },
     {
       "index": 81,
-      "value": "250000"
+      "value": "e90000"
     },
     {
       "index": 82,
-      "value": "590000"
+      "value": "3d0200"
     },
     {
       "index": 86,
-      "value": "830000"
+      "value": "560300"
     },
     {
       "index": 114,
-      "value": "050100"
+      "value": "250700"
     }
   ]
 }

@@ -71,6 +71,8 @@ class Connection:
                     return False
 
                 self.address = device.address
+                import asyncio
+                await asyncio.sleep(1.0)
 
             if self.address is None:
                 return False
